@@ -6,8 +6,13 @@
 */
 
 #include <iostream>
+#include "core/Core.hpp"
 
-int main(void) {
+int main(int argc, char *const *argv) {
+    if (argc != 2)
+        return 84;
+
     std::cout << "Hello, Arcade!" << std::endl;
+    arcade::Core core(argv[1]);
     return 0;
 }

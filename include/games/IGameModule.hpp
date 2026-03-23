@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 #include "IModule.hpp"
-#include "IDisplayModule.hpp"
+#include "graphicals/IDisplayModule.hpp"
 
 namespace arcade {
 
