@@ -5,8 +5,8 @@
 ** NCurses.hpp
 */
 
-#ifndef NCURSES_CPP
-    #define NCURSES_CPP
+#ifndef NCURSES_HPP
+    #define NCURSES_HPP
     #include <ncurses.h>
     #include "ADisplayModule.hpp"
 
@@ -16,25 +16,35 @@ namespace arcade {
             NCurses();
             ~NCurses();
 
-            void init();
-            void stop();
-            void clear();
-            void display();
+            void init() override;
+            void stop() override;
+            void clear() override;
+            void display() override;
 
-            // void drawEntity(Entity& e);
-            // void drawText(Text& t);
-            // void drawRectangle(int r, int c);
+            void drawEntity(const Entity& e) override;
+            void drawText(const Text& t) override;
+            void drawRectangle(const Rect& rect, const Color& color) override;
 
-            Key getKey();
-            MouseEvent getMouseEvent();
+            const std::string& getName() const override;
+
+            Key getKey() override;
+            MouseEvent getMouseEvent() override;
             
-            void setTitle(std::string& title);
-            void setWindowSize(int w, int h);
-            void setFullscreeen();
+            void setTitle(const std::string& title) override;
+            void setWindowSize(int w, int h) override;
+            void setFullscreen(bool fullscreen) override;
 
+            bool isOpen() const override;
+
+            float getDeltaTime() const override;
+            int getWidth() const override;
+            int getHeight() const override;
+            void setRenderContext(const RenderContext& context) override;
+    
         private:
             Key keyToEnum(int ch);
             int colorPair(Color c);
+            bool _fullscreen = false;
 
             WINDOW* _window;
             int _cols;

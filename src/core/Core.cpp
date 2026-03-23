@@ -27,20 +27,27 @@ Core::Core(std::string libPath)
             std::cerr << dlerror() << std::endl;
             exit(84);
         }
-        fptr function = (fptr)(dlsym(handle, "getType"));
-        if (!function) {
-            std::cerr << "Couldn't find function: getType for " << lib_path.c_str() << std::endl;
+        auto *entryPoint = reinterpret_cast<IModule* (*)()>(dlsym(handle, "entryPoint"));
+        if (!entryPoint) {
+            std::cerr << "Couldn't find entryPoint function in " << lib_path.c_str() << std::endl;
             dlclose(handle);
             continue;
         }
-        ModuleType type = function();
-        switch (type) {
+        arcade::IModule* function = entryPoint();
+        if (!function) {
+            std::cerr << "Couldn't find function: entryPoint for " << lib_path.c_str() << std::endl;
+            dlclose(handle);
+            continue;
+        }
+        switch (function->getType()) {
             case ModuleType::DISPLAY:
                 std::cout << "type of " << lib_path << ": DISPLAY\n";
                 _displayLibs.push_back(lib_path.c_str());
+                break;
             case ModuleType::GAME:
                 std::cout << "type of " << lib_path << ": GAME\n";
                 _gameLibs.push_back(lib_path.c_str());
+                break;
             default:
                 std::cerr << "Unknown type: " << lib_path << std::endl;
         }

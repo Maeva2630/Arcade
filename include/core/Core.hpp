@@ -7,7 +7,7 @@
 
 #ifndef CORE_HPP
     #define CORE_HPP
-    #define LIB_DIR "../lib"
+    #define LIB_DIR "./lib"
     #include <vector>
     #include <map>
     #include "games/IGameModule.hpp"
