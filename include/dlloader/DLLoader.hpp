@@ -30,12 +30,27 @@ class DLLoader {
                 const char* what() const noexcept override { return this->_message.c_str(); };
         };
 
+        /**
+         * @brief Construct a new DLLoader<T> object
+         * 
+         * try to load a .so library and stock it in the _handle variable
+         * 
+         * @param libraryPath 
+         */
         DLLoader<T>(const std::string &libraryPath) : _libPath(libraryPath) {
             _handle = dlopen(_libPath.c_str(), RTLD_GLOBAL | RTLD_NOW);
             if (!_handle)
                 throw DLLoaderException("On dlopen of " + _libPath, "DLLoader");
         };
 
+        /**
+         * @brief Get the Instance object
+         * 
+         * get the object of the library from the function entryPoint with dlsym
+         * 
+         * @param entryPoint 
+         * @return T* 
+         */
         T *getInstance(const std::string &entryPoint) const {
             T *(*fptr)(void);
             T *obj = NULL;
@@ -50,6 +65,10 @@ class DLLoader {
             return (obj);
         };
 
+        /**
+         * @brief Destroy the DLLoader object
+         * 
+         */
         ~DLLoader() {
             if (_handle)
                 dlclose(_handle);
