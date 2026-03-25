@@ -21,6 +21,13 @@ class DLLoader {
 
     public:
 
+        /**
+         * @brief Exception class for DLLoader
+         * 
+         * if there is an error during the loading/ deletion of the library
+         * it will be thrown with a DLLoaderException
+         * 
+         */
         class DLLoaderException : public std::exception
         {
             private:
