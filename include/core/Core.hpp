@@ -12,6 +12,7 @@
     #include <map>
     #include "games/IGameModule.hpp"
     #include "graphicals/IDisplayModule.hpp"
+    #include "dlloader/DLLoader.hpp"
 
 namespace arcade {
     class Core {
@@ -34,6 +35,8 @@ namespace arcade {
 
             IDisplayModule* _display;
             IGameModule* _game;
+
+            std::vector<DLLoader<IModule>> _loaders;
 
             std::vector<std::string> _displayLibs;
             std::vector<std::string> _gameLibs;
