@@ -50,10 +50,6 @@ void NCurses::display()
     std::cout << "NCurses display\n";
 }
 
-// void NCurses::drawEntity(Entity& e);
-// void NCurses::drawText(Text& t);
-// void NCurses::drawRectangle(int r, int c);
-
 Key NCurses::getKey()
 {
     // auto ch = getch();
