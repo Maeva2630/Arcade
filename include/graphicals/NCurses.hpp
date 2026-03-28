@@ -15,9 +15,20 @@ namespace arcade
     class NCurses : public ADisplayModule
     {
     public:
+        /**
+         * @brief Construct a new NCurses object
+         */
         NCurses();
         ~NCurses();
 
+        /**
+         * @brief Init all resources
+         * 
+         * initscr() to init the window
+         * init keyMap to all NCurses bindings
+         * put noecho() on window to disable writing 
+         * (disable on menu when the user will put his username)
+         */
         void init() override;
         void stop() override;
         void clear() override;
@@ -30,6 +41,9 @@ namespace arcade
         const std::string &getName() const override;
 
         Key getKey() override;
+
+        std::map<int, Key> initKeyFromEnum();
+    
         MouseEvent getMouseEvent() override;
 
         void setTitle(const std::string &title) override;
@@ -44,13 +58,15 @@ namespace arcade
         void setRenderContext(const RenderContext &context) override;
 
     private:
-        Key keyToEnum(int ch);
-        int colorPair(Color c);
         bool _fullscreen = false;
 
         WINDOW *_window;
         int _cols;
         int _rows;
+
+        // std::map<size_t, Color> _colorPairs;
+
+        // Color getColor(size_t code);
     };
 }
 

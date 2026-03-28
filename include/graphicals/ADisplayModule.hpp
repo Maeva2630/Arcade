@@ -6,6 +6,7 @@
 #pragma once
 
 #include "IDisplayModule.hpp"
+#include <map>
 
 namespace arcade {
 
@@ -18,17 +19,26 @@ namespace arcade {
  * this class instead of IDisplayModule directly.
  */
 class ADisplayModule : public IDisplayModule {
-public:
-    /**
-     * @brief Virtual destructor
-     */
-    virtual ~ADisplayModule() = default;
+    public:
+        /**
+         * @brief Virtual destructor
+         */
+        virtual ~ADisplayModule() = default;
 
-    /**
-     * @brief Get the type of this module
-     * @return ModuleType::DISPLAY
-     */
-    ModuleType getType() const override { return ModuleType::DISPLAY; }
+        /**
+         * @brief Get the type of this module
+         * @return ModuleType::DISPLAY
+         */
+        ModuleType getType() const override { return ModuleType::DISPLAY; }
+
+    protected:
+        /**
+         * @brief KeyMap
+         * Associate during init every key from the graphical library with our
+         * commun Key enum.
+         */
+        std::map<int, Key> _keyMap;
+        bool _isOpen;
 };
 
 } // namespace arcade
