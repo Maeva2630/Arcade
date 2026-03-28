@@ -61,12 +61,17 @@ namespace arcade
         bool _fullscreen = false;
 
         WINDOW *_window;
-        int _cols;
-        int _rows;
+        size_t _cols;
+        size_t _rows;
 
-        // std::map<size_t, Color> _colorPairs;
+        //foreground and background colors map 
+        std::map<std::pair<Color, Color>, size_t> _colorPairs;
+        std::map<Color, size_t> _colorMap;
+        size_t _nbPairs;
 
-        // Color getColor(size_t code);
+        // Color getColor(size_t code) const;
+        size_t checkColorPairs(Color background, Color foreground = Colors::WHITE);
+        std::map<Color, size_t> initColorMap();
     };
 }
 

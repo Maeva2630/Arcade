@@ -33,6 +33,7 @@ void NCurses::init()
     if (!_window)
         throw ModuleException("NCurses window init failed");
     _keyMap =  initKeyFromEnum();
+    _colorMap = initColorMap();
     noecho();
 }
 
@@ -161,20 +162,37 @@ void NCurses::setFullscreen(bool fullscreen)
 void NCurses::drawEntity(const Entity& e)
 {
     std::cout << "NCurses drawEntity\n";
-    mvprintw(e.pos.x, e.pos.y, "%c", e.character);
+
+    for (size_t x = e.pos.x; x < e.pos.x + e.size.x; x++) {
+        for (size_t y = e.pos.y; y < e.pos.y + e.size.y; y++) {
+            mvprintw(x, y, "%c", e.character);
+        }
+    }
 }
 
 void NCurses::drawText(const Text& t)
 {
+    size_t colorCode = checkColorPairs(t.color);
     std::cout << "NCurses drawText\n";
+
+    attron(colorCode);
     mvprintw(t.pos.x, t.pos.y, "%s", t.content);
+    attroff(colorCode);
 }
 
 void NCurses::drawRectangle(const Rect& rect, const Color& color)
 {
-    init_pair()
-    for (size_t y = 0; )
+    size_t colorCode = checkColorPairs(color);
     std::cout << "NCurses drawRectangle\n";
+
+    attron(colorCode);
+    for (size_t x = rect.x; x <= rect.x + rect.height; x++) {
+        for (size_t y = rect.y; y <= rect.y + rect.width; y++) {
+            move(x, y);
+            printw("*");
+        }
+    }
+    attroff(colorCode);
 }
 
 const std::string& NCurses::getName() const
@@ -186,7 +204,7 @@ const std::string& NCurses::getName() const
 bool NCurses::isOpen() const
 {
     std::cout << "NCurses isOpen\n";
-    return true;
+    return _isOpen;
 }
 
 float NCurses::getDeltaTime() const
@@ -212,4 +230,61 @@ void NCurses::setRenderContext(const RenderContext& context)
     std::cout << "NCurses setRenderContext\n";
 }
 
+
+//COLOR
+size_t NCurses::checkColorPairs(Color background, Color foreground = Colors::WHITE)
+{
+    auto check = _colorPairs.find({foreground, background});
+
+    if (check != _colorPairs.end()) {
+        return check->second;
+    } else {
+        _nbPairs++;
+        _colorPairs[{foreground, background}] = _nbPairs;
+        init_pair(_nbPairs, _colorMap[foreground], _colorMap[background]);
+    }
+    return _nbPairs;
 }
+
+// Color NCurses::getColor(size_t code) const
+// {
+//     switch (code) {
+//         case COLOR_BLACK:
+//             return Colors::BLACK;
+//         case COLOR_BLUE:
+//             return Colors::BLUE;
+//         case COLOR_CYAN:
+//             return Colors::CYAN;
+//         case COLOR_GREEN:
+//             return Colors::GREEN;
+//         case COLOR_MAGENTA:
+//             return Colors::MAGENTA;
+//         case COLOR_RED:
+//             return Colors::RED;
+//         case COLOR_WHITE:
+//             return Colors::WHITE;
+//         case COLOR_YELLOW:
+//             return Colors::YELLOW;
+//         default:
+//             return Colors::WHITE;
+//     }
+// }
+
+std::map<Color, size_t> NCurses::initColorMap()
+{
+    std::map<Color, size_t> newMap = {
+        {Colors::BLACK, COLOR_BLACK},
+        {Colors::BLUE, COLOR_BLUE},
+        {Colors::CYAN, COLOR_CYAN},
+        {Colors::GREEN, COLOR_GREEN},
+        {Colors::MAGENTA, COLOR_MAGENTA},
+        {Colors::RED, COLOR_RED},
+        {Colors::WHITE, COLOR_WHITE},
+        {Colors::YELLOW, COLOR_YELLOW},
+    };
+
+    return newMap;
+}
+
+}
+
