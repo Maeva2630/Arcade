@@ -103,45 +103,6 @@ else()
     message(STATUS "OK - SDL2 fetched and built")
 endif()
 
-# ---- SDL2 ----
-# find_package(SDL2 QUIET)
-# if (SDL2_FOUND)
-#     message(STATUS "Found SDL2")
-# else()
-#     message(STATUS "Fetching SDL2")
-#     FetchContent_Declare(
-#         SDL2
-#         GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-#         GIT_TAG release-3.4.2
-#         GIT_SHALLOW TRUE
-#     )
-#     set(SDL2_DISABLE_INSTALL ON)
-#     FetchContent_MakeAvailable(SDL2)
-# endif()
-
-# ---- SFML ----
-# find_package(SFML QUIET)
-# if (SFML_FOUND)
-#     message(STATUS "Found SFML")
-# else()
-#     message(STATUS "Fetching SFML")
-
-#     FetchContent_Declare(
-#         SFML
-#         GIT_REPOSITORY https://github.com/SFML/SFML.git
-#         GIT_TAG 2.5.1
-#         GIT_SHALLOW TRUE
-#     )
-    
-#     # set(SFML_DISABLE_INSTALL ON)
-#     set(SFML_BUILD_AUDIO OFF)
-#     set(SFML_BUILD_NETWORK OFF)
-#     set(SFML_BUILD_EXAMPLES OFF)
-#     set(SFML_BUILD_DOC OFF)
-
-#     FetchContent_MakeAvailable(SFML)
-# endif()
-
 # =========================
 # CORE
 # =========================
@@ -156,17 +117,17 @@ target_link_libraries(arcade dl)
 # GRAPHICAL LIBS
 # =========================
 
-# # NCURSES
+# # ---- NCURSES ----
 # file(GLOB NCURSES_SRC src/graphicals/ncurses/*.cpp)
 # add_library(arcade_ncurses SHARED ${NCURSES_SRC})
 # target_link_libraries(arcade_ncurses ncurses)
 
-# # SDL2
+# # ---- SDL2 ----
 # file(GLOB SDL2_SRC src/graphicals/sdl2/*.cpp)
 # add_library(arcade_sdl2 SHARED ${SDL2_SRC})
 # target_link_libraries(arcade_sdl2 SDL2)
 
-# # SFML
+# # ---- SFML ----
 # file(GLOB SFML_SRC src/graphicals/sfml/*.cpp)
 # add_library(arcade_sfml SHARED ${SFML_SRC})
 # target_link_libraries(arcade_sfml sfml-graphics sfml-window sfml-system)
@@ -175,10 +136,10 @@ target_link_libraries(arcade dl)
 # GAMES LIBS
 # =========================
 
-# # Snake
+# # ---- Snake ----
 # file(GLOB SNAKE_SRC src/games/snake/*.cpp)
 # add_library(arcade_snake SHARED ${SNAKE_SRC})
 
-# # Nibbler
+# # ---- Nibbler ----
 # file(GLOB NIBBLER_SRC src/games/nibbler/*.cpp)
 # add_library(arcade_nibbler SHARED ${NIBBLER_SRC})
