@@ -8,6 +8,7 @@
 #ifndef NCURSES_HPP
 #define NCURSES_HPP
 #include <ncurses.h>
+#include <chrono>
 #include "ADisplayModule.hpp"
 
 namespace arcade
@@ -180,14 +181,32 @@ namespace arcade
         size_t _cols;
         size_t _rows;
 
-        //foreground and background colors map 
+        /**
+         * @brief 
+         * List color pairs for NCurses
+         */
         std::map<std::pair<Color, Color>, size_t, ColorPairComparator> _colorPairs;
         std::map<Color, size_t, ColorComparator> _colorMap;
         size_t _nbPairs;
 
-        // Color getColor(size_t code) const;
+        /**
+         * @brief 
+         * 
+         * Get the demanded color pair or create it if it doesn't exist
+         * @param background 
+         * @param foreground 
+         * @return size_t 
+         */
         size_t checkColorPairs(Color background, Color foreground = Colors::WHITE);
         std::map<Color, size_t, ColorComparator> initColorMap();
+
+        /**
+         * @brief 
+         * Handle delta time for graphical library
+         * 
+         */
+        std::chrono::steady_clock::time_point _lastTime;
+        float updateDeltaTime();
     };
 }
 

@@ -23,21 +23,14 @@ Position ADisplayModule::convertGridPosition(Position gridPos, size_t screenHeig
         return gridPos;
     }
 
-    const float screenW = static_cast<float>(screenWidth);
-    const float screenH = static_cast<float>(screenHeight);
-    const float worldW = static_cast<float>(_renderContext.width);
-    const float worldH = static_cast<float>(_renderContext.height);
+    const Position screen = { static_cast<float>(screenWidth), static_cast<float>(screenHeight) };
+    const Position world = { static_cast<float>(_renderContext.width), static_cast<float>(_renderContext.height) };
+    const Position scalePos = { screen.x / world.x,  screen.y / world.y  };
+    const float scale = (scalePos.x < scalePos.y) ? scalePos.x : scalePos.y;
+    const Position scaledWorld = { world.x * scale, world.y * scale };
+    const Position offset = { (screen.x - scaledWorld.x) / 2.0f, (screen.y - scaledWorld.y) / 2.0f };
 
-    const float scaleX = screenW / worldW;
-    const float scaleY = screenH / worldH;
-    const float scale = (scaleX < scaleY) ? scaleX : scaleY;
-
-    const float scaledWorldW = worldW * scale;
-    const float scaledWorldH = worldH * scale;
-    const float offsetX = (screenW - scaledWorldW) / 2.0f;
-    const float offsetY = (screenH - scaledWorldH) / 2.0f;
-
-    return Position{offsetX + (gridPos.x * scale), offsetY + (gridPos.y * scale)};
+    return Position{offset.x + (gridPos.x * scale), offset.y + (gridPos.y * scale)};
 }
 
 Position ADisplayModule::convertGridSize(Position gridSize, size_t screenHeight, size_t screenWidth)
@@ -49,13 +42,12 @@ Position ADisplayModule::convertGridSize(Position gridSize, size_t screenHeight,
         return gridSize;
     }
 
-    const float screenW = static_cast<float>(screenWidth);
-    const float screenH = static_cast<float>(screenHeight);
-    const float worldW = static_cast<float>(_renderContext.width);
-    const float worldH = static_cast<float>(_renderContext.height);
+    const Position screen = { static_cast<float>(screenWidth), static_cast<float>(screenHeight) };
+    const Position world = { static_cast<float>(_renderContext.width), static_cast<float>(_renderContext.height) };
+    const Position scalePos = { screen.x / world.x, screen.y / world.y };
 
-    const float scaleX = screenW / worldW;
-    const float scaleY = screenH / worldH;
+    const float scaleX = scalePos.x;
+    const float scaleY = scalePos.y;
     const float scale = (scaleX < scaleY) ? scaleX : scaleY;
 
     return Position{gridSize.x * scale, gridSize.y * scale};

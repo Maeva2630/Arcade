@@ -16,7 +16,7 @@ extern "C" arcade::IModule *entryPoint(void)
 
 namespace arcade {
 
-NCurses::NCurses() : _window(nullptr), _nbPairs(0)
+NCurses::NCurses() : _window(nullptr), _nbPairs(0), _lastTime(std::chrono::steady_clock::now())
 {
     std::cout << "NCurses constructor\n";
 }
@@ -61,9 +61,10 @@ void NCurses::clear()
 void NCurses::display()
 {
     std::cout << "NCurses display\n";
-    if (_window)
+    if (_window) {
+        updateDeltaTime();
         refresh();
-    else
+    } else
         throw ModuleException("The window can not be refreshed");
 }
 
@@ -231,7 +232,15 @@ bool NCurses::isOpen() const
 float NCurses::getDeltaTime() const
 {
     std::cout << "NCurses getDeltaTime\n";
-    return 0.0f;
+    return _deltaTime;
+}
+
+float NCurses::updateDeltaTime()
+{
+    auto current = std::chrono::steady_clock::now();
+    _deltaTime = std::chrono::duration<float>(current - _lastTime).count();
+    _lastTime = current;
+    return _deltaTime;
 }
 
 int NCurses::getWidth() const
@@ -268,30 +277,6 @@ size_t NCurses::checkColorPairs(Color background, Color foreground)
     }
     return _nbPairs;
 }
-
-// Color NCurses::getColor(size_t code) const
-// {
-//     switch (code) {
-//         case COLOR_BLACK:
-//             return Colors::BLACK;
-//         case COLOR_BLUE:
-//             return Colors::BLUE;
-//         case COLOR_CYAN:
-//             return Colors::CYAN;
-//         case COLOR_GREEN:
-//             return Colors::GREEN;
-//         case COLOR_MAGENTA:
-//             return Colors::MAGENTA;
-//         case COLOR_RED:
-//             return Colors::RED;
-//         case COLOR_WHITE:
-//             return Colors::WHITE;
-//         case COLOR_YELLOW:
-//             return Colors::YELLOW;
-//         default:
-//             return Colors::WHITE;
-//     }
-// }
 
 std::map<Color, size_t, NCurses::ColorComparator> NCurses::initColorMap()
 {
