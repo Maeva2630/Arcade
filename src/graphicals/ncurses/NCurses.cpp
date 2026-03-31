@@ -264,31 +264,54 @@ void NCurses::setRenderContext(const RenderContext& context)
 }
 
 //COLOR
+uint32_t NCurses::colorToKey(const Color &color)
+{
+    return (static_cast<uint32_t>(color.r) << 24)
+        | (static_cast<uint32_t>(color.g) << 16)
+        | (static_cast<uint32_t>(color.b) << 8)
+        | static_cast<uint32_t>(color.a);
+}
+
+uint64_t NCurses::colorPairToKey(const Color &foreground, const Color &background)
+{
+    return (static_cast<uint64_t>(colorToKey(foreground)) << 32)
+        | static_cast<uint64_t>(colorToKey(background));
+}
+
 size_t NCurses::checkColorPairs(Color background, Color foreground)
 {
-    auto check = _colorPairs.find({foreground, background});
+    const uint64_t pairKey = colorPairToKey(foreground, background);
+    auto check = _colorPairs.find(pairKey);
+    const auto foregroundKey = colorToKey(foreground);
+    const auto backgroundKey = colorToKey(background);
+
+    auto fgIterator = _colorMap.find(foregroundKey);
+    auto bgIterator = _colorMap.find(backgroundKey);
+
+    const size_t fgCode = (fgIterator != _colorMap.end()) ? fgIterator->second : COLOR_WHITE;
+    const size_t bgCode = (bgIterator != _colorMap.end()) ? bgIterator->second : COLOR_BLACK;
 
     if (check != _colorPairs.end()) {
         return check->second;
     } else {
         _nbPairs++;
-        _colorPairs[{foreground, background}] = _nbPairs;
-        init_pair(_nbPairs, _colorMap[foreground], _colorMap[background]);
+        _colorPairs[pairKey] = _nbPairs;
+        init_pair(_nbPairs, fgCode, bgCode);
     }
     return _nbPairs;
 }
 
-std::map<Color, size_t, NCurses::ColorComparator> NCurses::initColorMap()
+std::unordered_map<uint32_t, size_t> NCurses::initColorMap()
 {
-    std::map<Color, size_t, NCurses::ColorComparator> newMap = {
-        {Colors::BLACK, COLOR_BLACK},
-        {Colors::BLUE, COLOR_BLUE},
-        {Colors::CYAN, COLOR_CYAN},
-        {Colors::GREEN, COLOR_GREEN},
-        {Colors::MAGENTA, COLOR_MAGENTA},
-        {Colors::RED, COLOR_RED},
-        {Colors::WHITE, COLOR_WHITE},
-        {Colors::YELLOW, COLOR_YELLOW},
+    std::unordered_map<uint32_t, size_t> newMap = {
+        {colorToKey(Colors::BLACK), COLOR_BLACK},
+        {colorToKey(Colors::BLUE), COLOR_BLUE},
+        {colorToKey(Colors::CYAN), COLOR_CYAN},
+        {colorToKey(Colors::GREEN), COLOR_GREEN},
+        {colorToKey(Colors::MAGENTA), COLOR_MAGENTA},
+        {colorToKey(Colors::RED), COLOR_RED},
+        {colorToKey(Colors::WHITE), COLOR_WHITE},
+        {colorToKey(Colors::YELLOW), COLOR_YELLOW},
     };
 
     return newMap;

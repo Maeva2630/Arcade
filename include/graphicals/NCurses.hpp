@@ -9,6 +9,7 @@
 #define NCURSES_HPP
 #include <ncurses.h>
 #include <chrono>
+#include <unordered_map>
 #include "ADisplayModule.hpp"
 
 namespace arcade
@@ -149,32 +150,6 @@ namespace arcade
         void setRenderContext(const RenderContext &context) override;
 
     private:
-        struct ColorComparator {
-            bool operator()(const Color& lhs, const Color& rhs) const
-            {
-                if (lhs.r != rhs.r)
-                    return lhs.r < rhs.r;
-                if (lhs.g != rhs.g)
-                    return lhs.g < rhs.g;
-                if (lhs.b != rhs.b)
-                    return lhs.b < rhs.b;
-                return lhs.a < rhs.a;
-            }
-        };
-
-        struct ColorPairComparator {
-            bool operator()(const std::pair<Color, Color>& lhs, const std::pair<Color, Color>& rhs) const
-            {
-                ColorComparator comparator;
-
-                if (comparator(lhs.first, rhs.first))
-                    return true;
-                if (comparator(rhs.first, lhs.first))
-                    return false;
-                return comparator(lhs.second, rhs.second);
-            }
-        };
-
         bool _fullscreen = false;
 
         WINDOW *_window;
@@ -185,8 +160,8 @@ namespace arcade
          * @brief 
          * List color pairs for NCurses
          */
-        std::map<std::pair<Color, Color>, size_t, ColorPairComparator> _colorPairs;
-        std::map<Color, size_t, ColorComparator> _colorMap;
+        std::unordered_map<uint64_t, size_t> _colorPairs;
+        std::unordered_map<uint32_t, size_t> _colorMap;
         size_t _nbPairs;
 
         /**
@@ -198,7 +173,9 @@ namespace arcade
          * @return size_t 
          */
         size_t checkColorPairs(Color background, Color foreground = Colors::WHITE);
-        std::map<Color, size_t, ColorComparator> initColorMap();
+        std::unordered_map<uint32_t, size_t> initColorMap();
+        static uint32_t colorToKey(const Color &color);
+        static uint64_t colorPairToKey(const Color &foreground, const Color &background);
 
         /**
          * @brief 
