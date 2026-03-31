@@ -7,6 +7,7 @@
 
 #include "IDisplayModule.hpp"
 #include <map>
+#include <memory>
 
 namespace arcade {
 
@@ -38,7 +39,15 @@ class ADisplayModule : public IDisplayModule {
          * commun Key enum.
          */
         std::map<int, Key> _keyMap;
-        bool _isOpen;
+        bool _isOpen = false;
+
+        RenderContext _renderContext;
+
+        static int convertToCell(float value);
+
+        Position convertGridPosition(Position gridPos, size_t screenHeight, size_t screenWidth);
+
+        Position convertGridSize(Position gridSize, size_t screenHeight, size_t screenWidth);
 };
 
 } // namespace arcade

@@ -16,7 +16,7 @@ extern "C" arcade::IModule *entryPoint(void)
 
 namespace arcade {
 
-NCurses::NCurses() : _window(nullptr)
+NCurses::NCurses() : _window(nullptr), _nbPairs(0)
 {
     std::cout << "NCurses constructor\n";
 }
@@ -34,6 +34,7 @@ void NCurses::init()
         throw ModuleException("NCurses window init failed");
     _keyMap =  initKeyFromEnum();
     _colorMap = initColorMap();
+    _isOpen = true;
     noecho();
 }
 
@@ -42,8 +43,8 @@ void NCurses::stop()
     std::cout << "NCurses stop\n";
     if (_window) {
         endwin();
-        free(_window);
         _window = nullptr;
+        _isOpen = false;
     } else
         throw ModuleException("The window can not be closed");
 }
@@ -52,7 +53,7 @@ void NCurses::clear()
 {
     std::cout << "NCurses clear\n";
     if (_window)
-        clear();
+        ::clear();
     else
         throw ModuleException("The window can not be cleared");
 }
@@ -142,7 +143,7 @@ void NCurses::setWindowSize(int w, int h)
 {
     std::cout << "NCurses setWindowSize: width=" << w << ", height=" << h << "\n";
     if (_window)
-        resizeterm(w, h);
+        resizeterm(h, w);
     else
         throw ModuleException("Can not resize window");
 }
@@ -161,13 +162,24 @@ void NCurses::setFullscreen(bool fullscreen)
 
 void NCurses::drawEntity(const Entity& e)
 {
+    size_t colorCode = checkColorPairs(e.backgroundColor, e.color);
     std::cout << "NCurses drawEntity\n";
 
-    for (size_t x = e.pos.x; x < e.pos.x + e.size.x; x++) {
-        for (size_t y = e.pos.y; y < e.pos.y + e.size.y; y++) {
-            mvprintw(x, y, "%c", e.character);
+    Position entityPos = convertGridPosition(e.pos, LINES, COLS);
+    Position entitySize = convertGridSize(e.size, LINES, COLS);
+
+    const int startX = convertToCell(entityPos.x);
+    const int startY = convertToCell(entityPos.y);
+    const int width = (entitySize.x <= 0.0f) ? 1 : convertToCell(entitySize.x);
+    const int height = (entitySize.y <= 0.0f) ? 1 : convertToCell(entitySize.y);
+
+    attron(COLOR_PAIR(colorCode));
+    for (int y = startY; y < startY + height; y++) {
+        for (int x = startX; x < startX + width; x++) {
+            mvaddch(y, x, e.character);
         }
     }
+    attroff(COLOR_PAIR(colorCode));
 }
 
 void NCurses::drawText(const Text& t)
@@ -175,9 +187,11 @@ void NCurses::drawText(const Text& t)
     size_t colorCode = checkColorPairs(t.color);
     std::cout << "NCurses drawText\n";
 
-    attron(colorCode);
-    mvprintw(t.pos.x, t.pos.y, "%s", t.content);
-    attroff(colorCode);
+    Position textPos = convertGridPosition(t.pos, LINES, COLS);
+
+    attron(COLOR_PAIR(colorCode));
+    mvprintw(convertToCell(textPos.y), convertToCell(textPos.x), "%s", t.content.c_str());
+    attroff(COLOR_PAIR(colorCode));
 }
 
 void NCurses::drawRectangle(const Rect& rect, const Color& color)
@@ -185,14 +199,21 @@ void NCurses::drawRectangle(const Rect& rect, const Color& color)
     size_t colorCode = checkColorPairs(color);
     std::cout << "NCurses drawRectangle\n";
 
-    attron(colorCode);
-    for (size_t x = rect.x; x <= rect.x + rect.height; x++) {
-        for (size_t y = rect.y; y <= rect.y + rect.width; y++) {
-            move(x, y);
-            printw("*");
+    Position rectPos = convertGridPosition(Position(rect.x, rect.y), LINES, COLS);
+    Position rectSize = convertGridSize(Position(rect.width, rect.height), LINES, COLS);
+
+    const int startX = convertToCell(rectPos.x);
+    const int startY = convertToCell(rectPos.y);
+    const int width = convertToCell(rectSize.x);
+    const int height = convertToCell(rectSize.y);
+
+    attron(COLOR_PAIR(colorCode));
+    for (int y = startY; y <= startY + height; y++) {
+        for (int x = startX; x <= startX + width; x++) {
+            mvaddch(y, x, '*');
         }
     }
-    attroff(colorCode);
+    attroff(COLOR_PAIR(colorCode));
 }
 
 const std::string& NCurses::getName() const
@@ -216,23 +237,25 @@ float NCurses::getDeltaTime() const
 int NCurses::getWidth() const
 {
     std::cout << "NCurses getWidth\n";
-    return 0;
+    
+    return COLS;
 }
 
 int NCurses::getHeight() const
 {
     std::cout << "NCurses getHeight\n";
-    return 0;
+    
+    return LINES;
 }
 
 void NCurses::setRenderContext(const RenderContext& context)
 {
     std::cout << "NCurses setRenderContext\n";
+    _renderContext = context;
 }
 
-
 //COLOR
-size_t NCurses::checkColorPairs(Color background, Color foreground = Colors::WHITE)
+size_t NCurses::checkColorPairs(Color background, Color foreground)
 {
     auto check = _colorPairs.find({foreground, background});
 
@@ -270,9 +293,9 @@ size_t NCurses::checkColorPairs(Color background, Color foreground = Colors::WHI
 //     }
 // }
 
-std::map<Color, size_t> NCurses::initColorMap()
+std::map<Color, size_t, NCurses::ColorComparator> NCurses::initColorMap()
 {
-    std::map<Color, size_t> newMap = {
+    std::map<Color, size_t, NCurses::ColorComparator> newMap = {
         {Colors::BLACK, COLOR_BLACK},
         {Colors::BLUE, COLOR_BLUE},
         {Colors::CYAN, COLOR_CYAN},
@@ -287,4 +310,3 @@ std::map<Color, size_t> NCurses::initColorMap()
 }
 
 }
-
