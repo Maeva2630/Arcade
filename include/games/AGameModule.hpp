@@ -18,17 +18,40 @@ namespace arcade {
  * this class instead of IGameModule directly.
  */
 class AGameModule : public IGameModule {
-public:
-    /**
-     * @brief Virtual destructor
-     */
-    virtual ~AGameModule() = default;
+    public:
+        /**
+         * @brief Virtual destructor
+         */
+        virtual ~AGameModule() = default;
 
-    /**
-     * @brief Get the type of this module
-     * @return ModuleType::GAME
-     */
-    ModuleType getType() const override { return ModuleType::GAME; }
+        /**
+         * @brief Get the type of this module
+         * @return ModuleType::GAME
+         */
+        ModuleType getType() const override { return ModuleType::GAME; }
+    
+    protected:
+        GameState _currentState;
+        std::vector<Entity> _entities;
+        std::vector<Text> _uiText;
+        RenderContext _renderContext;
+        int _score;
+
+        /**
+         * @brief Rebuild game entities from current state
+         * 
+         * Called after each game logic update to sync _entities
+         * with the current game state for rendering.
+         */
+        virtual void refreshEntities() {}
+
+        /**
+         * @brief Rebuild UI text elements from current state
+         * 
+         * Called to update score, status messages, controls help, etc.
+         * in the _uiText vector for rendering.
+         */
+        virtual void refreshUI() {}
 };
 
 } // namespace arcade
