@@ -8,7 +8,7 @@
 #ifndef SNAKE_ENTITY_HPP
 #define SNAKE_ENTITY_HPP
     #include <deque>
-    #include "IDisplayModule.hpp"
+    #include "graphicals/IDisplayModule.hpp"
     #define START_SNAKE_LENGTH 4
     #define START_HEAD_X 5.0f
     #define START_HEAD_Y 5.0f

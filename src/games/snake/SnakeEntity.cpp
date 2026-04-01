@@ -51,7 +51,7 @@ Snake::SnakeSegment Snake::getNextHead() const
     else if (Face::NORTH == head.face) { y =  y <= 0 ? MAX_GRID_Y -1 : y-1; }
     else if (Face::SOUTH == head.face) { y =  MAX_GRID_Y <= y+1 ? 0 : y+1; }
     
-    return SnakeSegment{ Position{x, y},  head.face};
+    return SnakeSegment{ Position{ static_cast<float>(x), static_cast<float>(y) },  head.face};
 }
 
 size_t Snake::getSegmentSize() const
