@@ -16,9 +16,7 @@ include(FetchContent)
 # DEPENDENCIES
 # =========================
 
-if (UNIX)
-    find_package(X11 REQUIRED)
-endif()
+find_package(X11 REQUIRED)
 
 # ---- ncurses ----
 find_package(Curses QUIET) # Execute the else branch if ncurses is not found
@@ -28,25 +26,15 @@ if (CURSES_FOUND)
 else()
     message(STATUS "KO - NCurses not found: Fetching")
     
-    include(ExternalProject) # To build external projects that are not CMake-based
-    set(NCURSES_INSTALL_DIR ${CMAKE_BINARY_DIR}/lib/ncurses/ncurses-install)
-
-    ExternalProject_Add(ncurses_external
-        URL https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.4.tar.gz
-        URL_HASH SHA256=6931283d9ac87c5073f30b6290c4c75f21632bb4fc3603ac8100812bed248159
-        CONFIGURE_COMMAND <SOURCE_DIR>/configure
-            --prefix=${NCURSES_INSTALL_DIR}
-        BUILD_COMMAND make -j${CMAKE_BUILD_PARALLEL_LEVEL} # Launch with the max of threads (cores) available
-        INSTALL_COMMAND make install
-        BUILD_BYPRODUCTS ${NCURSES_INSTALL_DIR}/lib/libncursesw.so # Success if this file is generated
+    FetchContent_Declare(
+        CURSES
+        GIT_REPOSITORY https://github.com/mirror/ncurses.git
+        GIT_TAG v6.4
+        GIT_SHALLOW TRUE # Only the latest commit, not the whole history
     )
 
-    add_library(ncurses SHARED IMPORTED GLOBAL)
-    add_dependencies(ncurses ncurses_external)
-    set_target_properties(ncurses PROPERTIES
-        IMPORTED_LOCATION ${NCURSES_INSTALL_DIR}/lib/libncursesw.so
-        INTERFACE_INCLUDE_DIRECTORIES ${NCURSES_INSTALL_DIR}/include/ncursesw
-    )
+    FetchContent_MakeAvailable(CURSES)
+    message(STATUS "OK - NCurses fetched and built")
 endif()
 
 # ---- SFML ----
@@ -71,7 +59,7 @@ else()
         SFML
         GIT_REPOSITORY https://github.com/SFML/SFML.git
         GIT_TAG 2.6.2
-        GIT_SHALLOW TRUE # Only the latest commit, not the whole history
+        GIT_SHALLOW TRUE
     )
 
     FetchContent_MakeAvailable(SFML)
