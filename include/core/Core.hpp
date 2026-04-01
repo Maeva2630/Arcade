@@ -7,9 +7,9 @@
 
 #ifndef CORE_HPP
     #define CORE_HPP
-    #define LIB_DIR "./lib"
     #include <vector>
     #include <map>
+    #include <memory>
     #include "games/IGameModule.hpp"
     #include "graphicals/IDisplayModule.hpp"
     #include "dlloader/DLLoader.hpp"
@@ -17,6 +17,15 @@
 namespace arcade {
     class Core {
         public:
+            class CoreException : public std::exception
+            {
+                private:
+                    std::string _message;
+                public:
+                    CoreException(std::string message) : _message(message) {};
+                    const char* what() const noexcept override { return this->_message.c_str(); };
+            };
+
             Core(std::string libPath);
             void run();
         
@@ -33,19 +42,20 @@ namespace arcade {
             void renderMenu();
             void renderGame();
 
-            IDisplayModule* _display;
-            IGameModule* _game;
+            std::unique_ptr<DLLoader<IDisplayModule>> _displayLoader;
+            std::unique_ptr<DLLoader<IGameModule>> _gameLoader;
 
-            std::vector<DLLoader<IModule>> _loaders;
+            std::unique_ptr<IDisplayModule> _display;
+            std::unique_ptr<IGameModule> _game;
 
             std::vector<std::string> _displayLibs;
             std::vector<std::string> _gameLibs;
 
             std::map<std::string, int> _scores;
-            std::string playerName;
+            std::string _playerName;
 
-            std::size_t currentDisplayIdx;
-            std::size_t currentGameIdx;
+            std::size_t _currentDisplayIdx;
+            std::size_t _currentGameIdx;
 
             bool _running;
     };
