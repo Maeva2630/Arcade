@@ -23,6 +23,10 @@ namespace arcade
             Snake();
             ~Snake() = default;
 
+            /**
+             * @brief
+             * Enum to know which direction the snake is facing
+             */
             enum Face {
                 EAST = 1,
                 WEST = 2,
@@ -30,26 +34,80 @@ namespace arcade
                 SOUTH = 4,
             };
 
+            /**
+             * @brief 
+             * SnakeSegment struct regrouping one position and a face
+             */
             struct SnakeSegment {
                 Position pos;
                 Face face;
             };
 
+            /**
+             * @brief Get the Head Reference object
+             * To modify the head of the snake
+             * @return SnakeSegment& 
+             */
             SnakeSegment &getHeadReference();
+            /**
+             * @brief Get the Head object
+             * To obtain information on the head of the snake
+             * @return SnakeSegment 
+             */
             SnakeSegment getHead() const;
 
+            /**
+             * @brief Get the Next Head object
+             * Get the next head information depending on user input and current head informations
+             * @return SnakeSegment 
+             */
             SnakeSegment getNextHead() const;
 
+            /**
+             * @brief Set the Face object
+             * Set the new facing of the snake depending on current face
+             * @param f 
+             */
             void setFace(Face f);
 
+            /**
+             * @brief Get the Segment Size object
+             * 
+             * @return size_t 
+             */
             size_t getSegmentSize() const;
 
+            /**
+             * @brief Get the Segments object reference
+             * 
+             * @return const std::deque<SnakeSegment>& 
+             */
             const std::deque<SnakeSegment> &getSegments() const;
 
+            /**
+             * @brief 
+             * 
+             * See if one segment of the snake covers this position
+             * @param pos 
+             * @return true 
+             * @return false 
+             */
             bool containsAtThisPos(Position pos) const;
 
+            /**
+             * @brief Set the Alive object
+             * Change the isAlive boolean of the snake
+             * @param isAlive 
+             */
             void setAlive(bool isAlive);
 
+            /**
+             * @brief 
+             * 
+             * update the body size of the snake
+             * @param hasEaten 
+             * @param nextHead 
+             */
             void updateBody(bool hasEaten, SnakeSegment nextHead);
 
         private:
