@@ -10,7 +10,7 @@
 
 extern "C" arcade::IModule *entryPoint(void)
 {
-    std::cout << "NCurses entryPoint\n";
+    // std::cout << "NCurses entryPoint\n";
     return new arcade::NCurses();
 }
 
@@ -18,29 +18,35 @@ namespace arcade {
 
 NCurses::NCurses() : _window(nullptr), _nbPairs(0), _lastTime(std::chrono::steady_clock::now())
 {
-    std::cout << "NCurses constructor\n";
+    // std::cout << "NCurses constructor\n";
 }
 
 NCurses::~NCurses()
 {
-    std::cout << "NCurses destructor\n";
+    // std::cout << "NCurses destructor\n";
 }
 
 void NCurses::init()
 {
-    std::cout << "NCurses init\n";
+    // std::cout << "NCurses init\n";
     _window = initscr();
     if (!_window)
         throw ModuleException("NCurses window init failed");
+    
+    cbreak();
+    noecho();
+    keypad(_window, TRUE);
+    wtimeout(_window, 50);
+    curs_set(0);
+    
     _keyMap =  initKeyFromEnum();
     _colorMap = initColorMap();
     _isOpen = true;
-    noecho();
 }
 
 void NCurses::stop()
 {
-    std::cout << "NCurses stop\n";
+    // std::cout << "NCurses stop\n";
     if (_window) {
         endwin();
         _window = nullptr;
@@ -51,7 +57,7 @@ void NCurses::stop()
 
 void NCurses::clear()
 {
-    std::cout << "NCurses clear\n";
+    // std::cout << "NCurses clear\n";
     if (_window)
         ::clear();
     else
@@ -60,7 +66,7 @@ void NCurses::clear()
 
 void NCurses::display()
 {
-    std::cout << "NCurses display\n";
+    // std::cout << "NCurses display\n";
     if (_window) {
         updateDeltaTime();
         refresh();
@@ -70,7 +76,7 @@ void NCurses::display()
 
 Key NCurses::getKey()
 {
-    std::cout << "NCurses getKey\n";
+    // std::cout << "NCurses getKey\n";
     int ch = getch();
     auto key = this->_keyMap.find(ch);
 
@@ -137,12 +143,12 @@ MouseEvent NCurses::getMouseEvent()
 
 void NCurses::setTitle(const std::string& title)
 {
-    std::cout << "NCurses setTitle: " << title << "\n";
+    // std::cout << "NCurses setTitle: " << title << "\n";
 }
 
 void NCurses::setWindowSize(int w, int h)
 {
-    std::cout << "NCurses setWindowSize: width=" << w << ", height=" << h << "\n";
+    // std::cout << "NCurses setWindowSize: width=" << w << ", height=" << h << "\n";
     if (_window)
         resizeterm(h, w);
     else
@@ -151,7 +157,7 @@ void NCurses::setWindowSize(int w, int h)
 
 void NCurses::setFullscreen(bool fullscreen)
 {
-    std::cout << "NCurses setFullscreen\n";
+    // std::cout << "NCurses setFullscreen\n";
     _fullscreen = fullscreen;
 
     // int x = 0; // rename variables into width and height
@@ -164,7 +170,7 @@ void NCurses::setFullscreen(bool fullscreen)
 void NCurses::drawEntity(const Entity& e)
 {
     size_t colorCode = checkColorPairs(e.backgroundColor, e.color);
-    std::cout << "NCurses drawEntity\n";
+    // std::cout << "NCurses drawEntity\n";
 
     Position entityPos = convertGridPosition(e.pos, LINES, COLS);
     Position entitySize = convertGridSize(e.size, LINES, COLS);
@@ -186,7 +192,7 @@ void NCurses::drawEntity(const Entity& e)
 void NCurses::drawText(const Text& t)
 {
     size_t colorCode = checkColorPairs(t.color);
-    std::cout << "NCurses drawText\n";
+    // std::cout << "NCurses drawText\n";
 
     Position textPos = convertGridPosition(t.pos, LINES, COLS);
 
@@ -198,7 +204,7 @@ void NCurses::drawText(const Text& t)
 void NCurses::drawRectangle(const Rect& rect, const Color& color)
 {
     size_t colorCode = checkColorPairs(color);
-    std::cout << "NCurses drawRectangle\n";
+    // std::cout << "NCurses drawRectangle\n";
 
     Position rectPos = convertGridPosition(Position(rect.x, rect.y), LINES, COLS);
     Position rectSize = convertGridSize(Position(rect.width, rect.height), LINES, COLS);
@@ -225,13 +231,13 @@ const std::string& NCurses::getName() const
 
 bool NCurses::isOpen() const
 {
-    std::cout << "NCurses isOpen\n";
+    // std::cout << "NCurses isOpen\n";
     return _isOpen;
 }
 
 float NCurses::getDeltaTime() const
 {
-    std::cout << "NCurses getDeltaTime\n";
+    // std::cout << "NCurses getDeltaTime\n";
     return _deltaTime;
 }
 
@@ -245,21 +251,21 @@ float NCurses::updateDeltaTime()
 
 int NCurses::getWidth() const
 {
-    std::cout << "NCurses getWidth\n";
+    // std::cout << "NCurses getWidth\n";
     
     return COLS;
 }
 
 int NCurses::getHeight() const
 {
-    std::cout << "NCurses getHeight\n";
+    // std::cout << "NCurses getHeight\n";
     
     return LINES;
 }
 
 void NCurses::setRenderContext(const RenderContext& context)
 {
-    std::cout << "NCurses setRenderContext\n";
+    // std::cout << "NCurses setRenderContext\n";
     _renderContext = context;
 }
 

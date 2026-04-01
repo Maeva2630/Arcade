@@ -8,9 +8,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_compile_options(-g3 -Wall -rdynamic -Wextra -fno-gnu-unique)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 
 include_directories(include)
 include(FetchContent)
+
+option(ARCADE_ENABLE_SDL2 "Enable SDL backend dependency/build" OFF)
 
 # =========================
 # DEPENDENCIES
@@ -67,22 +71,26 @@ else()
 endif()
 
 # ---- SDL2 ----
-find_package(SDL2 QUIET)
+if (ARCADE_ENABLE_SDL2)
+    find_package(SDL2 QUIET)
 
-if (SDL2_FOUND)
-    message(STATUS "OK - Found SDL2")
+    if (SDL2_FOUND)
+        message(STATUS "OK - Found SDL2")
+    else()
+        message(STATUS "KO - SDL2 not found: Fetching")
+
+        FetchContent_Declare(
+            SDL2
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+            GIT_TAG release-3.4.2
+            GIT_SHALLOW TRUE
+        )
+
+        FetchContent_MakeAvailable(SDL2)
+        message(STATUS "OK - SDL2 fetched and built")
+    endif()
 else()
-    message(STATUS "KO - SDL2 not found: Fetching")
-
-    FetchContent_Declare(
-        SDL2
-        GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-        GIT_TAG release-3.4.2
-        GIT_SHALLOW TRUE
-    )
-
-    FetchContent_MakeAvailable(SDL2)
-    message(STATUS "OK - SDL2 fetched and built")
+    message(STATUS "SDL disabled (ARCADE_ENABLE_SDL2=OFF)")
 endif()
 
 # =========================
@@ -100,9 +108,9 @@ target_link_libraries(arcade dl)
 # =========================
 
 # # ---- NCURSES ----
-# file(GLOB NCURSES_SRC src/graphicals/ncurses/*.cpp)
-# add_library(arcade_ncurses SHARED ${NCURSES_SRC})
-# target_link_libraries(arcade_ncurses ncurses)
+file(GLOB NCURSES_SRC src/graphicals/ncurses/*.cpp)
+add_library(arcade_ncurses SHARED ${NCURSES_SRC} src/graphicals/ADisplay.cpp)
+target_link_libraries(arcade_ncurses ncurses)
 
 # # ---- SDL2 ----
 # file(GLOB SDL2_SRC src/graphicals/sdl2/*.cpp)
@@ -119,8 +127,8 @@ target_link_libraries(arcade dl)
 # =========================
 
 # # ---- Snake ----
-# file(GLOB SNAKE_SRC src/games/snake/*.cpp)
-# add_library(arcade_snake SHARED ${SNAKE_SRC})
+file(GLOB SNAKE_SRC src/games/snake/*.cpp)
+add_library(arcade_snake SHARED ${SNAKE_SRC})
 
 # # ---- Nibbler ----
 # file(GLOB NIBBLER_SRC src/games/nibbler/*.cpp)

@@ -17,7 +17,7 @@ int main(int argc, char *const *argv) {
         
         core.run();
     } catch (const arcade::Core::CoreException& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        // std::cerr << "Error: " << e.what() << std::endl;
         return 84;
     }
     return 0;

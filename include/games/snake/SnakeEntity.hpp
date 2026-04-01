@@ -28,10 +28,10 @@ namespace arcade
              * Enum to know which direction the snake is facing
              */
             enum Face {
-                EAST = 1,
+                EAST = 0,
+                NORTH = 1,
                 WEST = 2,
-                NORTH = 3,
-                SOUTH = 4,
+                SOUTH = 3,
             };
 
             /**

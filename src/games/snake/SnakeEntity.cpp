@@ -34,9 +34,11 @@ Snake::SnakeSegment Snake::getHead() const
 
 void Snake::setFace(Face f) 
 { 
-    if (2 != abs(getHead().face - f)) {
+    Face current = getHead().face;
+    int diff = static_cast<int>(current) - static_cast<int>(f);
+    if (diff != 2 && diff != -2) {
         getHeadReference().face = f;
-    } 
+    }
 }
 
 Snake::SnakeSegment Snake::getNextHead() const
