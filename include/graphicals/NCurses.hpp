@@ -147,14 +147,17 @@ namespace arcade
          * @return int 
          */
         int getHeight() const override;
+        /**
+         * @brief Set the Render Context object
+         * 
+         * @param context 
+         */
         void setRenderContext(const RenderContext &context) override;
 
     private:
         bool _fullscreen = false;
 
         WINDOW *_window;
-        size_t _cols;
-        size_t _rows;
 
         /**
          * @brief 
@@ -173,8 +176,27 @@ namespace arcade
          * @return size_t 
          */
         size_t checkColorPairs(Color background, Color foreground = Colors::WHITE);
+
+        /**
+         * @brief 
+         * Init the colorMap from the NCurses enum
+         * @return std::unordered_map<uint32_t, size_t> 
+         */
         std::unordered_map<uint32_t, size_t> initColorMap();
+        /**
+         * @brief 
+         * convert a Color to a uint32_t
+         * @param color 
+         * @return uint32_t 
+         */
         static uint32_t colorToKey(const Color &color);
+        /**
+         * @brief 
+         * convert a Color Pair to uint64_t
+         * @param foreground 
+         * @param background 
+         * @return uint64_t 
+         */
         static uint64_t colorPairToKey(const Color &foreground, const Color &background);
 
         /**
@@ -183,6 +205,12 @@ namespace arcade
          * 
          */
         std::chrono::steady_clock::time_point _lastTime;
+
+        /**
+         * @brief update delta time for graphical display 
+         * 
+         * @return float 
+         */
         float updateDeltaTime();
     };
 }
