@@ -13,7 +13,7 @@
 
 namespace arcade {
 
-static const char* LIB_DIR = "../lib";
+static const char* LIB_DIR = "lib";
 
 using GlobalInputHandler = std::function<void(Key)>;
 using StatesHandler = std::function<void(GameState)>;
@@ -51,9 +51,25 @@ Core::Core(std::string libPath)
     _running = true;
 }
 
+void Core::initAll()
+{
+    _display->init();
+    _game->init();
+    _display->setRenderContext(_game->getRenderContext());
+}
+
+void Core::stopAll()
+{
+    //peut etre mettre un try catch ici 
+    _display->stop();
+    _game->stop();
+}
+
 void Core::run()
 {
+    initAll();
     mainLoop();
+    stopAll();
 }
 
 void Core::mainLoop()
@@ -162,7 +178,21 @@ void Core::renderMenu()
 
 void Core::renderGame()
 {
-    std::cout << "Rendering game..." << std::endl;
+    _display->clear();
+
+    _game->handleInput(_display->getKey());
+
+    _game->update(_display->getDeltaTime());
+
+    for (Entity entity : _game->getEntities()) {
+        _display->drawEntity(entity);
+    }
+
+    for (Text text : _game->getUIText()) {
+        _display->drawText(text);
+    }
+
+    _display->display();
 }
 
 }

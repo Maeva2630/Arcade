@@ -32,7 +32,7 @@ namespace arcade {
         private:
             void mainLoop();
             void handleGlobalInput(Key key);
-
+    
             void switchDisplay(std::size_t idx);
             void switchGame(std::size_t idx);
 
@@ -41,6 +41,9 @@ namespace arcade {
 
             void renderMenu();
             void renderGame();
+
+            void initAll();
+            void stopAll();
 
             std::unique_ptr<DLLoader<IDisplayModule>> _displayLoader;
             std::unique_ptr<DLLoader<IGameModule>> _gameLoader;
