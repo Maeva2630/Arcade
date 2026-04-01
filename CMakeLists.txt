@@ -5,10 +5,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_compile_options(-Wall -rdynamic -Wextra -fno-gnu-unique)
+add_compile_options(-g3 -Wall -rdynamic -Wextra -fno-gnu-unique)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 
 include_directories(include)
 include(FetchContent)
@@ -30,7 +29,7 @@ else()
     message(STATUS "KO - NCurses not found: Fetching")
     
     include(ExternalProject) # To build external projects that are not CMake-based
-    set(NCURSES_INSTALL_DIR ${CMAKE_BINARY_DIR}/ncurses-install)
+    set(NCURSES_INSTALL_DIR ${CMAKE_BINARY_DIR}/lib/ncurses/ncurses-install)
 
     ExternalProject_Add(ncurses_external
         URL https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.4.tar.gz
@@ -75,9 +74,6 @@ else()
         GIT_SHALLOW TRUE # Only the latest commit, not the whole history
     )
 
-    set(SFML_BUILD_AUDIO ON CACHE BOOL "Build SFML audio module" FORCE)
-    set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries" FORCE)
-
     FetchContent_MakeAvailable(SFML)
     message(STATUS "OK - SFML fetched and built")
 endif()
@@ -96,8 +92,6 @@ else()
         GIT_TAG release-3.4.2
         GIT_SHALLOW TRUE
     )
-
-    set(SDL_SHARED ON CACHE BOOL "Build shared libraries" FORCE)
 
     FetchContent_MakeAvailable(SDL2)
     message(STATUS "OK - SDL2 fetched and built")
