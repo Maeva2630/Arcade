@@ -58,7 +58,7 @@ void Core::run()
 
 void Core::mainLoop()
 {
-    std::map<GameState, StatesHandler> states = {
+    static const std::map<GameState, StatesHandler> states = {
         {GameState::MENU, [this](GameState) { renderMenu(); }},
         {GameState::RUNNING, [this](GameState) { renderGame(); }},
         {GameState::PAUSED, [this](GameState) { std::cout << "Game paused." << std::endl; }},
@@ -66,7 +66,7 @@ void Core::mainLoop()
         {GameState::WON, [this](GameState) { std::cout << "Rendering victory screen..." << std::endl; }}
     };
 
-    while (_running) {
+    while (_running && _display->isOpen()) {
         handleGlobalInput(_display->getKey());
 
         auto it = states.find(_game->getState());
@@ -80,7 +80,7 @@ void Core::mainLoop()
 
 void Core::handleGlobalInput(Key key)
 {
-    std::map<Key, GlobalInputHandler> inputs = {
+    static const std::map<Key, GlobalInputHandler> inputs = {
         {Key::NEXT_GRAPHICS, [this](Key) { switchDisplay((_currentDisplayIdx + 1) % _displayLibs.size()); }},
         {Key::PREV_GRAPHICS, [this](Key) { switchDisplay((_currentDisplayIdx + _displayLibs.size() - 1) % _displayLibs.size()); }},
         {Key::NEXT_GAME, [this](Key) { switchGame((_currentGameIdx + 1) % _gameLibs.size()); }},
