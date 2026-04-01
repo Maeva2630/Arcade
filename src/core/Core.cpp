@@ -9,12 +9,14 @@
 #include <iostream>
 #include <filesystem>
 #include <dlfcn.h>
+#include <functional>
 
 namespace arcade {
 
 static const char* LIB_DIR = "../lib";
 
-typedef ModuleType (*fptr)();
+using GlobalInputHandler = std::function<void(Key)>;
+using StatesHandler = std::function<void(GameState)>;
 
 Core::Core(std::string libPath)
 {
@@ -51,21 +53,45 @@ Core::Core(std::string libPath)
 
 void Core::run()
 {
-
+    mainLoop();
 }
 
 void Core::mainLoop()
 {
-    while (_running) {
-        handleGlobalInput(_display.get()->getKey());
+    std::map<GameState, StatesHandler> states = {
+        {GameState::MENU, [this](GameState) { renderMenu(); }},
+        {GameState::RUNNING, [this](GameState) { renderGame(); }},
+        {GameState::PAUSED, [this](GameState) { std::cout << "Game paused." << std::endl; }},
+        {GameState::GAME_OVER, [this](GameState) { std::cout << "Rendering game over screen..." << std::endl; }},
+        {GameState::WON, [this](GameState) { std::cout << "Rendering victory screen..." << std::endl; }}
+    };
 
-        // render / display
+    while (_running) {
+        handleGlobalInput(_display->getKey());
+
+        auto it = states.find(_game->getState());
+        if (it != states.end()) {
+            it->second(_game->getState());
+        }
+        
+        _display->display();
     }
 }
 
 void Core::handleGlobalInput(Key key)
 {
+    std::map<Key, GlobalInputHandler> inputs = {
+        {Key::NEXT_GRAPHICS, [this](Key) { switchDisplay((_currentDisplayIdx + 1) % _displayLibs.size()); }},
+        {Key::PREV_GRAPHICS, [this](Key) { switchDisplay((_currentDisplayIdx + _displayLibs.size() - 1) % _displayLibs.size()); }},
+        {Key::NEXT_GAME, [this](Key) { switchGame((_currentGameIdx + 1) % _gameLibs.size()); }},
+        {Key::PREV_GAME, [this](Key) { switchGame((_currentGameIdx + _gameLibs.size() - 1) % _gameLibs.size()); }},
+        {Key::EXIT, [this](Key) { _running = false; }}
+    };
 
+    auto it = inputs.find(key);
+    if (it != inputs.end()) {
+        it->second(key);
+    }
 }
 
 void Core::switchDisplay(std::size_t idx)
@@ -126,17 +152,17 @@ void Core::loadLibs(std::string dir)
 
 void Core::saveScore(std::string name, int score)
 {
-   
+    _scores[name] = score;
 }
 
 void Core::renderMenu()
 {
-   
+    std::cout << "Rendering menu..." << std::endl;
 }
 
 void Core::renderGame()
 {
-   
+    std::cout << "Rendering game..." << std::endl;
 }
 
 }
