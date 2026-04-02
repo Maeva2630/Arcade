@@ -17,6 +17,13 @@
 namespace arcade {
     class Core {
         public:
+            /**
+             * @brief Exception class for Core
+             * 
+             * if there is an error during the loading/ deletion of the library
+             * it will be thrown with a CoreException
+             * 
+             */
             class CoreException : public std::exception
             {
                 private:
@@ -31,12 +38,36 @@ namespace arcade {
         
         private:
             void mainLoop();
+
+            /**
+             * @brief Handle global input
+             * @param key The input key to handle
+             */
             void handleGlobalInput(Key key);
 
+            /**
+             * @brief Switch the active display module
+             * @param idx The index of the display module to switch to
+             */
             void switchDisplay(std::size_t idx);
+
+            /**
+             * @brief Switch the active game module
+             * @param idx The index of the game module to switch to
+             */
             void switchGame(std::size_t idx);
 
+            /**
+             * @brief Load all libraries from a directory
+             * @param dir The directory to load libraries from
+             */
             void loadLibs(std::string dir);
+            
+            /**
+             * @brief Save the player's score
+             * @param name The player's name
+             * @param score The player's score
+             */
             void saveScore(std::string name, int score);
 
             void renderMenu();
