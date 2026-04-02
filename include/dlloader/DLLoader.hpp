@@ -45,7 +45,7 @@ class DLLoader {
          * @param libraryPath 
          */
         DLLoader<T>(const std::string &libraryPath) : _libPath(libraryPath) {
-            _handle = dlopen(_libPath.c_str(), RTLD_GLOBAL | RTLD_NOW);
+            _handle = dlopen(_libPath.c_str(), RTLD_LAZY);
             if (!_handle)
                 throw DLLoaderException("On dlopen of " + _libPath, "DLLoader");
         };
