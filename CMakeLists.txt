@@ -76,24 +76,26 @@ macro(arcade_library target)
     )
 endmacro()
 
+set(DISPLAY_COMMON_SRC src/graphicals/ADisplay.cpp)
+
 # ---- ncurses ----
 file(GLOB NCURSES_SRC src/graphicals/ncurses/*.cpp)
-add_library(arcade_ncurses SHARED ${NCURSES_SRC})
+add_library(arcade_ncurses SHARED ${NCURSES_SRC} ${DISPLAY_COMMON_SRC})
 target_include_directories(arcade_ncurses PRIVATE ${CURSES_INCLUDE_DIR})
 target_link_libraries(arcade_ncurses ${CURSES_LIBRARIES})
 arcade_library(arcade_ncurses)
 
-# ---- SFML ----
-file(GLOB SFML_SRC src/graphicals/sfml/*.cpp)
-add_library(arcade_sfml SHARED ${SFML_SRC})
-target_link_libraries(arcade_sfml sfml-graphics sfml-window sfml-system)
-arcade_library(arcade_sfml)
+# # ---- SFML ----
+# file(GLOB SFML_SRC src/graphicals/sfml/*.cpp)
+# add_library(arcade_sfml SHARED ${SFML_SRC})
+# target_link_libraries(arcade_sfml sfml-graphics sfml-window sfml-system)
+# arcade_library(arcade_sfml)
 
-# ---- SDL2 ----
-file(GLOB SDL2_SRC src/graphicals/sdl2/*.cpp)
-add_library(arcade_sdl2 SHARED ${SDL2_SRC})
-target_link_libraries(arcade_sdl2 SDL2::SDL2)
-arcade_library(arcade_sdl2)
+# # ---- SDL2 ----
+# file(GLOB SDL2_SRC src/graphicals/sdl2/*.cpp)
+# add_library(arcade_sdl2 SHARED ${SDL2_SRC})
+# target_link_libraries(arcade_sdl2 SDL2::SDL2)
+# arcade_library(arcade_sdl2)
 
 # =========================
 # GAMES LIBS
