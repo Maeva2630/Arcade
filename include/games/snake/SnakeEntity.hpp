@@ -12,8 +12,8 @@
     #define START_SNAKE_LENGTH 4
     #define START_HEAD_X 5.0f
     #define START_HEAD_Y 5.0f
-    #define MAX_GRID_X 10
-    #define MAX_GRID_Y 10
+    #define MAX_GRID_X 50
+    #define MAX_GRID_Y 20
 
 namespace arcade
 {

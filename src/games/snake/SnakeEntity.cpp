@@ -44,16 +44,19 @@ void Snake::setFace(Face f)
 Snake::SnakeSegment Snake::getNextHead() const
 {
     SnakeSegment head = getHead();
+    int x = static_cast<int>(head.pos.x);
+    int y = static_cast<int>(head.pos.y);
 
-    int x = static_cast<int>(head.pos.x) % MAX_GRID_X;
-    int y = static_cast<int>(head.pos.y) % MAX_GRID_Y;
-    
-    if (Face::EAST  == head.face) { x =  MAX_GRID_X <= x+1 ? 0 : x+1; }
-    else if (Face::WEST  == head.face) { x =  x <= 0 ? MAX_GRID_X -1 : x-1; }
-    else if (Face::NORTH == head.face) { y =  y <= 0 ? MAX_GRID_Y -1 : y-1; }
-    else if (Face::SOUTH == head.face) { y =  MAX_GRID_Y <= y+1 ? 0 : y+1; }
-    
-    return SnakeSegment{ Position{ static_cast<float>(x), static_cast<float>(y) },  head.face};
+    if (head.face == Face::EAST)
+        x = (x >= MAX_GRID_X - 1) ? 1 : x + 1;
+    else if (head.face == Face::WEST)
+        x = (x <= 1) ? MAX_GRID_X - 1 : x - 1;
+    else if (head.face == Face::NORTH)
+        y = (y <= 1) ? MAX_GRID_Y - 1 : y - 1;
+    else if (head.face == Face::SOUTH)
+        y = (y >= MAX_GRID_Y - 1) ? 1 : y + 1;
+
+    return SnakeSegment{ Position{ static_cast<float>(x), static_cast<float>(y) }, head.face };
 }
 
 size_t Snake::getSegmentSize() const
