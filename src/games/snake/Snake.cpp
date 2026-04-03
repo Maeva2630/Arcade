@@ -25,8 +25,8 @@ void SnakeModule::FoodSystem::spawn(const Snake &snake, int width, int height, G
 {
     std::vector<Position> freeCells;
 
-    for (int y = 1; y < height; ++y) {
-        for (int x = 1; x < width; ++x) {
+    for (int y = 3; y < height - 2; ++y) {
+        for (int x = 1; x < width - 1; ++x) {
             Position candidate(static_cast<float>(x), static_cast<float>(y));
             if (!snake.containsAtThisPos(candidate))
                 freeCells.emplace_back(candidate);
@@ -47,7 +47,7 @@ void SnakeModule::FoodSystem::spawn(const Snake &snake, int width, int height, G
 SnakeModule::SnakeModule() : _score(0), _moveDelay(0.0f)
 {
     _currentState = GameState::MENU;
-    _renderContext = {MAX_GRID_X, MAX_GRID_Y, CoordinateSpace::GRID};
+    _renderContext = {MAX_GRID_X + 1, MAX_GRID_Y + 1, CoordinateSpace::GRID};
 }
 
 SnakeModule::~SnakeModule()
@@ -119,7 +119,7 @@ void SnakeModule::update(float deltaTime)
 
 void SnakeModule::generateFood()
 {
-    _food.spawn(_snake, MAX_GRID_X - 1, MAX_GRID_Y - 1, _currentState);
+    _food.spawn(_snake, MAX_GRID_X, MAX_GRID_Y, _currentState);
 }
 
 void SnakeModule::refreshFrame()
@@ -127,17 +127,17 @@ void SnakeModule::refreshFrame()
     const size_t frameSize = 4;
     std::array<Entity, frameSize> frames;
 
-    frames[0].pos = Position(0.0f, 0.0f);
-    frames[0].size = Position(1.0f, MAX_GRID_Y - 1.0f);
+    frames[0].pos = Position(0.0f, 2.0f);
+    frames[0].size = Position(1.0f, MAX_GRID_Y - 3.0f);
 
-    frames[1].pos = Position(0.0f, 0.0f);
+    frames[1].pos = Position(0.0f, 2.0f);
     frames[1].size = Position(MAX_GRID_X - 1.0f, 1.0f);
 
-    frames[2].pos = Position(0.0f, MAX_GRID_Y - 1.0f);
+    frames[2].pos = Position(0.0f, MAX_GRID_Y - 2.0f);
     frames[2].size = Position(MAX_GRID_X - 1.0f, 1.0f);
 
-    frames[3].pos = Position(MAX_GRID_X - 1.0f, 0.0f);
-    frames[3].size = Position(1.0f, MAX_GRID_Y - 1.0f);
+    frames[3].pos = Position(MAX_GRID_X - 1.0f, 2.0f);
+    frames[3].size = Position(1.0f, MAX_GRID_Y - 3.0f);
 
     for (Entity &i : frames) {
         i.color = Colors::WHITE;
@@ -177,6 +177,9 @@ void SnakeModule::refreshEntities()
 void SnakeModule::refreshUI()
 {
     _uiText.clear();
+
+    std::string title = "SNAKE";
+    _uiText.emplace_back(title, MAX_GRID_X / 2 + 1, 0.0f, Colors::YELLOW, 10);
     
     std::string scoreStr = "Score: " + std::to_string(_score);
     _uiText.emplace_back(scoreStr, 1.0f, 1.0f, Colors::WHITE, 10);
@@ -188,8 +191,8 @@ void SnakeModule::refreshUI()
     } else if (_currentState == GameState::WON) {
         _uiText.emplace_back("YOU WIN!", MAX_GRID_X / 2 - 1, MAX_GRID_Y / 2, Colors::GREEN, 12);
     }
-    _uiText.emplace_back("[Controls] Arrows: snake move | P: pause | R: restart | M: menu | Esc: exit",
-                         1.0f, MAX_GRID_Y - 1.0f, Colors::CYAN, 9);
+    _uiText.emplace_back("[Arrows: move] [P: pause] [R: restart] [M: menu] [Esc: exit]",
+                         1.0f, MAX_GRID_Y, Colors::CYAN, 9);
 }
 
 void SnakeModule::handleInput(Key key)
