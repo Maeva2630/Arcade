@@ -13,6 +13,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 include_directories(include)
 include(FetchContent)
 
+option(ARCADE_ENABLE_SDL2 "Enable SDL backend dependency/build" OFF)
+
 # =========================
 # DEPENDENCIES
 # =========================

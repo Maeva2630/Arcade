@@ -54,32 +54,79 @@ Core::Core(std::string libPath)
     _running = true;
 }
 
+void Core::initAll()
+{
+    _display->init();
+    _game->init();
+    _display->setRenderContext(_game->getRenderContext());
+}
+
+void Core::stopAll()
+{
+    _display->stop();
+    _game->stop();
+}
+
 void Core::run()
 {
+    initAll();
     mainLoop();
+    stopAll();
+}
+
+void Core::handleGameInput(Key key)
+{
+    if (key == Key::P) {
+        if (_game->getState() == GameState::RUNNING) {
+            _game->pause();
+        } else if (_game->getState() == GameState::PAUSED) {
+            _game->resume();
+        }
+    } else if (key == Key::R && (_game->getState() == GameState::RUNNING || _game->getState() == GameState::PAUSED
+    || _game->getState() == GameState::GAME_OVER
+    || _game->getState() == GameState::WON)) {
+        _game->restart();
+    } else if (key == Key::M) {
+        _game->stop();
+        _game->init();
+    }
 }
 
 void Core::mainLoop()
 {
-    static const std::map<GameState, StatesHandler> states = {
-        {GameState::MENU, [this](GameState) { renderMenu(); }},
-        {GameState::RUNNING, [this](GameState) { renderGame(); }},
-        {GameState::PAUSED, [this](GameState) { std::cout << "Game paused." << std::endl; }},
-        {GameState::GAME_OVER, [this](GameState) { std::cout << "Rendering game over screen..." << std::endl; }},
-        {GameState::WON, [this](GameState) { std::cout << "Rendering victory screen..." << std::endl; }},
-        {GameState::PAUSED,    [this](GameState) { _game->pause(); renderGame(); }},
-        {GameState::GAME_OVER, [this](GameState) { saveScore(_playerName, _game->getScore()); std::cout << "Game over." << std::endl; }},
-        {GameState::WON,       [this](GameState) { saveScore(_playerName, _game->getScore()); std::cout << "You won!" << std::endl; }},
-    };
-
     while (_running && _display->isOpen()) {
-        for (Key key = _display->getKey(); key != Key::UNKNOWN; key = _display->getKey()) {
-            handleGlobalInput(key);
-        }
+        Key key = _display->getKey();
+        handleGlobalInput(key);
+        handleGameInput(key);
 
-        auto it = states.find(_game->getState());
-        if (it != states.end()) {
-            it->second(_game->getState());
+        if (_game->getState() == GameState::MENU) {
+            renderMenu();
+        } else if (_game->getState() == GameState::RUNNING || _game->getState() == GameState::PAUSED) {
+            _display->clear();
+            
+            if (_game->getState() == GameState::RUNNING) {
+                _game->handleInput(key);
+            }
+            
+            _game->update(_display->getDeltaTime());
+            
+            for (Entity entity : _game->getEntities()) {
+                _display->drawEntity(entity);
+            }
+            
+            for (Text text : _game->getUIText()) {
+                _display->drawText(text);
+            }
+        } else if (_game->getState() == GameState::GAME_OVER || _game->getState() == GameState::WON) {
+            _display->clear();
+            
+            for (Entity entity : _game->getEntities()) {
+                _display->drawEntity(entity);
+            }
+            
+            for (Text text : _game->getUIText()) {
+                _display->drawText(text);
+            }
         }
         
         _display->display();
@@ -201,17 +248,21 @@ void Core::renderMenu()
 
 void Core::renderGame()
 {
-    _game.get()->update(_display.get()->getDeltaTime());
+    _display->clear();
 
-    _display.get()->clear();
+    _game->handleInput(_display->getKey());
 
-    for (const auto& entity : _game->getEntities())
+    _game->update(_display->getDeltaTime());
+
+    for (Entity entity : _game->getEntities()) {
         _display->drawEntity(entity);
-        
-    for (const auto& text : _game->getUIText())
-        _display->drawText(text);
+    }
 
-    std::cout << "Rendering game..." << std::endl;
+    for (Text text : _game->getUIText()) {
+        _display->drawText(text);
+    }
+
+    _display->display();
 }
 
 }
