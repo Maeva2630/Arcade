@@ -32,6 +32,7 @@ namespace arcade {
         private:
             void mainLoop();
             void handleGlobalInput(Key key);
+            void handleGameInput(Key key);
     
             void switchDisplay(std::size_t idx);
             void switchGame(std::size_t idx);

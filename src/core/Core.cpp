@@ -60,7 +60,6 @@ void Core::initAll()
 
 void Core::stopAll()
 {
-    //peut etre mettre un try catch ici 
     _display->stop();
     _game->stop();
 }
@@ -72,32 +71,31 @@ void Core::run()
     stopAll();
 }
 
+void Core::handleGameInput(Key key)
+{
+    if (key == Key::P) {
+        if (_game->getState() == GameState::RUNNING) {
+            _game->pause();
+        } else if (_game->getState() == GameState::PAUSED) {
+            _game->resume();
+        }
+    } else if (key == Key::R && (_game->getState() == GameState::RUNNING || _game->getState() == GameState::PAUSED
+    || _game->getState() == GameState::GAME_OVER
+    || _game->getState() == GameState::WON)) {
+        _game->restart();
+    } else if (key == Key::M) {
+        _game->stop();
+        _game->init();
+    }
+}
+
 void Core::mainLoop()
 {
     while (_running && _display->isOpen()) {
         Key key = _display->getKey();
-        
-        // Handle global input (menu/graphics switching)
         handleGlobalInput(key);
+        handleGameInput(key);
 
-        // Handle game-specific controls that work in any state
-        if (key == Key::P) {
-            // Pause/Resume toggle
-            if (_game->getState() == GameState::RUNNING) {
-                _game->pause();
-            } else if (_game->getState() == GameState::PAUSED) {
-                _game->resume();
-            }
-        } else if (key == Key::R && (_game->getState() == GameState::RUNNING || _game->getState() == GameState::PAUSED || _game->getState() == GameState::GAME_OVER || _game->getState() == GameState::WON)) {
-            // Restart game
-            _game->restart();
-        } else if (key == Key::M) {
-            // Back to menu
-            _game->stop();
-            _game->init();
-        }
-
-        // Game state-based update and rendering
         if (_game->getState() == GameState::MENU) {
             renderMenu();
         } else if (_game->getState() == GameState::RUNNING || _game->getState() == GameState::PAUSED) {
@@ -199,7 +197,7 @@ void Core::loadLibs(std::string dir)
             }
 
         } catch (const std::exception& e) {
-            // std::cerr << "Skipping " << lib_path << ": " << e.what() << std::endl;
+            std::cerr << "Skipping " << lib_path << ": " << e.what() << std::endl;
         }
     }
 }
@@ -211,7 +209,6 @@ void Core::saveScore(std::string name, int score)
 
 void Core::renderMenu()
 {
-    // std::cout << "Rendering menu..." << std::endl;
 }
 
 void Core::renderGame()
