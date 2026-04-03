@@ -128,16 +128,16 @@ void SnakeModule::refreshFrame()
     std::array<Entity, frameSize> frames;
 
     frames[0].pos = Position(0.0f, 0.0f);
-    frames[0].size = Position(1.0f, MAX_GRID_Y);
+    frames[0].size = Position(1.0f, MAX_GRID_Y - 1.0f);
 
     frames[1].pos = Position(0.0f, 0.0f);
-    frames[1].size = Position(MAX_GRID_X - 1.0, 1.0f);
+    frames[1].size = Position(MAX_GRID_X - 1.0f, 1.0f);
 
     frames[2].pos = Position(0.0f, MAX_GRID_Y - 1.0f);
     frames[2].size = Position(MAX_GRID_X - 1.0f, 1.0f);
 
     frames[3].pos = Position(MAX_GRID_X - 1.0f, 0.0f);
-    frames[3].size = Position(1.0f, MAX_GRID_Y);
+    frames[3].size = Position(1.0f, MAX_GRID_Y - 1.0f);
 
     for (Entity &i : frames) {
         i.color = Colors::WHITE;
