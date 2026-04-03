@@ -103,6 +103,7 @@ void SnakeModule::update(float deltaTime)
         if (_snake.containsAtThisPos(nextHead.pos) && !hasEaten) {
             _snake.setAlive(false);
             _currentState = GameState::GAME_OVER;
+            refreshUI();
             return;
         } else {
             if (hasEaten) {
@@ -179,17 +180,17 @@ void SnakeModule::refreshUI()
     _uiText.clear();
 
     std::string title = "SNAKE";
-    _uiText.emplace_back(title, MAX_GRID_X / 2 + 1, 0.0f, Colors::YELLOW, 10);
+    _uiText.emplace_back(title, MAX_GRID_X / 2 - 3, 0.0f, Colors::YELLOW, 10);
     
     std::string scoreStr = "Score: " + std::to_string(_score);
     _uiText.emplace_back(scoreStr, 1.0f, 1.0f, Colors::WHITE, 10);
 
     if (_currentState == GameState::PAUSED) {
-        _uiText.emplace_back("PAUSED", MAX_GRID_X / 2 - 1, MAX_GRID_Y / 2, Colors::YELLOW, 12);
+        _uiText.emplace_back("PAUSED", MAX_GRID_X / 2 - 3, MAX_GRID_Y / 2, Colors::YELLOW, 12);
     } else if (_currentState == GameState::GAME_OVER) {
-        _uiText.emplace_back("GAME OVER", MAX_GRID_X / 2 - 1, MAX_GRID_Y / 2, Colors::RED, 12);
+        _uiText.emplace_back("GAME OVER", MAX_GRID_X / 2 - 3, MAX_GRID_Y / 2, Colors::RED, 12);
     } else if (_currentState == GameState::WON) {
-        _uiText.emplace_back("YOU WIN!", MAX_GRID_X / 2 - 1, MAX_GRID_Y / 2, Colors::GREEN, 12);
+        _uiText.emplace_back("YOU WIN!", MAX_GRID_X / 2 - 3, MAX_GRID_Y / 2, Colors::GREEN, 12);
     }
     _uiText.emplace_back("[Arrows: move] [P: pause] [R: restart] [M: menu] [Esc: exit]",
                          1.0f, MAX_GRID_Y, Colors::CYAN, 9);
@@ -245,6 +246,7 @@ void SnakeModule::pause()
 {
     if (_currentState == GameState::RUNNING) {
         _currentState = GameState::PAUSED;
+        refreshUI();
     }
 }
 
@@ -252,6 +254,7 @@ void SnakeModule::resume()
 {
     if (_currentState == GameState::PAUSED) {
         _currentState = GameState::RUNNING;
+        refreshUI();
     }
 }
 
