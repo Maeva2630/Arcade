@@ -7,8 +7,13 @@
 
 #ifndef SNAKEMODULE_HPP_
 # define SNAKEMODULE_HPP_
-    #include "AGameModule.hpp"
+    #include "games/AGameModule.hpp"
+    #include "games/snake/SnakeEntity.hpp"
     #include <iostream>
+    #include <list>
+    #include <random>
+
+    #define MOVE_INTERVAL_SECONDS 0.12
 
 namespace arcade {
 
@@ -31,14 +36,25 @@ namespace arcade {
             void pause() override;
             void resume() override;
             RenderContext getRenderContext() const override;
-        
-            private:
-                GameState current_state;
-                std::string name;
-                std::vector<Entity> entities;
-                std::vector<Text> ui_text;
-                RenderContext render_context;
-                int score;
+
+        private:
+            void generateFood();
+            void refreshEntities() override;
+            void refreshUI() override;
+
+            struct FoodSystem {
+                Position cell;
+                bool hasFood;
+                std::mt19937 rng;
+
+                FoodSystem();
+                void spawn(const Snake &snake, int width, int height, GameState &state);
+            };
+
+            int _score;
+            float _moveDelay;
+            FoodSystem _food;
+            Snake _snake;
     };
 };
 
