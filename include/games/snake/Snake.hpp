@@ -12,6 +12,7 @@
     #include <iostream>
     #include <list>
     #include <random>
+    #include <array>
 
     #define MOVE_INTERVAL_SECONDS 0.12
 
@@ -41,6 +42,7 @@ namespace arcade {
             void generateFood();
             void refreshEntities() override;
             void refreshUI() override;
+            void refreshFrame();
 
             struct FoodSystem {
                 Position cell;
