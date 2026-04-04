@@ -222,4 +222,13 @@ MouseEvent Sdl2::getMouseEvent()
     );
 }
 
+void Sdl2::setTitle(const std::string& title)
+{
+    if (!_window)
+        throw ModuleException("Window is not initialized");
+    SDL_SetWindowTitle(_window, title.c_str());
+}
+
+
+
 }
