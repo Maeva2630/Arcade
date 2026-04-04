@@ -38,7 +38,7 @@ void Sdl2::init()
         throw ModuleException("Failed to load default font");
     }
 
-    _keymap = initKeyFromEnum();
+    _keyMap = initKeyFromEnum();
 }
 
 std::map<int, Key> Sdl2::initKeyFromEnum()
@@ -198,9 +198,13 @@ void Sdl2::drawText(const Text& t)
     SDL_DestroyTexture(textTexture);
 }
 
-// Key Sdl2::getKey()
-// {
-//     if( SDL_PollEvent(_event) > 0 )
-// }
+Key Sdl2::getKey()
+{
+    if( SDL_PollEvent(_event) <= 0 || (_event->type != SDL_KEYDOWN &&
+        _event->key.repeat == 0))
+        return Key::UNKNOWN;
+
+    return _keyMap[_event->key.keysym.sym];
+}
 
 }
