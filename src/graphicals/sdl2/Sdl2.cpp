@@ -138,11 +138,6 @@ void Sdl2::display()
     SDL_RenderPresent(_renderer);
 }
 
-Key Sdl2::getKey()
-{
-    if( SDL_PollEvent(&_event) > 0 )
-}
-
 void Sdl2::drawRectangle(const Rect &rect, const Color &color)
 {
     Position rectPos = convertGridPosition(Position(rect.x, rect.y), _winSize.y, _winSize.x);
@@ -186,7 +181,8 @@ void Sdl2::drawText(const Text& t)
     if (!textTexture)
         return;
 
-    int textWidth, textHeight = 0;
+    int textWidth = 0;
+    int textHeight = 0;
     if (SDL_QueryTexture(textTexture, nullptr, nullptr, &textWidth, &textHeight) != 0) {
         SDL_DestroyTexture(textTexture);
         return;
@@ -200,11 +196,30 @@ void Sdl2::drawText(const Text& t)
 
 Key Sdl2::getKey()
 {
-    if( SDL_PollEvent(_event) <= 0 || (_event->type != SDL_KEYDOWN &&
-        _event->key.repeat == 0))
+    if (SDL_PollEvent(&_event) <= 0 || _event.type != SDL_KEYDOWN || _event.key.repeat != 0)
         return Key::UNKNOWN;
 
-    return _keyMap[_event->key.keysym.sym];
+    auto it = _keyMap.find(_event.key.keysym.sym);
+    return (it != _keyMap.end()) ? it->second : Key::UNKNOWN;
+}
+
+MouseEvent Sdl2::getMouseEvent()
+{
+    if (SDL_PollEvent(&_event) <= 0 || _event.type != SDL_MOUSEBUTTONDOWN)
+        return MouseEvent();
+
+    Key button = Key::UNKNOWN;
+    if (_event.button.button == SDL_BUTTON_LEFT)
+        button = Key::MOUSE_LEFT;
+    else if (_event.button.button == SDL_BUTTON_MIDDLE)
+        button = Key::MOUSE_MIDDLE;
+    else if (_event.button.button == SDL_BUTTON_RIGHT)
+        button = Key::MOUSE_RIGHT;
+
+    return MouseEvent(
+        Position(static_cast<float>(_event.button.x), static_cast<float>(_event.button.y)),
+        button
+    );
 }
 
 }

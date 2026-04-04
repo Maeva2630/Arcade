@@ -76,7 +76,7 @@ namespace arcade
 
             TTF_Font *_font;
 
-            SDL_Event *_event;
+            SDL_Event _event;
 
             std::map<std::pair<std::string, int>, TTF_Font *> _fontMap;
     };
