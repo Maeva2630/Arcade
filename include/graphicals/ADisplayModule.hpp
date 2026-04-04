@@ -8,6 +8,8 @@
 #include "IDisplayModule.hpp"
 #include <map>
 #include <memory>
+    #define WIN_SIZE_X 800
+    #define WIN_SIZE_Y 600
 
 namespace arcade {
 
@@ -45,7 +47,9 @@ class ADisplayModule : public IDisplayModule {
          * @brief 
          * Delta time to handle different fps for each graphic library
          */
-        float _deltaTime;
+        float _deltaTime = 0.0f;
+
+        Position _winSize = Position(WIN_SIZE_X, WIN_SIZE_Y);
 
         /**
          * @brief 
