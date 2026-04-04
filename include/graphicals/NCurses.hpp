@@ -83,13 +83,7 @@ namespace arcade
          */
         Key getKey() override;
 
-        /**
-         * @brief init the keyMap from the enum Key
-         * 
-         * @return std::map<int, Key> 
-         */
-        std::map<int, Key> initKeyFromEnum();
-    
+        
         /**
          * @brief Get the Mouse Event object
          * 
@@ -103,7 +97,7 @@ namespace arcade
          * @param title 
          */
         void setTitle(const std::string &title) override;
-
+        
         /**
          * @brief Set the Window Size object
          * 
@@ -111,7 +105,7 @@ namespace arcade
          * @param h (new height for the window)
          */
         void setWindowSize(int w, int h) override;
-
+        
         /**
          * @brief Set the Fullscreen object
          * 
@@ -154,11 +148,18 @@ namespace arcade
          */
         void setRenderContext(const RenderContext &context) override;
 
-    private:
+        private:
         bool _fullscreen = false;
-
+        
         WINDOW *_window;
 
+        /**
+         * @brief init the keyMap from the enum Key
+         * 
+         * @return std::map<int, Key> 
+         */
+        std::map<int, Key> initKeyFromEnum();
+        
         /**
          * @brief 
          * List color pairs for NCurses
