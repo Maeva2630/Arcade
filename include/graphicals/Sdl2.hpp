@@ -92,10 +92,13 @@ namespace arcade
             TTF_Font *_font;
 
             SDL_Event _event;
+            Uint64 _lastTicks;
 
             std::map<std::pair<std::string, int>, TTF_Font *> _fontMap;
             std::map<std::string, SDL_Texture *> _textureCache;
             std::map<std::string, SpriteDefinition> _spriteMap;
+
+            void updateDeltaTime();
     };
 };
 

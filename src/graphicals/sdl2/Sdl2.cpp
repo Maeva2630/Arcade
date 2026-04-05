@@ -15,7 +15,7 @@ extern "C" arcade::IModule *entryPoint(void)
 namespace arcade
 {
 
-Sdl2::Sdl2() : _window(nullptr), _renderer(nullptr), _font(nullptr)
+Sdl2::Sdl2() : _window(nullptr), _renderer(nullptr), _font(nullptr), _lastTicks(0)
 {
 }
 
@@ -50,6 +50,8 @@ void Sdl2::init()
     }
 
     _keyMap = initKeyFromEnum();
+    _lastTicks = SDL_GetTicks64();
+    _deltaTime = 0.0f;
     _isOpen = true;
 }
 
@@ -193,8 +195,20 @@ void Sdl2::clear()
     SDL_RenderClear(_renderer);
 }
 
+void Sdl2::updateDeltaTime()
+{
+    const Uint64 now = SDL_GetTicks64();
+
+    if (_lastTicks == 0)
+        _deltaTime = 0.0f;
+    else
+        _deltaTime = static_cast<float>(now - _lastTicks) / 1000.0f;
+    _lastTicks = now;
+}
+
 void Sdl2::display()
 {
+    updateDeltaTime();
     SDL_RenderPresent(_renderer);
 }
 
@@ -323,7 +337,7 @@ void Sdl2::drawEntity(const Entity& e)
         return;
     }
 
-    SpriteDefinition sprite = resolveSprite(e);
+    SpriteDefinition sprite = getSprite(e);
     SDL_Texture *texture = getTexture(sprite.texturePath);
     if (!texture) {
         Rect entityRect = {e.pos.x, e.pos.y, e.size.x, e.size.y};
