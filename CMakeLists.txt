@@ -56,6 +56,13 @@ if (NOT SDL2_FOUND)
     endif()
 endif()
 
+# ---- SDL2_ttf ----
+find_package(SDL2_ttf QUIET)
+if (NOT SDL2_ttf_FOUND AND NOT TARGET SDL2_ttf::SDL2_ttf)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(SDL2_TTF REQUIRED SDL2_ttf)
+endif()
+
 # =========================
 # CORE
 # =========================
@@ -91,20 +98,25 @@ arcade_library(arcade_ncurses)
 # target_link_libraries(arcade_sfml sfml-graphics sfml-window sfml-system)
 # arcade_library(arcade_sfml)
 
-# # ---- SDL2 ----
-# file(GLOB SDL2_SRC src/graphicals/sdl2/*.cpp)
-# add_library(arcade_sdl2 SHARED ${SDL2_SRC})
-# target_link_libraries(arcade_sdl2 SDL2::SDL2)
-# arcade_library(arcade_sdl2)
+# ---- SDL2 ----
+file(GLOB SDL2_SRC src/graphicals/sdl2/*.cpp)
+add_library(arcade_sdl2 SHARED ${SDL2_SRC} ${DISPLAY_COMMON_SRC})
+if (TARGET SDL2_ttf::SDL2_ttf)
+    target_link_libraries(arcade_sdl2 SDL2::SDL2 SDL2_ttf::SDL2_ttf)
+else()
+    target_include_directories(arcade_sdl2 PRIVATE ${SDL2_TTF_INCLUDE_DIRS})
+    target_link_libraries(arcade_sdl2 SDL2::SDL2 ${SDL2_TTF_LIBRARIES})
+endif()
+arcade_library(arcade_sdl2)
 
 # =========================
 # GAMES LIBS
 # =========================
 
 # ---- Snake ----
-# file(GLOB SNAKE_SRC src/games/snake/*.cpp)
-# add_library(arcade_snake SHARED ${SNAKE_SRC})
-# arcade_library(arcade_snake)
+file(GLOB SNAKE_SRC src/games/snake/*.cpp)
+add_library(arcade_snake SHARED ${SNAKE_SRC})
+arcade_library(arcade_snake)
 
 # ---- Nibbler ----
 # file(GLOB NIBBLER_SRC src/games/nibbler/*.cpp)
