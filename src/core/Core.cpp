@@ -59,6 +59,7 @@ void Core::initAll()
     _display->init();
     _game->init();
     _display->setRenderContext(_game->getRenderContext());
+    _display->setTitle(_game->getName());
 }
 
 void Core::stopAll()

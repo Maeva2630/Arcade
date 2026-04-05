@@ -151,7 +151,7 @@ MouseEvent NCurses::getMouseEvent()
     return MouseEvent(Position(static_cast<float>(event.x), static_cast<float>(event.y)), button);
 }
 
-void NCurses::setTitle(const std::string& title)
+void NCurses::setTitle(const std::string&)
 {
 }
 
