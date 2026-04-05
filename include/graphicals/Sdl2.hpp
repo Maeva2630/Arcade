@@ -11,6 +11,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <map>
+#include <string>
 #include <utility>
 
 namespace arcade
@@ -65,8 +66,22 @@ namespace arcade
             void setRenderContext(const RenderContext &context) override;
         
         private:
+            struct SpriteDefinition {
+                std::string texturePath;
+                Rect srcRect;
+                bool useSrcRect;
+
+                SpriteDefinition() : texturePath(""), srcRect(0, 0, 0, 0), useSrcRect(false) {}
+                SpriteDefinition(const std::string &path)
+                    : texturePath(path), srcRect(0, 0, 0, 0), useSrcRect(false) {}
+                SpriteDefinition(const std::string &path, const Rect &source)
+                    : texturePath(path), srcRect(source), useSrcRect(true) {}
+            };
+
             SDL_Color colorConvert(Color color);
             TTF_Font *getFontForText(const Text &t);
+            SDL_Texture *getTexture(const std::string &texturePath);
+            SpriteDefinition getSprite(const Entity &e) const;
 
             std::map<int, Key> initKeyFromEnum();
 
@@ -79,6 +94,8 @@ namespace arcade
             SDL_Event _event;
 
             std::map<std::pair<std::string, int>, TTF_Font *> _fontMap;
+            std::map<std::string, SDL_Texture *> _textureCache;
+            std::map<std::string, SpriteDefinition> _spriteMap;
     };
 };
 

@@ -7,11 +7,22 @@
 
 #include "graphicals/Sdl2.hpp"
 
+extern "C" arcade::IModule *entryPoint(void)
+{
+    return new arcade::Sdl2();
+}
+
 namespace arcade
 {
 
 Sdl2::Sdl2() : _window(nullptr), _renderer(nullptr), _font(nullptr)
 {
+}
+
+Sdl2::~Sdl2()
+{
+    if (_window || _renderer || _font)
+        stop();
 }
 
 void Sdl2::init()
@@ -39,6 +50,7 @@ void Sdl2::init()
     }
 
     _keyMap = initKeyFromEnum();
+    _isOpen = true;
 }
 
 std::map<int, Key> Sdl2::initKeyFromEnum()
@@ -110,26 +122,74 @@ TTF_Font *Sdl2::getFontForText(const Text &t)
     return loadedFont;
 }
 
+SDL_Texture *Sdl2::getTexture(const std::string &texturePath)
+{
+    auto cached = _textureCache.find(texturePath);
+    if (cached != _textureCache.end())
+        return cached->second;
+
+    SDL_Surface *surface = SDL_LoadBMP(texturePath.c_str());
+    if (!surface)
+        return nullptr;
+
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(_renderer, surface);
+    SDL_FreeSurface(surface);
+    if (!texture)
+        return nullptr;
+
+    _textureCache[texturePath] = texture;
+    return texture;
+}
+
+Sdl2::SpriteDefinition Sdl2::getSprite(const Entity &e) const
+{
+    auto sprite = _spriteMap.find(e.spritePath);
+    if (sprite != _spriteMap.end())
+        return sprite->second;
+
+    return SpriteDefinition(e.spritePath);
+}
+
 void Sdl2::stop()
 {
+    if (!_window && !_renderer && !_font && _fontMap.empty() && _textureCache.empty())
+        return;
+
     for (auto &entry : _fontMap) {
         if (entry.second)
             TTF_CloseFont(entry.second);
     }
     _fontMap.clear();
 
-    if (_font)
+    for (auto &entry : _textureCache) {
+        if (entry.second)
+            SDL_DestroyTexture(entry.second);
+    }
+    _textureCache.clear();
+    _spriteMap.clear();
+
+    if (_font) {
         TTF_CloseFont(_font);
+        _font = nullptr;
+    }
     TTF_Quit();
 
-    if (_renderer)
+    if (_renderer) {
         SDL_DestroyRenderer(_renderer);
-    SDL_DestroyWindow(_window);
+        _renderer = nullptr;
+    }
+    if (_window) {
+        SDL_DestroyWindow(_window);
+        _window = nullptr;
+    }
+
     SDL_Quit();
+    _isOpen = false;
 }
 
 void Sdl2::clear()
 {
+    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
     SDL_RenderClear(_renderer);
 }
 
@@ -143,7 +203,12 @@ void Sdl2::drawRectangle(const Rect &rect, const Color &color)
     Position rectPos = convertGridPosition(Position(rect.x, rect.y), _winSize.y, _winSize.x);
     Position rectSize = convertGridSize(Position(rect.width, rect.height), _winSize.y, _winSize.x);
 
-    SDL_Rect sdl_rect = {rect.x, rect.y, rect.width, rect.height};
+    SDL_Rect sdl_rect = {
+        convertToCell(rectPos.x),
+        convertToCell(rectPos.y),
+        convertToCell(rectSize.x),
+        convertToCell(rectSize.y)
+    };
     
     SDL_SetRenderDrawColor(_renderer, color.r, color.g, color.b, color.a);
     SDL_RenderFillRect(_renderer, &sdl_rect); 
@@ -156,16 +221,16 @@ void Sdl2::setRenderContext(const RenderContext &context)
 
 void Sdl2::setWindowSize(int w, int h)
 {
-    if (!_window)
+    if (_window) {
+        _winSize = {static_cast<float>(w), static_cast<float>(h)};
+        SDL_SetWindowSize(_window, w, h);
+    }
+    else
         throw ModuleException("Can not resize window");
-
-    SDL_SetWindowSize(_window, w, h);
-    _winSize = Position(static_cast<float>(w), static_cast<float>(h));
 }
 
 void Sdl2::drawText(const Text& t)
 {
-
     Position textPos = convertGridPosition(t.pos, static_cast<size_t>(_winSize.y), static_cast<size_t>(_winSize.x));
     SDL_Color color = colorConvert(t.color);
     TTF_Font *currentFont = getFontForText(t);
@@ -229,6 +294,82 @@ void Sdl2::setTitle(const std::string& title)
     SDL_SetWindowTitle(_window, title.c_str());
 }
 
+void Sdl2::setFullscreen(bool fullscreen)
+{
+    _fullscreen = fullscreen;
 
+    if (_window) {
+        SDL_SetWindowFullscreen(_window, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+        int newSizeX, newSizeY = 0;
+        SDL_GetWindowSize(_window, &newSizeX, &newSizeY); 
+        _winSize = Position(static_cast<float>(newSizeX), static_cast<float>(newSizeY));
+    } else
+        throw ModuleException("Can not change window to full screen mode");
+}
+
+void Sdl2::drawEntity(const Entity& e)
+{
+    Position entityPos = convertGridPosition(e.pos, _winSize.y, _winSize.x);
+    Position entitySize = convertGridSize(e.size, _winSize.y, _winSize.x);
+
+    const int startX = convertToCell(entityPos.x);
+    const int startY = convertToCell(entityPos.y);
+    const int width = (entitySize.x <= 0.0f) ? 1 : convertToCell(entitySize.x);
+    const int height = (entitySize.y <= 0.0f) ? 1 : convertToCell(entitySize.y);
+
+    if (e.spritePath.empty()) {
+        Rect entityRect = {e.pos.x, e.pos.y, e.size.x, e.size.y};
+        drawRectangle(entityRect, e.color);
+        return;
+    }
+
+    SpriteDefinition sprite = resolveSprite(e);
+    SDL_Texture *texture = getTexture(sprite.texturePath);
+    if (!texture) {
+        Rect entityRect = {e.pos.x, e.pos.y, e.size.x, e.size.y};
+        drawRectangle(entityRect, e.color);
+        return;
+    }
+
+    SDL_Rect dstRect = {startX, startY, width, height};
+
+    if (sprite.useSrcRect) {
+        SDL_Rect srcRect = {
+            sprite.srcRect.x,
+            sprite.srcRect.y,
+            sprite.srcRect.width,
+            sprite.srcRect.height
+        };
+        SDL_RenderCopy(_renderer, texture, &srcRect, &dstRect);
+    } else {
+        SDL_RenderCopy(_renderer, texture, nullptr, &dstRect);
+    }
+}
+
+const std::string& Sdl2::getName() const
+{
+    static std::string name = "SDL2";
+    return name;
+}
+
+bool Sdl2::isOpen() const
+{
+    return _isOpen;
+}
+
+float Sdl2::getDeltaTime() const
+{
+    return _deltaTime;
+}
+
+int Sdl2::getWidth() const
+{
+    return convertToCell(_winSize.x);
+}
+
+int Sdl2::getHeight() const
+{
+    return convertToCell(_winSize.y);
+}
 
 }
