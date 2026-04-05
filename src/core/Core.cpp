@@ -13,7 +13,7 @@
 
 namespace arcade {
 
-static const char* LIB_DIR = "./lib";
+static const char* LIB_DIR = "lib";
 
 using GlobalInputHandler = std::function<void(Key)>;
 using StatesHandler = std::function<void(GameState)>;
