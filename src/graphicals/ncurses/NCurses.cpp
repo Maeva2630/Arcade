@@ -45,7 +45,11 @@ void NCurses::init()
     _keyMap =  initKeyFromEnum();
     _colorMap = initColorMap();
     _isOpen = true;
-    _winSize = Position(static_cast<float>(_winSize.x), static_cast<float>(_winSize.y));
+
+    int rows = 0;
+    int cols = 0;
+    getmaxyx(_window, rows, cols);
+    _winSize = Position(static_cast<float>(cols), static_cast<float>(rows));
 }
 
 void NCurses::stop()
@@ -70,6 +74,12 @@ void NCurses::display()
 {
     if (_window) {
         updateDeltaTime();
+
+        int rows = 0;
+        int cols = 0;
+        getmaxyx(_window, rows, cols);
+        _winSize = Position(static_cast<float>(cols), static_cast<float>(rows));
+
         refresh();
     } else
         throw ModuleException("The window can not be refreshed");
