@@ -44,6 +44,12 @@ class ADisplayModule : public IDisplayModule {
         bool _isOpen = false;
 
         /**
+         * @brief Bool to pass the window to full screen or revert
+         * 
+         */
+        bool _fullscreen = false;
+
+        /**
          * @brief 
          * Delta time to handle different fps for each graphic library
          */

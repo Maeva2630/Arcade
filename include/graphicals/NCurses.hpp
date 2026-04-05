@@ -149,7 +149,6 @@ namespace arcade
         void setRenderContext(const RenderContext &context) override;
 
         private:
-        bool _fullscreen = false;
         
         WINDOW *_window;
 
