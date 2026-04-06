@@ -58,12 +58,6 @@ void Sdl2::init()
 std::map<int, Key> Sdl2::initKeyFromEnum()
 {
     std::map<int, Key> newMap = {
-        {SDLK_F1, Key::PREV_GRAPHICS},
-        {SDLK_F2, Key::NEXT_GRAPHICS},
-        {SDLK_F3, Key::PREV_GAME},
-        {SDLK_F4, Key::NEXT_GAME},
-        {SDLK_F6, Key::MENU},
-        {SDLK_ESCAPE, Key::EXIT},
 
         {SDLK_UP, Key::UP},
         {SDLK_DOWN, Key::DOWN},
@@ -85,6 +79,13 @@ std::map<int, Key> Sdl2::initKeyFromEnum()
         {'q', Key::Q}, {'r', Key::R}, {'s', Key::S}, {'t', Key::T},
         {'u', Key::U}, {'v', Key::V}, {'w', Key::W}, {'x', Key::X},
         {'y', Key::Y}, {'z', Key::Z},
+
+        {SDLK_F1, Key::PREV_GRAPHICS},
+        {SDLK_F2, Key::NEXT_GRAPHICS},
+        {SDLK_F3, Key::PREV_GAME},
+        {SDLK_F4, Key::NEXT_GAME},
+        {SDLK_F6, Key::MENU},
+        {SDLK_F12, Key::EXIT},
     };
 
     return newMap;

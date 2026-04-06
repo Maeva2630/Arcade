@@ -99,13 +99,6 @@ Key NCurses::getKey()
 std::map<int, Key> NCurses::initKeyFromEnum()
 {
     std::map<int, Key> newMap = {
-        {KEY_F(1), Key::PREV_GRAPHICS},
-        {KEY_F(2), Key::NEXT_GRAPHICS},
-        {KEY_F(3), Key::PREV_GAME},
-        {KEY_F(4), Key::NEXT_GAME},
-        {KEY_F(5), Key::RESTART},
-        {KEY_F(6), Key::MENU},
-        {27, Key::EXIT},
 
         {KEY_UP, Key::UP},
         {KEY_DOWN, Key::DOWN},
@@ -127,6 +120,14 @@ std::map<int, Key> NCurses::initKeyFromEnum()
         {'q', Key::Q}, {'r', Key::R}, {'s', Key::S}, {'t', Key::T},
         {'u', Key::U}, {'v', Key::V}, {'w', Key::W}, {'x', Key::X},
         {'y', Key::Y}, {'z', Key::Z},
+
+        {KEY_F(1), Key::PREV_GRAPHICS},
+        {KEY_F(2), Key::NEXT_GRAPHICS},
+        {KEY_F(3), Key::PREV_GAME},
+        {KEY_F(4), Key::NEXT_GAME},
+        {KEY_F(5), Key::RESTART},
+        {KEY_F(6), Key::MENU},
+        {KEY_F(12), Key::EXIT},
     };
 
     return newMap;
