@@ -13,7 +13,7 @@
 
 namespace arcade {
 
-static const char* LIB_DIR = "./lib";
+static const char* LIB_DIR = "lib";
 
 using GlobalInputHandler = std::function<void(Key)>;
 using StatesHandler = std::function<void(GameState)>;
@@ -59,6 +59,7 @@ void Core::initAll()
     _display->init();
     _game->init();
     _display->setRenderContext(_game->getRenderContext());
+    _display->setTitle(_game->getName());
 }
 
 void Core::stopAll()

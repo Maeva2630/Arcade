@@ -45,6 +45,11 @@ void NCurses::init()
     _keyMap =  initKeyFromEnum();
     _colorMap = initColorMap();
     _isOpen = true;
+
+    int rows = 0;
+    int cols = 0;
+    getmaxyx(_window, rows, cols);
+    _winSize = Position(static_cast<float>(cols), static_cast<float>(rows));
 }
 
 void NCurses::stop()
@@ -69,6 +74,12 @@ void NCurses::display()
 {
     if (_window) {
         updateDeltaTime();
+
+        int rows = 0;
+        int cols = 0;
+        getmaxyx(_window, rows, cols);
+        _winSize = Position(static_cast<float>(cols), static_cast<float>(rows));
+
         refresh();
     } else
         throw ModuleException("The window can not be refreshed");
@@ -140,7 +151,7 @@ MouseEvent NCurses::getMouseEvent()
     return MouseEvent(Position(static_cast<float>(event.x), static_cast<float>(event.y)), button);
 }
 
-void NCurses::setTitle(const std::string& title)
+void NCurses::setTitle(const std::string&)
 {
 }
 
@@ -161,8 +172,8 @@ void NCurses::drawEntity(const Entity& e)
 {
     size_t colorCode = checkColorPairs(e.backgroundColor, e.color);
 
-    Position entityPos = convertGridPosition(e.pos, LINES, COLS);
-    Position entitySize = convertGridSize(e.size, LINES, COLS);
+    Position entityPos = convertGridPosition(e.pos, _winSize.y, _winSize.x);
+    Position entitySize = convertGridSize(e.size, _winSize.y, _winSize.x);
 
     const int startX = convertToCell(entityPos.x);
     const int startY = convertToCell(entityPos.y);
@@ -182,7 +193,7 @@ void NCurses::drawText(const Text& t)
 {
     size_t colorCode = checkColorPairs(Colors::BLACK, t.color);
 
-    Position textPos = convertGridPosition(t.pos, LINES, COLS);
+    Position textPos = convertGridPosition(t.pos, _winSize.y, _winSize.x);
 
     attron(COLOR_PAIR(colorCode));
     mvprintw(convertToCell(textPos.y), convertToCell(textPos.x), "%s", t.content.c_str());
@@ -193,8 +204,8 @@ void NCurses::drawRectangle(const Rect& rect, const Color& color)
 {
     size_t colorCode = checkColorPairs(color);
 
-    Position rectPos = convertGridPosition(Position(rect.x, rect.y), LINES, COLS);
-    Position rectSize = convertGridSize(Position(rect.width, rect.height), LINES, COLS);
+    Position rectPos = convertGridPosition(Position(rect.x, rect.y), _winSize.y, _winSize.x);
+    Position rectSize = convertGridSize(Position(rect.width, rect.height), _winSize.y, _winSize.x);
 
     const int startX = convertToCell(rectPos.x);
     const int startY = convertToCell(rectPos.y);
@@ -236,12 +247,12 @@ float NCurses::updateDeltaTime()
 
 int NCurses::getWidth() const
 {
-    return COLS;
+    return _winSize.x;
 }
 
 int NCurses::getHeight() const
 {
-    return LINES;
+    return _winSize.y;
 }
 
 void NCurses::setRenderContext(const RenderContext& context)
