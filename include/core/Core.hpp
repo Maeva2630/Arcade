@@ -45,7 +45,8 @@ namespace arcade {
              * @param key The input key to handle
              */
             void handleGlobalInput(Key key);
-
+            void handleGameInput(Key key);
+    
             /**
              * @brief Switch the active display module
              * @param idx The index of the display module to switch to
@@ -73,6 +74,12 @@ namespace arcade {
 
             void renderMenu();
             void renderGame();
+
+            void initAll();
+            void stopAll();
+
+            void applyMenuSelection();
+            void applyGameState(GameState target);
 
             std::unique_ptr<DLLoader<IDisplayModule>> _displayLoader;
             std::unique_ptr<DLLoader<IGameModule>> _gameLoader;
