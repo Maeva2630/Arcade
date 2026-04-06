@@ -195,7 +195,7 @@ void SnakeModule::refreshUI()
     } else if (_currentState == GameState::WON) {
         _uiText.emplace_back("YOU WIN!", MAX_GRID_X / 2 - 3, MAX_GRID_Y / 2, Colors::GREEN, 36);
     }
-    _uiText.emplace_back("[Arrows: move] [P: pause] [R: restart] [M: menu]",
+    _uiText.emplace_back("[Arrows: move] [P: pause] [R: restart] [Esc: exit]",
                          1.0f, MAX_GRID_Y, Colors::CYAN, 36);
 }
 

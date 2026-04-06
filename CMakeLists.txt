@@ -113,9 +113,11 @@ arcade_library(arcade_sdl2)
 # GAMES LIBS
 # =========================
 
+set(GAME_COMMON_SRC src/games/AGame.cpp)
+
 # ---- Snake ----
 file(GLOB SNAKE_SRC src/games/snake/*.cpp)
-add_library(arcade_snake SHARED ${SNAKE_SRC})
+add_library(arcade_snake SHARED ${SNAKE_SRC} ${GAME_COMMON_SRC})
 arcade_library(arcade_snake)
 
 # ---- Nibbler ----
