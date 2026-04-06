@@ -75,39 +75,20 @@ void Core::run()
     stopAll();
 }
 
-void Core::handleGameInput(Key key)
-{
-    if (key == Key::P) {
-        if (_game->getState() == GameState::RUNNING) {
-            _game->pause();
-        } else if (_game->getState() == GameState::PAUSED) {
-            _game->resume();
-        }
-    } else if (key == Key::R && (_game->getState() == GameState::RUNNING || _game->getState() == GameState::PAUSED
-    || _game->getState() == GameState::GAME_OVER
-    || _game->getState() == GameState::WON)) {
-        _game->restart();
-    } else if (key == Key::M) {
-        _game->stop();
-        _game->init();
-    }
-}
-
 void Core::mainLoop()
 {
     while (_running && _display->isOpen()) {
         Key key = _display->getKey();
         handleGlobalInput(key);
-        handleGameInput(key);
+
+        if (_game->getState() == GameState::RUNNING || _game->getState() == GameState::PAUSED) {
+            _game->handleInput(key);
+        }
 
         if (_game->getState() == GameState::MENU) {
             renderMenu();
         } else if (_game->getState() == GameState::RUNNING || _game->getState() == GameState::PAUSED) {
             _display->clear();
-            
-            if (_game->getState() == GameState::RUNNING) {
-                _game->handleInput(key);
-            }
             
             _game->update(_display->getDeltaTime());
             
@@ -141,16 +122,13 @@ void Core::handleGlobalInput(Key key)
         {Key::PREV_GRAPHICS, [this](Key) { switchDisplay((_currentDisplayIdx + _displayLibs.size() - 1) % _displayLibs.size()); }},
         {Key::NEXT_GAME, [this](Key) { switchGame((_currentGameIdx + 1) % _gameLibs.size()); }},
         {Key::PREV_GAME, [this](Key) { switchGame((_currentGameIdx + _gameLibs.size() - 1) % _gameLibs.size()); }},
-        {Key::RESTART, [this](Key) { _game->restart(); }},
-        {Key::MENU,    [this](Key) { _game->pause(); }},
-        {Key::EXIT, [this](Key) { _running = false; }}
+        {Key::MENU,    [this](Key) { _game->stop(); }},
+        {Key::EXIT,    [this](Key) { _running = false; }},
     };
 
     auto it = inputs.find(key);
     if (it != inputs.end()) {
         it->second(key);
-    } else if (it == inputs.end() && _game) {
-        _game.get()->handleInput(key);
     }
 }
 
