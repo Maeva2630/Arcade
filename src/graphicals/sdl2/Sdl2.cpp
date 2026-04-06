@@ -330,8 +330,9 @@ void Sdl2::drawEntity(const Entity& e)
     const int width = (entitySize.x <= 0.0f) ? 1 : convertToCell(entitySize.x);
     const int height = (entitySize.y <= 0.0f) ? 1 : convertToCell(entitySize.y);
 
+    Rect entityRect = {convertToCell(e.pos.x), convertToCell(e.pos.y),
+             convertToCell(e.size.x), convertToCell(e.size.x)};
     if (e.spritePath.empty()) {
-        Rect entityRect = {e.pos.x, e.pos.y, e.size.x, e.size.y};
         drawRectangle(entityRect, e.color);
         return;
     }
@@ -339,7 +340,6 @@ void Sdl2::drawEntity(const Entity& e)
     SpriteDefinition sprite = getSprite(e);
     SDL_Texture *texture = getTexture(sprite.texturePath);
     if (!texture) {
-        Rect entityRect = {e.pos.x, e.pos.y, e.size.x, e.size.y};
         drawRectangle(entityRect, e.color);
         return;
     }
