@@ -34,6 +34,7 @@ namespace arcade {
             };
 
             Core(std::string libPath);
+            ~Core();
             void run();
         
         private:
@@ -88,7 +89,13 @@ namespace arcade {
             std::size_t _currentDisplayIdx;
             std::size_t _currentGameIdx;
 
+            std::size_t _selectedGameIdx;
+            std::size_t _selectedDisplayIdx;
+
+            GameState _previousState;
+
             bool _running;
+            bool _inCoreMenu;
     };
 }
 
