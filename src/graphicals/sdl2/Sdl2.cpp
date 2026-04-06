@@ -331,7 +331,7 @@ void Sdl2::drawEntity(const Entity& e)
     const int height = (entitySize.y <= 0.0f) ? 1 : convertToCell(entitySize.y);
 
     Rect entityRect = {convertToCell(e.pos.x), convertToCell(e.pos.y),
-             convertToCell(e.size.x), convertToCell(e.size.x)};
+             convertToCell(e.size.x), convertToCell(e.size.y)};
     if (e.spritePath.empty()) {
         drawRectangle(entityRect, e.color);
         return;
