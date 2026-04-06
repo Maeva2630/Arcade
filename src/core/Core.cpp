@@ -208,17 +208,22 @@ static std::string libName(const std::string& path)
 
 void Core::renderMenu()
 {
+    static const std::size_t fontSize = 48;
+    static const std::size_t spacing = 4;
+    std::size_t x = 0;
+    std::size_t y = 0;
+    
     _display->clear();
-    _display->drawText(Text("=== ARCADE ===", 0, 0, Colors::YELLOW, 12));
+    _display->drawText(Text("=== ARCADE ===", x, y, Colors::YELLOW, fontSize + 10));
 
-    _display->drawText(Text("Game  [F3/F4]:", 0, 2, Colors::CYAN, 10));
+    _display->drawText(Text("Game  [F3/F4]:", x, y += spacing, Colors::CYAN, fontSize + 2));
     for (std::size_t i = 0; i < _gameLibs.size(); i++) {
         Color c = (i == _selectedGameIdx) ? Colors::GREEN : Colors::WHITE;
         std::string marker = (i == _selectedGameIdx) ? "> " : "  ";
-        _display->drawText(Text(marker + libName(_gameLibs[i]), 2, 3 + i, c, 10));
+        _display->drawText(Text(marker + libName(_gameLibs[i]), x + 2, y += spacing / 2, c, fontSize));
     }
 
-    _display->drawText(Text("Graphics [F1/F2]:", 0, 4 + _gameLibs.size(), Colors::CYAN, 10));
+    _display->drawText(Text("Graphics [F1/F2]:", x, y += spacing, Colors::CYAN, fontSize + 2));
     for (std::size_t i = 0; i < _displayLibs.size(); i++) {
         bool isSelected = (i == _selectedDisplayIdx);
         bool isActive = (i == _currentDisplayIdx);
@@ -231,14 +236,14 @@ void Core::renderMenu()
         _display->drawText(Text(
             marker + libName(_displayLibs[i]) + active,
             2,
-            5 + _gameLibs.size() + i,
+            y += spacing / 2,
             c,
-            10
+            fontSize
         ));
     }
 
     _display->drawText(
-        Text("Enter: launch | Escape: exit", 0, 7 + _gameLibs.size() + _displayLibs.size(), Colors::WHITE, 9));
+        Text("Enter: launch | Escape: exit", x, y += spacing, Colors::WHITE, fontSize - 8));
 }
 
 void Core::switchDisplay(std::size_t idx)
