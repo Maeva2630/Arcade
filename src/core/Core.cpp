@@ -77,10 +77,8 @@ void Core::run()
 
 void Core::applyMenuSelection()
 {
-    if (_selectedGameIdx != _currentGameIdx)
-        switchGame(_selectedGameIdx);
-    if (_selectedDisplayIdx != _currentDisplayIdx)
-        switchDisplay(_selectedDisplayIdx);
+    if (!_inCoreMenu)
+        return;
     if (_game->getState() == GameState::PAUSED)
         _game->resume();
     _inCoreMenu = false;
@@ -108,6 +106,7 @@ void Core::handleGameInput(Key key)
     const std::map<Key, GameState> keyToState = {
         {Key::P, pauseTarget},
         {Key::M, GameState::MENU},
+        {Key::MENU, GameState::MENU},
     };
  
     const auto it = keyToState.find(key);
@@ -120,19 +119,20 @@ void Core::handleGameInput(Key key)
 void Core::handleGlobalInput(Key key)
 {
     static const std::map<Key, std::function<void()>> coreInputs = {
-        {Key::NEXT_GRAPHICS, [this] { _selectedDisplayIdx = (_selectedDisplayIdx + 1) % _displayLibs.size(); }},
-        {Key::PREV_GRAPHICS, [this] { _selectedDisplayIdx = (_selectedDisplayIdx + _displayLibs.size() - 1) % _displayLibs.size(); }},
-        {Key::NEXT_GAME,     [this] { _selectedGameIdx = (_selectedGameIdx + 1) % _gameLibs.size(); }},
-        {Key::PREV_GAME,     [this] { _selectedGameIdx = (_selectedGameIdx + _gameLibs.size() - 1) % _gameLibs.size(); }},
+        {Key::NEXT_GRAPHICS, [this] { _selectedDisplayIdx = (_selectedDisplayIdx + 1) % _displayLibs.size(); switchDisplay(_selectedDisplayIdx); }},
+        {Key::PREV_GRAPHICS, [this] { _selectedDisplayIdx = (_selectedDisplayIdx + _displayLibs.size() - 1) % _displayLibs.size(); switchDisplay(_selectedDisplayIdx); }},
+        {Key::NEXT_GAME,     [this] { _selectedGameIdx = (_inCoreMenu) ? (_selectedGameIdx + 1) % _gameLibs.size() : _selectedGameIdx; }},
+        {Key::PREV_GAME,     [this] { _selectedGameIdx = (_inCoreMenu) ? (_selectedGameIdx + _gameLibs.size() - 1) % _gameLibs.size() : _selectedGameIdx; }},
         {Key::RESTART,       [this] { _game->restart(); }},
         {Key::ENTER,         [this] { applyMenuSelection(); }},
         {Key::EXIT,          [this] { _running = false; }},
+        {Key::R,             [this] { _game->restart(); }},
+        {Key::ESCAPE,        [this] { _running = false; }},
     };
  
-    if (_inCoreMenu) {
-        const auto it = coreInputs.find(key);
-        if (it != coreInputs.end())
-            it->second();
+    const auto it = coreInputs.find(key);
+    if (it != coreInputs.end()) {
+        it->second();
         return;
     }
  
