@@ -34,7 +34,6 @@ namespace arcade {
             };
 
             Core(std::string libPath);
-            ~Core();
             void run();
         
         private:

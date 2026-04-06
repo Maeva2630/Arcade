@@ -54,12 +54,6 @@ Core::Core(std::string libPath)
     _inCoreMenu = true;
 }
 
-Core::~Core()
-{
-    if (_display)
-        _display->stop();
-}
-
 void Core::initAll()
 {
     _display->init();
@@ -130,6 +124,7 @@ void Core::handleGlobalInput(Key key)
         {Key::PREV_GRAPHICS, [this] { _selectedDisplayIdx = (_selectedDisplayIdx + _displayLibs.size() - 1) % _displayLibs.size(); }},
         {Key::NEXT_GAME,     [this] { _selectedGameIdx = (_selectedGameIdx + 1) % _gameLibs.size(); }},
         {Key::PREV_GAME,     [this] { _selectedGameIdx = (_selectedGameIdx + _gameLibs.size() - 1) % _gameLibs.size(); }},
+        {Key::RESTART,       [this] { _game->restart(); }},
         {Key::ENTER,         [this] { applyMenuSelection(); }},
         {Key::EXIT,          [this] { _running = false; }},
     };
@@ -243,7 +238,7 @@ void Core::renderMenu()
     }
 
     _display->drawText(
-        Text("Entree: lancer | Echap: quitter", 0, 7 + _gameLibs.size() + _displayLibs.size(), Colors::WHITE, 9));
+        Text("Enter: launch | Escape: exit", 0, 7 + _gameLibs.size() + _displayLibs.size(), Colors::WHITE, 9));
 }
 
 void Core::switchDisplay(std::size_t idx)
