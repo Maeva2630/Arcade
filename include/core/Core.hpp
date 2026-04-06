@@ -74,10 +74,25 @@ namespace arcade {
             void renderMenu();
             void renderGame();
 
+            /**
+             * @brief Initialize all modules (display and game)
+             */
             void initAll();
+
+            /**
+             * @brief Stop all modules (display and game)
+             */
             void stopAll();
 
+            /**
+             * @brief Apply the current menu selection to switch game/display or start the game
+             */
             void applyMenuSelection();
+
+            /**
+             * @brief Apply a game state change (pause, resume, menu)
+             * @param target The target game state to apply
+             */
             void applyGameState(GameState target);
 
             std::unique_ptr<DLLoader<IDisplayModule>> _displayLoader;
