@@ -13,7 +13,6 @@
 
 extern "C" arcade::IModule *entryPoint(void)
 {
-    // std::cout << "Snake entryPoint\n";
     return new arcade::SnakeModule();
 }
 
@@ -28,10 +27,9 @@ SnakeModule::FoodSystem::FoodSystem() : cell(-1.0f, -1.0f), hasFood(false), rng(
 void SnakeModule::FoodSystem::spawn(const Snake &snake, int width, int height, GameState &state)
 {
     std::vector<Position> freeCells;
-    freeCells.reserve(static_cast<size_t>(width * height));
 
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+    for (int y = 3; y < height - 2; ++y) {
+        for (int x = 1; x < width - 1; ++x) {
             Position candidate(static_cast<float>(x), static_cast<float>(y));
             if (!snake.containsAtThisPos(candidate))
                 freeCells.emplace_back(candidate);
@@ -51,20 +49,18 @@ void SnakeModule::FoodSystem::spawn(const Snake &snake, int width, int height, G
 
 SnakeModule::SnakeModule() : _score(0), _moveDelay(0.0f)
 {
-    // std::cout << "SnakeModule constructor" << std::endl;
     _currentState = GameState::MENU;
-    _renderContext = {MAX_GRID_X, MAX_GRID_Y, CoordinateSpace::GRID};
+    _renderContext = {MAX_GRID_X + 1, MAX_GRID_Y + 1, CoordinateSpace::GRID};
 }
 
 SnakeModule::~SnakeModule()
 {
-    // std::cout << "Snake destructor" << std::endl;
+    stop();
 }
 
 void SnakeModule::init()
 {
-    // std::cout << "SnakeModule init" << std::endl;
-    _currentState = GameState::MENU;
+    _currentState = GameState::RUNNING;
 
     _score = 0;
     _moveDelay = 0.0f;
@@ -81,7 +77,6 @@ void SnakeModule::stop()
     _moveDelay = 0.0f;
     _entities.clear();
     _uiText.clear();
-    // std::cout << "SnakeModule stop" << std::endl;
 }
 
 const std::string& SnakeModule::getName() const
@@ -111,6 +106,7 @@ void SnakeModule::update(float deltaTime)
         if (_snake.containsAtThisPos(nextHead.pos) && !hasEaten) {
             _snake.setAlive(false);
             _currentState = GameState::GAME_OVER;
+            refreshUI();
             return;
         } else {
             if (hasEaten) {
@@ -130,10 +126,34 @@ void SnakeModule::generateFood()
     _food.spawn(_snake, MAX_GRID_X, MAX_GRID_Y, _currentState);
 }
 
+void SnakeModule::refreshFrame()
+{
+    const size_t frameSize = 4;
+    std::array<Entity, frameSize> frames;
+
+    frames[0].pos = Position(0.0f, 2.0f);
+    frames[0].size = Position(1.0f, MAX_GRID_Y - 3.0f);
+
+    frames[1].pos = Position(0.0f, 2.0f);
+    frames[1].size = Position(MAX_GRID_X - 1.0f, 1.0f);
+
+    frames[2].pos = Position(0.0f, MAX_GRID_Y - 2.0f);
+    frames[2].size = Position(MAX_GRID_X - 1.0f, 1.0f);
+
+    frames[3].pos = Position(MAX_GRID_X - 1.0f, 2.0f);
+    frames[3].size = Position(1.0f, MAX_GRID_Y - 3.0f);
+
+    for (Entity &i : frames) {
+        i.color = Colors::WHITE;
+        i.backgroundColor = Colors::BLACK;
+        i.character = '*';
+        _entities.emplace_back(i);
+    }
+}
+
 void SnakeModule::refreshEntities()
 {
     _entities.clear();
-    _entities.reserve(_snake.getSegmentSize() + (_food.hasFood ? 1U : 0U));
 
     const std::deque<Snake::SnakeSegment> &segments = _snake.getSegments();
 
@@ -154,36 +174,33 @@ void SnakeModule::refreshEntities()
         foodEntity.color = Colors::RED;
         _entities.emplace_back(foodEntity);
     }
+
+    refreshFrame();
 }
 
 void SnakeModule::refreshUI()
 {
     _uiText.clear();
+
+    std::string title = "SNAKE";
+    _uiText.emplace_back(title, MAX_GRID_X / 2 - 3, 0.0f, Colors::YELLOW, 32);
     
-    // Score and length in top-left
     std::string scoreStr = "Score: " + std::to_string(_score);
-    _uiText.emplace_back(scoreStr, -0.5f, -1.5f, Colors::WHITE, 10);
-    
-    std::string lengthStr = "Length: " + std::to_string(_snake.getSegmentSize());
-    _uiText.emplace_back(lengthStr, 3.5f, -1.5f, Colors::WHITE, 10);
-    
-    // State-specific messages
+    _uiText.emplace_back(scoreStr, 1.0f, 1.0f, Colors::WHITE, 32);
+
     if (_currentState == GameState::PAUSED) {
-        _uiText.emplace_back("PAUSED", 4.0f, 5.0f, Colors::YELLOW, 12);
+        _uiText.emplace_back("PAUSED", MAX_GRID_X / 2 - 3, MAX_GRID_Y / 2, Colors::YELLOW, 36);
     } else if (_currentState == GameState::GAME_OVER) {
-        _uiText.emplace_back("GAME OVER", 3.5f, 5.0f, Colors::RED, 12);
+        _uiText.emplace_back("GAME OVER", MAX_GRID_X / 2 - 3, MAX_GRID_Y / 2, Colors::RED, 36);
     } else if (_currentState == GameState::WON) {
-        _uiText.emplace_back("YOU WIN!", 4.0f, 5.0f, Colors::GREEN, 12);
+        _uiText.emplace_back("YOU WIN!", MAX_GRID_X / 2 - 3, MAX_GRID_Y / 2, Colors::GREEN, 36);
     }
-    
-    // Controls help in bottom
-    _uiText.emplace_back("Arrows: move | P: pause | R: restart | M: menu | Esc: exit",
-                         0.5f, 11.5f, Colors::CYAN, 9);
+    _uiText.emplace_back("[Arrows: move] [P: pause] [R: restart] [M: menu]",
+                         1.0f, MAX_GRID_Y, Colors::CYAN, 36);
 }
 
 void SnakeModule::handleInput(Key key)
 {
-    // std::cout << "SnakeModule handleInput" << std::endl;
     static const std::map<Key, SnakeInputHandler> inputs = {
         {Key::LEFT,     [this](Key) { _snake.setFace(Snake::Face::WEST); }},
         {Key::RIGHT,    [this](Key) { _snake.setFace(Snake::Face::EAST); }},
@@ -199,54 +216,48 @@ void SnakeModule::handleInput(Key key)
 
 const std::vector<Entity>& SnakeModule::getEntities() const
 {
-    // std::cout << "SnakeModule getEntities : " << _entities.size() << " entities" << std::endl;
     return _entities;
 }
 
 const std::vector<Text>& SnakeModule::getUIText() const
 {
-    // std::cout << "SnakeModule getUIText : " << _uiText.size() << " text elements" << std::endl;
     return _uiText;
 }
 
 GameState SnakeModule::getState() const
 {
-    // std::cout << "SnakeModule getState : " << static_cast<int>(_currentState) << std::endl;
     return _currentState;
 }
 
 int SnakeModule::getScore() const
 {
-    // std::cout << "SnakeModule getScore : " << _score << std::endl;
     return _score;
 }
 
 void SnakeModule::restart()
 {
-    // std::cout << "SnakeModule restart" << std::endl;
     stop();
     init();
 }
 
 void SnakeModule::pause()
 {
-    // std::cout << "SnakeModule pause" << std::endl;
     if (_currentState == GameState::RUNNING) {
         _currentState = GameState::PAUSED;
+        refreshUI();
     }
 }
 
 void SnakeModule::resume()
 {
-    // std::cout << "SnakeModule resume" << std::endl;
     if (_currentState == GameState::PAUSED) {
         _currentState = GameState::RUNNING;
+        refreshUI();
     }
 }
 
 RenderContext SnakeModule::getRenderContext() const
 {    
-    // std::cout << "SnakeModule getRenderContext" << std::endl;
     return _renderContext;
 }
 
