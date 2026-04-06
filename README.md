@@ -1,5 +1,5 @@
 # ARCADE  
-### _< A RETRO PLATFORM />_
+### <u>A RETRO PLATFORM</u>
 
 ## Description
 
