@@ -108,7 +108,7 @@ TTF_Font *Sdl2::getFontForText(const Text &t)
         return _font;
 
     const std::string fontPath = t.fontPath.empty() ? "assets/font.ttf" : t.fontPath;
-    const int fontSize = (t.fontSize > 0) ? t.fontSize : 12;
+    const int fontSize = (t.fontSize > 0) ? t.fontSize : 36;
     const std::pair<std::string, int> key = {fontPath, fontSize};
 
     auto it = _fontMap.find(key);
@@ -125,8 +125,8 @@ TTF_Font *Sdl2::getFontForText(const Text &t)
 
 SDL_Texture *Sdl2::getTexture(const std::string &texturePath)
 {
-    auto cached = _textureCache.find(texturePath);
-    if (cached != _textureCache.end())
+    auto cached = _textureMap.find(texturePath);
+    if (cached != _textureMap.end())
         return cached->second;
 
     SDL_Surface *surface = SDL_LoadBMP(texturePath.c_str());
@@ -138,7 +138,7 @@ SDL_Texture *Sdl2::getTexture(const std::string &texturePath)
     if (!texture)
         return nullptr;
 
-    _textureCache[texturePath] = texture;
+    _textureMap[texturePath] = texture;
     return texture;
 }
 
@@ -153,7 +153,7 @@ Sdl2::SpriteDefinition Sdl2::getSprite(const Entity &e) const
 
 void Sdl2::stop()
 {
-    if (!_window && !_renderer && !_font && _fontMap.empty() && _textureCache.empty())
+    if (!_window && !_renderer && !_font && _fontMap.empty() && _textureMap.empty())
         return;
 
     for (auto &entry : _fontMap) {
@@ -162,11 +162,11 @@ void Sdl2::stop()
     }
     _fontMap.clear();
 
-    for (auto &entry : _textureCache) {
+    for (auto &entry : _textureMap) {
         if (entry.second)
             SDL_DestroyTexture(entry.second);
     }
-    _textureCache.clear();
+    _textureMap.clear();
     _spriteMap.clear();
 
     if (_font) {
