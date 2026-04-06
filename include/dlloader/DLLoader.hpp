@@ -33,7 +33,7 @@ class DLLoader {
             private:
                 std::string _message;
             public:
-                DLLoaderException(std::string message, std::string context) : _message(message) {};
+                DLLoaderException(std::string message) : _message(message) {};
                 const char* what() const noexcept override { return this->_message.c_str(); };
         };
 
@@ -47,7 +47,7 @@ class DLLoader {
         DLLoader<T>(const std::string &libraryPath) : _libPath(libraryPath) {
             _handle = dlopen(_libPath.c_str(), RTLD_LAZY);
             if (!_handle)
-                throw DLLoaderException("On dlopen of " + _libPath, "DLLoader");
+                throw DLLoaderException("On dlopen of " + _libPath);
         };
 
         /**
@@ -64,11 +64,11 @@ class DLLoader {
 
             void *entry = dlsym(_handle, entryPoint.c_str());
             if (!entry)
-                throw DLLoaderException("On dlsym of " + _libPath, "DLLoader");
+                throw DLLoaderException("On dlsym of " + _libPath);
             fptr = reinterpret_cast<T*(*)(void)>(entry);
             obj = fptr();
             if (!obj)
-                throw DLLoaderException("On cast of " + _libPath, "DLLoader");
+                throw DLLoaderException("On cast of " + _libPath);
             return (obj);
         };
 
