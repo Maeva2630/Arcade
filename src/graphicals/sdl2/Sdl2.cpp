@@ -83,7 +83,6 @@ std::map<int, Key> Sdl2::initKeyFromEnum()
         {SDLK_F2, Key::NEXT_GRAPHICS},
         {SDLK_F3, Key::PREV_GAME},
         {SDLK_F4, Key::NEXT_GAME},
-        {SDLK_F5, Key::RESTART},
         {SDLK_F6, Key::MENU},
         {SDLK_F12, Key::EXIT}
     };
