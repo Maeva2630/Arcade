@@ -44,7 +44,6 @@ namespace arcade {
              * @param key The input key to handle
              */
             void handleGlobalInput(Key key);
-            void handleGameInput(Key key);
     
             /**
              * @brief Switch the active display module
@@ -88,12 +87,6 @@ namespace arcade {
              * @brief Apply the current menu selection to switch game/display or start the game
              */
             void applyMenuSelection();
-
-            /**
-             * @brief Apply a game state change (pause, resume, menu)
-             * @param target The target game state to apply
-             */
-            void applyGameState(GameState target);
 
             std::unique_ptr<DLLoader<IDisplayModule>> _displayLoader;
             std::unique_ptr<DLLoader<IGameModule>> _gameLoader;

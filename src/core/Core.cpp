@@ -79,41 +79,11 @@ void Core::applyMenuSelection()
 {
     if (!_inCoreMenu)
         return;
+    if (_selectedGameIdx != _currentGameIdx)
+        switchDisplay(_selectedGameIdx);
     if (_game->getState() == GameState::PAUSED)
         _game->resume();
     _inCoreMenu = false;
-}
-
-void Core::applyGameState(GameState target)
-{
-    static const std::map<GameState, std::function<void()>> stateActions = {
-        {GameState::RUNNING,  [this] { _game->resume(); }},
-        {GameState::PAUSED,   [this] { _game->pause(); }},
-        {GameState::MENU,     [this] { _game->pause(); _inCoreMenu = true; }},
-    };
- 
-    const auto it = stateActions.find(target);
-    if (it != stateActions.end())
-        it->second();
-}
-
-void Core::handleGameInput(Key key)
-{
-    GameState pauseTarget = GameState::RUNNING;
-    if (_game->getState() == GameState::RUNNING)
-        pauseTarget = GameState::PAUSED;
-
-    const std::map<Key, GameState> keyToState = {
-        {Key::P, pauseTarget},
-        {Key::M, GameState::MENU},
-        {Key::MENU, GameState::MENU},
-    };
- 
-    const auto it = keyToState.find(key);
-    if (it != keyToState.end())
-        applyGameState(it->second);
-    else
-        _game->handleInput(key);
 }
 
 void Core::handleGlobalInput(Key key)
@@ -123,10 +93,10 @@ void Core::handleGlobalInput(Key key)
         {Key::PREV_GRAPHICS, [this] { _selectedDisplayIdx = (_selectedDisplayIdx + _displayLibs.size() - 1) % _displayLibs.size(); switchDisplay(_selectedDisplayIdx); }},
         {Key::NEXT_GAME,     [this] { _selectedGameIdx = (_inCoreMenu) ? (_selectedGameIdx + 1) % _gameLibs.size() : _selectedGameIdx; }},
         {Key::PREV_GAME,     [this] { _selectedGameIdx = (_inCoreMenu) ? (_selectedGameIdx + _gameLibs.size() - 1) % _gameLibs.size() : _selectedGameIdx; }},
-        {Key::RESTART,       [this] { _game->restart(); }},
+        {Key::M,             [this] { _game->pause(); _inCoreMenu = true; }},
+        {Key::MENU,          [this] { _game->pause(); _inCoreMenu = true; }},
         {Key::ENTER,         [this] { applyMenuSelection(); }},
         {Key::EXIT,          [this] { _running = false; }},
-        {Key::R,             [this] { _game->restart(); }},
         {Key::ESCAPE,        [this] { _running = false; }},
     };
  
@@ -136,7 +106,8 @@ void Core::handleGlobalInput(Key key)
         return;
     }
  
-    handleGameInput(key);
+    if (_game && !_inCoreMenu)
+        _game->handleInput(key);
 }
 
 void Core::mainLoop()

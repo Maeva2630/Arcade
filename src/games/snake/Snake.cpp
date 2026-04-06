@@ -195,7 +195,7 @@ void SnakeModule::refreshUI()
     } else if (_currentState == GameState::WON) {
         _uiText.emplace_back("YOU WIN!", MAX_GRID_X / 2 - 3, MAX_GRID_Y / 2, Colors::GREEN, 36);
     }
-    _uiText.emplace_back("[Arrows: move] [P: pause] [R: restart] [Esc: exit]",
+    _uiText.emplace_back("[Arrows: move] [P: pause] [R: restart] [Esc: exit] [M: menu]",
                          1.0f, MAX_GRID_Y, Colors::CYAN, 36);
 }
 
@@ -206,12 +206,15 @@ void SnakeModule::handleInput(Key key)
         {Key::RIGHT,    [this](Key) { _snake.setFace(Snake::Face::EAST); }},
         {Key::UP,       [this](Key) { _snake.setFace(Snake::Face::NORTH); }},
         {Key::DOWN,     [this](Key) { _snake.setFace(Snake::Face::SOUTH); }},
-        {Key::MENU,     [this](Key) { pause(); _currentState = GameState::MENU; }},
     };
 
     const auto it = inputs.find(key);
-    if (it != inputs.end())
+    if (it != inputs.end()) {
         it->second(key);
+        return;
+    }
+
+    handleGameInput(key);
 }
 
 const std::vector<Entity>& SnakeModule::getEntities() const
