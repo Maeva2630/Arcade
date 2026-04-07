@@ -7,6 +7,8 @@
 
 #ifndef CORE_HPP
     #define CORE_HPP
+    #define FONTSIZE 48
+    #define SPACING 2
     #include <vector>
     #include <map>
     #include <memory>
@@ -89,6 +91,9 @@ namespace arcade {
              */
             void saveScore();
 
+            void renderPlayerName();
+            void renderHighScores();
+            void renderSelection();
             void renderMenu();
             void renderGame();
 
@@ -126,6 +131,9 @@ namespace arcade {
             std::size_t _selectedDisplayIdx;
 
             GameState _previousState;
+
+            std::size_t _menuX;
+            std::size_t _menuY;
 
             bool _running;
             bool _inCoreMenu;

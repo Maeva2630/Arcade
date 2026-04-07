@@ -216,25 +216,21 @@ static std::string libName(const std::string& path)
     return file;
 }
 
-void Core::renderMenu()
+void Core::renderPlayerName()
 {
-    static const std::size_t fontSize = 48;
-    static const std::size_t spacing = 2;
-    std::size_t x = 0;
-    std::size_t y = 0;
-    
-    _display->clear();
-    _display->drawText(Text("=== ARCADE ===", x, y, Colors::YELLOW, fontSize + 10));
-
-    y += spacing;
-    _display->drawText(Text("Player Name: (authorized characters: a-z, 0-9)", x, y += spacing, Colors::CYAN, fontSize + 2));
+    _menuY += SPACING;
+    _display->drawText(Text("Player Name: (authorized characters: a-z, 0-9)", _menuX, _menuY += SPACING, Colors::CYAN, FONTSIZE + 2));
     if (_playerName.empty())
-        _display->drawText(Text("Enter your name...", x + 2, y += spacing, (_launchWithoutName) ? Colors::RED : Colors::WHITE, fontSize));
+        _display->drawText(Text("Enter your name...", _menuX + 2, _menuY += SPACING, (_launchWithoutName) ? Colors::RED : Colors::WHITE, FONTSIZE));
     else
-        _display->drawText(Text(_playerName, x + 2, y += spacing, Colors::WHITE, fontSize));
+        _display->drawText(Text(_playerName, _menuX + 2, _menuY += SPACING, Colors::WHITE, FONTSIZE));
 
-    y += spacing;
-    _display->drawText(Text("=== HIGH SCORES ===", x, y += spacing, Colors::YELLOW, fontSize + 5));
+}
+
+void Core::renderHighScores()
+{
+    _menuY += SPACING;
+    _display->drawText(Text("=== HIGH SCORES ===", _menuX, _menuY += SPACING, Colors::YELLOW, FONTSIZE + 5));
 
     for (const auto& pair : _scores) {
         const std::string& game = pair.first;
@@ -242,15 +238,15 @@ void Core::renderMenu()
         if (game != libName(_gameLibs[_selectedGameIdx]))
             continue;
 
-        _display->drawText(Text(game + ":", x, y += spacing, Colors::MAGENTA, fontSize));
+        _display->drawText(Text(game + ":", _menuX, _menuY += SPACING, Colors::MAGENTA, FONTSIZE));
 
         _display->drawText(Text(
             "Best: " + scores.bestGameScore.player + " - " +
             std::to_string(scores.bestGameScore.score),
-            x + 2,
-            y += spacing,
+            _menuX + 2,
+            _menuY += SPACING,
             Colors::WHITE,
-            fontSize
+            FONTSIZE
         ));
 
         std::size_t playerScore = 0;
@@ -260,24 +256,27 @@ void Core::renderMenu()
 
         _display->drawText(Text(
             "You: " + _playerName + " - " + std::to_string(playerScore),
-            x + 2,
-            y += spacing,
+            _menuX + 2,
+            _menuY += SPACING,
             Colors::CYAN,
-            fontSize
+            FONTSIZE
         ));
     }
+}
 
-    y += spacing;
-    _display->drawText(Text("=== SELECT YOUR GAME AND GRAPHICS ===", x, y += spacing, Colors::YELLOW, fontSize + 5));
+void Core::renderSelection()
+{
+    _menuY += SPACING;
+    _display->drawText(Text("=== SELECT YOUR GAME AND GRAPHICS ===", _menuX, _menuY += SPACING, Colors::YELLOW, FONTSIZE + 5));
 
-    _display->drawText(Text("Game  [F3/F4]:", x, y += spacing, Colors::CYAN, fontSize + 2));
+    _display->drawText(Text("Game  [F3/F4]:", _menuX, _menuY += SPACING, Colors::CYAN, FONTSIZE + 2));
     for (std::size_t i = 0; i < _gameLibs.size(); i++) {
         Color c = (i == _selectedGameIdx) ? Colors::GREEN : Colors::WHITE;
         std::string marker = (i == _selectedGameIdx) ? "> " : "  ";
-        _display->drawText(Text(marker + libName(_gameLibs[i]), x + 2, y += spacing, c, fontSize));
+        _display->drawText(Text(marker + libName(_gameLibs[i]), _menuX + 2, _menuY += SPACING, c, FONTSIZE));
     }
 
-    _display->drawText(Text("Graphics [F1/F2]:", x, y += spacing, Colors::CYAN, fontSize + 2));
+    _display->drawText(Text("Graphics [F1/F2]:", _menuX, _menuY += SPACING, Colors::CYAN, FONTSIZE + 2));
     for (std::size_t i = 0; i < _displayLibs.size(); i++) {
         bool isSelected = (i == _selectedDisplayIdx);
         bool isActive = (i == _currentDisplayIdx);
@@ -290,14 +289,28 @@ void Core::renderMenu()
         _display->drawText(Text(
             marker + libName(_displayLibs[i]) + active,
             2,
-            y += spacing,
+            _menuY += SPACING,
             c,
-            fontSize
+            FONTSIZE
         ));
     }
+}
 
+void Core::renderMenu()
+{
+    _menuX = 0;
+    _menuY = 0;
+
+    _display->clear();
+    _display->drawText(Text("=== ARCADE ===", _menuX, _menuY, Colors::YELLOW, FONTSIZE + 10));
+
+    renderPlayerName();
+    renderHighScores();
+    renderSelection();
+
+    // Helper
     _display->drawText(
-        Text("Enter: launch | Escape: exit", x, y += spacing, Colors::WHITE, fontSize - 8));
+        Text("Enter: launch | Escape: exit", _menuX, _menuY += SPACING, Colors::WHITE, FONTSIZE - 8));
 }
 
 void Core::switchDisplay(std::size_t idx)
