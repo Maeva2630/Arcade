@@ -79,8 +79,6 @@ void Core::applyMenuSelection()
 {
     if (!_inCoreMenu)
         return;
-    if (_selectedGameIdx != _currentGameIdx)
-        switchDisplay(_selectedGameIdx);
     if (_game->getState() == GameState::PAUSED)
         _game->resume();
     _inCoreMenu = false;
@@ -91,8 +89,8 @@ void Core::handleGlobalInput(Key key)
     static const std::map<Key, std::function<void()>> coreInputs = {
         {Key::NEXT_GRAPHICS, [this] { _selectedDisplayIdx = (_selectedDisplayIdx + 1) % _displayLibs.size(); switchDisplay(_selectedDisplayIdx); }},
         {Key::PREV_GRAPHICS, [this] { _selectedDisplayIdx = (_selectedDisplayIdx + _displayLibs.size() - 1) % _displayLibs.size(); switchDisplay(_selectedDisplayIdx); }},
-        {Key::NEXT_GAME,     [this] { _selectedGameIdx = (_inCoreMenu) ? (_selectedGameIdx + 1) % _gameLibs.size() : _selectedGameIdx; }},
-        {Key::PREV_GAME,     [this] { _selectedGameIdx = (_inCoreMenu) ? (_selectedGameIdx + _gameLibs.size() - 1) % _gameLibs.size() : _selectedGameIdx; }},
+        {Key::NEXT_GAME,     [this] { _selectedGameIdx = (_selectedGameIdx + 1) % _gameLibs.size(); switchGame(_selectedGameIdx); }},
+        {Key::PREV_GAME,     [this] { _selectedGameIdx = (_selectedGameIdx + _gameLibs.size() - 1) % _gameLibs.size(); switchGame(_selectedGameIdx); }},
         {Key::M,             [this] { _game->pause(); _inCoreMenu = true; }},
         {Key::MENU,          [this] { _game->pause(); _inCoreMenu = true; }},
         {Key::ENTER,         [this] { applyMenuSelection(); }},
