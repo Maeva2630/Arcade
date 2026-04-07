@@ -121,6 +121,6 @@ add_library(arcade_snake SHARED ${SNAKE_SRC} ${GAME_COMMON_SRC})
 arcade_library(arcade_snake)
 
 # ---- Nibbler ----
-# file(GLOB NIBBLER_SRC src/games/nibbler/*.cpp)
-# add_library(arcade_nibbler SHARED ${NIBBLER_SRC})
-# arcade_library(arcade_nibbler)
+file(GLOB NIBBLER_SRC src/games/nibbler/*.cpp)
+add_library(arcade_nibbler SHARED ${NIBBLER_SRC} ${GAME_COMMON_SRC})
+arcade_library(arcade_nibbler)
