@@ -15,6 +15,17 @@
     #include "dlloader/DLLoader.hpp"
 
 namespace arcade {
+
+    struct PlayerScore {
+        std::string player;
+        std::size_t score;
+    };
+
+    struct GameScores {
+        PlayerScore bestGameScore;
+        std::map<std::string, std::size_t> bestPlayerScores;
+    };
+
     class Core {
         public:
             /**
@@ -68,13 +79,15 @@ namespace arcade {
              * @param dir The directory to load libraries from
              */
             void loadLibs(std::string dir);
-            
+
+            void updateScore(std::size_t newScore);
+
             /**
              * @brief Save the player's score with the format "playerName:highscore" in a file
              * @param name The player's name
              * @param score The player's score
              */
-            void saveScore(std::string name, int score);
+            void saveScore();
 
             void renderMenu();
             void renderGame();
@@ -103,7 +116,7 @@ namespace arcade {
             std::vector<std::string> _displayLibs;
             std::vector<std::string> _gameLibs;
 
-            std::map<std::string, int> _scores;
+            std::map<std::string, GameScores> _scores;
             std::string _playerName;
 
             std::size_t _currentDisplayIdx;

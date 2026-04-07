@@ -48,6 +48,10 @@ Core::Core(std::string libPath)
     switchDisplay(_currentDisplayIdx);
     switchGame(_currentGameIdx);
     
+    // _scores = loadScores("scores.txt");
+    _scores.emplace("snake", GameScores{{"alice", 100}, {{"bob", 80}, {"charlie", 60}}});
+    _scores.emplace("nibbler", GameScores{{"dave", 150}, {{"eve", 120}, {"frank", 90}}});
+
     _previousState = GameState::MENU;
 
     _running = true;
@@ -73,6 +77,7 @@ void Core::run()
 {
     initAll();
     mainLoop();
+    saveScore();
     stopAll();
 }
 
@@ -165,7 +170,7 @@ void Core::mainLoop()
 
             if (currentState != _previousState) {
                 if (currentState == GameState::GAME_OVER || currentState == GameState::WON)
-                    saveScore(_playerName, _game->getScore());
+                    saveScore();
                 _previousState = currentState;
             }
 
@@ -174,6 +179,7 @@ void Core::mainLoop()
                 it->second();
         }
 
+        updateScore(_game->getScore());
         _display->display();
     }
 }
@@ -213,24 +219,62 @@ static std::string libName(const std::string& path)
 void Core::renderMenu()
 {
     static const std::size_t fontSize = 48;
-    static const std::size_t spacing = 4;
+    static const std::size_t spacing = 2;
     std::size_t x = 0;
     std::size_t y = 0;
     
     _display->clear();
     _display->drawText(Text("=== ARCADE ===", x, y, Colors::YELLOW, fontSize + 10));
 
+    y += spacing;
     _display->drawText(Text("Player Name: (authorized characters: a-z, 0-9)", x, y += spacing, Colors::CYAN, fontSize + 2));
     if (_playerName.empty())
-        _display->drawText(Text("Enter your name...", x + 2, y += spacing / 2, (_launchWithoutName) ? Colors::RED : Colors::WHITE, fontSize));
+        _display->drawText(Text("Enter your name...", x + 2, y += spacing, (_launchWithoutName) ? Colors::RED : Colors::WHITE, fontSize));
     else
-        _display->drawText(Text(_playerName, x + 2, y += spacing / 2, Colors::WHITE, fontSize));
+        _display->drawText(Text(_playerName, x + 2, y += spacing, Colors::WHITE, fontSize));
+
+    y += spacing;
+    _display->drawText(Text("=== HIGH SCORES ===", x, y += spacing, Colors::YELLOW, fontSize + 5));
+
+    for (const auto& pair : _scores) {
+        const std::string& game = pair.first;
+        const GameScores& scores = pair.second;
+        if (game != libName(_gameLibs[_selectedGameIdx]))
+            continue;
+
+        _display->drawText(Text(game + ":", x, y += spacing, Colors::MAGENTA, fontSize));
+
+        _display->drawText(Text(
+            "Best: " + scores.bestGameScore.player + " - " +
+            std::to_string(scores.bestGameScore.score),
+            x + 2,
+            y += spacing,
+            Colors::WHITE,
+            fontSize
+        ));
+
+        std::size_t playerScore = 0;
+        auto it = scores.bestPlayerScores.find(_playerName);
+        if (it != scores.bestPlayerScores.end())
+            playerScore = it->second;
+
+        _display->drawText(Text(
+            "You: " + _playerName + " - " + std::to_string(playerScore),
+            x + 2,
+            y += spacing,
+            Colors::CYAN,
+            fontSize
+        ));
+    }
+
+    y += spacing;
+    _display->drawText(Text("=== SELECT YOUR GAME AND GRAPHICS ===", x, y += spacing, Colors::YELLOW, fontSize + 5));
 
     _display->drawText(Text("Game  [F3/F4]:", x, y += spacing, Colors::CYAN, fontSize + 2));
     for (std::size_t i = 0; i < _gameLibs.size(); i++) {
         Color c = (i == _selectedGameIdx) ? Colors::GREEN : Colors::WHITE;
         std::string marker = (i == _selectedGameIdx) ? "> " : "  ";
-        _display->drawText(Text(marker + libName(_gameLibs[i]), x + 2, y += spacing / 2, c, fontSize));
+        _display->drawText(Text(marker + libName(_gameLibs[i]), x + 2, y += spacing, c, fontSize));
     }
 
     _display->drawText(Text("Graphics [F1/F2]:", x, y += spacing, Colors::CYAN, fontSize + 2));
@@ -246,7 +290,7 @@ void Core::renderMenu()
         _display->drawText(Text(
             marker + libName(_displayLibs[i]) + active,
             2,
-            y += spacing / 2,
+            y += spacing,
             c,
             fontSize
         ));
@@ -332,9 +376,21 @@ void Core::loadLibs(std::string dir)
     }
 }
 
-void Core::saveScore(std::string name, int score)
+void Core::updateScore(std::size_t newScore)
 {
-    _scores[name] = score;
+    std::string game = libName(_gameLibs[_currentGameIdx]);
+    auto& gameData = _scores[game];
+
+    if (gameData.bestPlayerScores[_playerName] < newScore) {
+        gameData.bestPlayerScores[_playerName] = newScore;
+    }
+
+    if (gameData.bestGameScore.score < newScore) {
+        gameData.bestGameScore = {_playerName, newScore};
+    }
 }
+
+void Core::saveScore()
+{}
 
 }
