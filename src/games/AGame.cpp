@@ -15,7 +15,8 @@ using GlobalInputHandler = std::function<void(Key)>;
 void AGameModule::handleGameInput(Key key)
 {
     static const std::map<Key, GlobalInputHandler> inputs = {
-        {Key::P,       [this](Key) { (_currentState == GameState::RUNNING) ? pause() : resume(); }},
+        {Key::P,       [this](Key) { if (_currentState == GameState::RUNNING) pause();
+            else if (_currentState == GameState::PAUSED) resume(); }},
         {Key::R,       [this](Key) { restart(); }},
         {Key::RESTART, [this](Key) { restart(); }},
     };
