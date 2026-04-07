@@ -40,6 +40,12 @@ namespace arcade {
             void mainLoop();
 
             /**
+             * @brief Handle name input
+             * @param key The input key to handle
+             */
+            void handleNameInput(Key key);
+
+            /**
              * @brief Handle global input
              * @param key The input key to handle
              */
@@ -64,7 +70,7 @@ namespace arcade {
             void loadLibs(std::string dir);
             
             /**
-             * @brief Save the player's score
+             * @brief Save the player's score with the format "playerName:highscore" in a file
              * @param name The player's name
              * @param score The player's score
              */
@@ -110,6 +116,7 @@ namespace arcade {
 
             bool _running;
             bool _inCoreMenu;
+            bool _launchWithoutName;
     };
 }
 

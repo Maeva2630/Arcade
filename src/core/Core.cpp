@@ -52,6 +52,7 @@ Core::Core(std::string libPath)
 
     _running = true;
     _inCoreMenu = true;
+    _launchWithoutName = false;
 }
 
 void Core::initAll()
@@ -79,9 +80,41 @@ void Core::applyMenuSelection()
 {
     if (!_inCoreMenu)
         return;
+    if (_playerName.empty()) {
+        _launchWithoutName = true;
+        return;
+    }
     if (_game->getState() == GameState::PAUSED)
         _game->resume();
     _inCoreMenu = false;
+    _launchWithoutName = false;
+}
+
+void Core::handleNameInput(Key key)
+{
+    static const std::size_t maxNameLength = 20;
+    static const std::map<Key, char> nameInputs = {
+        {Key::NUM_0, '0'}, {Key::NUM_1, '1'}, {Key::NUM_2, '2'},
+        {Key::NUM_3, '3'}, {Key::NUM_4, '4'}, {Key::NUM_5, '5'},
+        {Key::NUM_6, '6'}, {Key::NUM_7, '7'}, {Key::NUM_8, '8'},
+        {Key::NUM_9, '9'},
+        {Key::A, 'a'}, {Key::B, 'b'}, {Key::C, 'c'}, {Key::D, 'd'},
+        {Key::E, 'e'}, {Key::F, 'f'}, {Key::G, 'g'}, {Key::H, 'h'},
+        {Key::I, 'i'}, {Key::J, 'j'}, {Key::K, 'k'}, {Key::L, 'l'},
+        {Key::M, 'm'}, {Key::N, 'n'}, {Key::O, 'o'}, {Key::P, 'p'},
+        {Key::Q, 'q'}, {Key::R, 'r'}, {Key::S, 's'}, {Key::T, 't'},
+        {Key::U, 'u'}, {Key::V, 'v'}, {Key::W, 'w'}, {Key::X, 'x'},
+        {Key::Y, 'y'}, {Key::Z, 'z'},
+    };
+
+    if (key == Key::BACKSPACE && !_playerName.empty()) {
+        _playerName.pop_back();
+    } else {
+        auto it = nameInputs.find(key);
+        if (it != nameInputs.end() && _playerName.size() < maxNameLength) {
+            _playerName += it->second;
+        }
+    }
 }
 
 void Core::handleGlobalInput(Key key)
@@ -91,7 +124,6 @@ void Core::handleGlobalInput(Key key)
         {Key::PREV_GRAPHICS, [this] { _selectedDisplayIdx = (_selectedDisplayIdx + _displayLibs.size() - 1) % _displayLibs.size(); switchDisplay(_selectedDisplayIdx); }},
         {Key::NEXT_GAME,     [this] { _selectedGameIdx = (_selectedGameIdx + 1) % _gameLibs.size(); switchGame(_selectedGameIdx); }},
         {Key::PREV_GAME,     [this] { _selectedGameIdx = (_selectedGameIdx + _gameLibs.size() - 1) % _gameLibs.size(); switchGame(_selectedGameIdx); }},
-        {Key::M,             [this] { _game->pause(); _inCoreMenu = true; }},
         {Key::MENU,          [this] { _game->pause(); _inCoreMenu = true; }},
         {Key::ENTER,         [this] { applyMenuSelection(); }},
         {Key::EXIT,          [this] { _running = false; }},
@@ -104,8 +136,11 @@ void Core::handleGlobalInput(Key key)
         return;
     }
  
-    if (_game && !_inCoreMenu)
+    if (_inCoreMenu) {
+        handleNameInput(key);
+    } else if (_game) {
         _game->handleInput(key);
+    }
 }
 
 void Core::mainLoop()
@@ -184,6 +219,12 @@ void Core::renderMenu()
     
     _display->clear();
     _display->drawText(Text("=== ARCADE ===", x, y, Colors::YELLOW, fontSize + 10));
+
+    _display->drawText(Text("Player Name: (authorized characters: a-z, 0-9)", x, y += spacing, Colors::CYAN, fontSize + 2));
+    if (_playerName.empty())
+        _display->drawText(Text("Enter your name...", x + 2, y += spacing / 2, (_launchWithoutName) ? Colors::RED : Colors::WHITE, fontSize));
+    else
+        _display->drawText(Text(_playerName, x + 2, y += spacing / 2, Colors::WHITE, fontSize));
 
     _display->drawText(Text("Game  [F3/F4]:", x, y += spacing, Colors::CYAN, fontSize + 2));
     for (std::size_t i = 0; i < _gameLibs.size(); i++) {
