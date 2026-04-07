@@ -6,17 +6,14 @@
 */
 
 #include "core/Core.hpp"
-#include <iostream>
 #include <filesystem>
-#include <dlfcn.h>
 #include <functional>
+#include <iostream>
+#include <dlfcn.h>
 
 namespace arcade {
 
 static const char* LIB_DIR = "lib";
-
-using GlobalInputHandler = std::function<void(Key)>;
-using StatesHandler = std::function<void(GameState)>;
 
 Core::Core(std::string libPath)
 {
@@ -24,18 +21,16 @@ Core::Core(std::string libPath)
 
     loadLibs(LIB_DIR);
 
-    if (_displayLibs.empty()) {
+    if (_displayLibs.empty())
         throw CoreException("No display librairies found.");
-    }
 
-    if (_gameLibs.empty()) {
+    if (_gameLibs.empty())
         throw CoreException("No game librairies found.");
-    }
 
-    std::cout << _displayLibs.size() << " display libraries found.\n";
+    if (libPath.substr(0, 2) == "./")
+        libPath = libPath.substr(2);
 
     for (std::size_t i = 0; i < _displayLibs.size(); i++) {
-        std::cout << "display library: " << _displayLibs[i] << std::endl;
         if (_displayLibs[i] == libPath) {
             _currentDisplayIdx = i;
             found = true;
@@ -47,11 +42,16 @@ Core::Core(std::string libPath)
         throw CoreException(libPath + " is not a graphics library.");
 
     _currentGameIdx = 0;
-
+    _selectedGameIdx = _currentGameIdx;
+    _selectedDisplayIdx = _currentDisplayIdx;
+    
     switchDisplay(_currentDisplayIdx);
     switchGame(_currentGameIdx);
+    
+    _previousState = GameState::MENU;
 
     _running = true;
+    _inCoreMenu = true;
 }
 
 void Core::initAll()
@@ -75,61 +75,146 @@ void Core::run()
     stopAll();
 }
 
-void Core::mainLoop()
+void Core::applyMenuSelection()
 {
-    while (_running && _display->isOpen()) {
-        Key key = _display->getKey();
-        handleGlobalInput(key);
-
-        if (_game->getState() == GameState::RUNNING || _game->getState() == GameState::PAUSED) {
-            _game->handleInput(key);
-        }
-
-        if (_game->getState() == GameState::MENU) {
-            renderMenu();
-        } else if (_game->getState() == GameState::RUNNING || _game->getState() == GameState::PAUSED) {
-            _display->clear();
-            
-            _game->update(_display->getDeltaTime());
-            
-            for (Entity entity : _game->getEntities()) {
-                _display->drawEntity(entity);
-            }
-            
-            for (Text text : _game->getUIText()) {
-                _display->drawText(text);
-            }
-        } else if (_game->getState() == GameState::GAME_OVER || _game->getState() == GameState::WON) {
-            _display->clear();
-            
-            for (Entity entity : _game->getEntities()) {
-                _display->drawEntity(entity);
-            }
-            
-            for (Text text : _game->getUIText()) {
-                _display->drawText(text);
-            }
-        }
-        
-        _display->display();
-    }
+    if (!_inCoreMenu)
+        return;
+    if (_selectedGameIdx != _currentGameIdx)
+        switchDisplay(_selectedGameIdx);
+    if (_game->getState() == GameState::PAUSED)
+        _game->resume();
+    _inCoreMenu = false;
 }
 
 void Core::handleGlobalInput(Key key)
 {
-    static const std::map<Key, GlobalInputHandler> inputs = {
-        {Key::NEXT_GRAPHICS, [this](Key) { switchDisplay((_currentDisplayIdx + 1) % _displayLibs.size()); }},
-        {Key::PREV_GRAPHICS, [this](Key) { switchDisplay((_currentDisplayIdx + _displayLibs.size() - 1) % _displayLibs.size()); }},
-        {Key::NEXT_GAME, [this](Key) { switchGame((_currentGameIdx + 1) % _gameLibs.size()); }},
-        {Key::PREV_GAME, [this](Key) { switchGame((_currentGameIdx + _gameLibs.size() - 1) % _gameLibs.size()); }},
-        {Key::MENU,    [this](Key) { _game->stop(); }},
-        {Key::EXIT,    [this](Key) { _running = false; }},
+    static const std::map<Key, std::function<void()>> coreInputs = {
+        {Key::NEXT_GRAPHICS, [this] { _selectedDisplayIdx = (_selectedDisplayIdx + 1) % _displayLibs.size(); switchDisplay(_selectedDisplayIdx); }},
+        {Key::PREV_GRAPHICS, [this] { _selectedDisplayIdx = (_selectedDisplayIdx + _displayLibs.size() - 1) % _displayLibs.size(); switchDisplay(_selectedDisplayIdx); }},
+        {Key::NEXT_GAME,     [this] { _selectedGameIdx = (_inCoreMenu) ? (_selectedGameIdx + 1) % _gameLibs.size() : _selectedGameIdx; }},
+        {Key::PREV_GAME,     [this] { _selectedGameIdx = (_inCoreMenu) ? (_selectedGameIdx + _gameLibs.size() - 1) % _gameLibs.size() : _selectedGameIdx; }},
+        {Key::M,             [this] { _game->pause(); _inCoreMenu = true; }},
+        {Key::MENU,          [this] { _game->pause(); _inCoreMenu = true; }},
+        {Key::ENTER,         [this] { applyMenuSelection(); }},
+        {Key::EXIT,          [this] { _running = false; }},
+        {Key::ESCAPE,        [this] { _running = false; }},
+    };
+ 
+    const auto it = coreInputs.find(key);
+    if (it != coreInputs.end()) {
+        it->second();
+        return;
+    }
+ 
+    if (_game && !_inCoreMenu)
+        _game->handleInput(key);
+}
+
+void Core::mainLoop()
+{
+    static const std::map<GameState, std::function<void()>> renderHandlers = {
+        {GameState::MENU,       [this]() { renderMenu(); }},
+        {GameState::RUNNING,    [this]() { renderGame(); }},
+        {GameState::PAUSED,     [this]() { renderGame(); }},
+        {GameState::GAME_OVER,  [this]() { renderGame(); }},
+        {GameState::WON,        [this]() { renderGame(); }},
     };
 
-    auto it = inputs.find(key);
-    if (it != inputs.end()) {
-        it->second(key);
+    while (_running && _display->isOpen()) {
+        Key key = _display->getKey();
+        if (key != Key::UNKNOWN)
+            handleGlobalInput(key);
+
+        if (_inCoreMenu) {
+            renderMenu();
+        } else {
+            GameState currentState = _game->getState();
+
+            if (currentState != _previousState) {
+                if (currentState == GameState::GAME_OVER || currentState == GameState::WON)
+                    saveScore(_playerName, _game->getScore());
+                _previousState = currentState;
+            }
+
+            const auto it = renderHandlers.find(currentState);
+            if (it != renderHandlers.end())
+                it->second();
+        }
+
+        _display->display();
     }
+}
+
+void Core::renderGame()
+{
+    _display->clear();
+    _game->update(_display->getDeltaTime());
+
+    for (Entity entity : _game->getEntities())
+        _display->drawEntity(entity);
+
+    for (Text text : _game->getUIText())
+        _display->drawText(text);
+}
+
+static std::string libName(const std::string& path)
+{
+    std::size_t slash = path.rfind('/');
+    std::string file;
+
+    if (slash == std::string::npos) {
+        file = path;
+    } else {
+        file = path.substr(slash + 1);
+    }
+
+    if (file.substr(0, 7) == "arcade_")
+        file = file.substr(7);
+
+    if (file.find(".") != std::string::npos)
+        file = file.substr(0, file.find("."));
+
+    return file;
+}
+
+void Core::renderMenu()
+{
+    static const std::size_t fontSize = 48;
+    static const std::size_t spacing = 4;
+    std::size_t x = 0;
+    std::size_t y = 0;
+    
+    _display->clear();
+    _display->drawText(Text("=== ARCADE ===", x, y, Colors::YELLOW, fontSize + 10));
+
+    _display->drawText(Text("Game  [F3/F4]:", x, y += spacing, Colors::CYAN, fontSize + 2));
+    for (std::size_t i = 0; i < _gameLibs.size(); i++) {
+        Color c = (i == _selectedGameIdx) ? Colors::GREEN : Colors::WHITE;
+        std::string marker = (i == _selectedGameIdx) ? "> " : "  ";
+        _display->drawText(Text(marker + libName(_gameLibs[i]), x + 2, y += spacing / 2, c, fontSize));
+    }
+
+    _display->drawText(Text("Graphics [F1/F2]:", x, y += spacing, Colors::CYAN, fontSize + 2));
+    for (std::size_t i = 0; i < _displayLibs.size(); i++) {
+        bool isSelected = (i == _selectedDisplayIdx);
+        bool isActive = (i == _currentDisplayIdx);
+
+        Color c = isSelected ? Colors::GREEN : Colors::WHITE;
+
+        std::string marker = isSelected ? "> " : "  ";
+        std::string active = isActive ? " [RUNNING]" : "";
+
+        _display->drawText(Text(
+            marker + libName(_displayLibs[i]) + active,
+            2,
+            y += spacing / 2,
+            c,
+            fontSize
+        ));
+    }
+
+    _display->drawText(
+        Text("Enter: launch | Escape: exit", x, y += spacing, Colors::WHITE, fontSize - 8));
 }
 
 void Core::switchDisplay(std::size_t idx)
@@ -145,14 +230,14 @@ void Core::switchDisplay(std::size_t idx)
     }
 
     auto newLoader = std::make_unique<DLLoader<IDisplayModule>>(_displayLibs[idx]);
-    auto newDisplay = std::unique_ptr<IDisplayModule>(newLoader.get()->getInstance("entryPoint"));
+    auto newDisplay = std::unique_ptr<IDisplayModule>(newLoader->getInstance("entryPoint"));
     
     _displayLoader = std::move(newLoader);
     _display = std::move(newDisplay);
 
-    _display.get()->init();
+    _display->init();
     if (_game)
-        _display.get()->setRenderContext(_game->getRenderContext());
+        _display->setRenderContext(_game->getRenderContext());
 
     _currentDisplayIdx = idx;
 }
@@ -170,14 +255,14 @@ void Core::switchGame(std::size_t idx)
     }
 
     auto newLoader = std::make_unique<DLLoader<IGameModule>>(_gameLibs[idx]);
-    auto newGame = std::unique_ptr<IGameModule>(newLoader.get()->getInstance("entryPoint"));
+    auto newGame = std::unique_ptr<IGameModule>(newLoader->getInstance("entryPoint"));
 
     _gameLoader = std::move(newLoader);
     _game = std::move(newGame);
 
-    _game.get()->init();
+    _game->init();
     if (_display)
-        _display.get()->setRenderContext(_game->getRenderContext());
+        _display->setRenderContext(_game->getRenderContext());
 
     _currentGameIdx = idx;
 }
@@ -193,7 +278,6 @@ void Core::loadLibs(std::string dir)
 
             switch (module->getType()) {
                 case ModuleType::DISPLAY:
-                std::cout << "Found display library: " << module->getName() << std::endl;
                     _displayLibs.push_back(lib_path);
                     break;
                 case ModuleType::GAME:
@@ -212,36 +296,6 @@ void Core::loadLibs(std::string dir)
 void Core::saveScore(std::string name, int score)
 {
     _scores[name] = score;
-}
-
-void Core::renderMenu()
-{
-    _display.get()->clear();
-    _display.get()->drawText(Text("Select a game:", 2, 2, Colors::WHITE));
-
-    for (std::size_t i = 0; i < _gameLibs.size(); i++)
-        _display.get()->drawText(Text(_gameLibs[i], 2, 4 + i));
-
-    std::cout << "Rendering menu..." << std::endl;
-}
-
-void Core::renderGame()
-{
-    _display->clear();
-
-    _game->handleInput(_display->getKey());
-
-    _game->update(_display->getDeltaTime());
-
-    for (Entity entity : _game->getEntities()) {
-        _display->drawEntity(entity);
-    }
-
-    for (Text text : _game->getUIText()) {
-        _display->drawText(text);
-    }
-
-    _display->display();
 }
 
 }

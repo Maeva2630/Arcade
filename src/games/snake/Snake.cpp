@@ -6,9 +6,10 @@
 */
 
 #include "games/snake/Snake.hpp"
+#include <functional>
 #include <vector>
 #include <random>
-
+#include <map>
 
 extern "C" arcade::IModule *entryPoint(void)
 {
@@ -16,6 +17,8 @@ extern "C" arcade::IModule *entryPoint(void)
 }
 
 namespace arcade {
+
+using SnakeInputHandler = std::function<void(Key)>;
 
 SnakeModule::FoodSystem::FoodSystem() : cell(-1.0f, -1.0f), hasFood(false), rng(std::random_device{}())
 {
@@ -78,7 +81,7 @@ void SnakeModule::stop()
 
 const std::string& SnakeModule::getName() const
 {
-    const std::string &name = "Snake";
+    static const std::string &name = "Snake";
     return name;
 }
 
@@ -192,29 +195,26 @@ void SnakeModule::refreshUI()
     } else if (_currentState == GameState::WON) {
         _uiText.emplace_back("YOU WIN!", MAX_GRID_X / 2 - 3, MAX_GRID_Y / 2, Colors::GREEN, 36);
     }
-    _uiText.emplace_back("[Arrows: move] [P: pause] [R: restart] [Esc: exit]",
+    _uiText.emplace_back("[Arrows: move] [P: pause] [R: restart] [Esc: exit] [M: menu]",
                          1.0f, MAX_GRID_Y, Colors::CYAN, 36);
 }
 
 void SnakeModule::handleInput(Key key)
 {
-    handleGameInput(key);
-    switch (key) {
-        case Key::LEFT:
-            _snake.setFace(Snake::Face::WEST);
-            break;
-        case Key::RIGHT:
-            _snake.setFace(Snake::Face::EAST);
-            break;
-        case Key::UP:
-            _snake.setFace(Snake::Face::NORTH);
-            break;
-        case Key::DOWN:
-            _snake.setFace(Snake::Face::SOUTH);
-            break;
-        default:
-            break;
+    static const std::map<Key, SnakeInputHandler> inputs = {
+        {Key::LEFT,     [this](Key) { _snake.setFace(Snake::Face::WEST); }},
+        {Key::RIGHT,    [this](Key) { _snake.setFace(Snake::Face::EAST); }},
+        {Key::UP,       [this](Key) { _snake.setFace(Snake::Face::NORTH); }},
+        {Key::DOWN,     [this](Key) { _snake.setFace(Snake::Face::SOUTH); }},
+    };
+
+    const auto it = inputs.find(key);
+    if (it != inputs.end()) {
+        it->second(key);
+        return;
     }
+
+    handleGameInput(key);
 }
 
 const std::vector<Entity>& SnakeModule::getEntities() const

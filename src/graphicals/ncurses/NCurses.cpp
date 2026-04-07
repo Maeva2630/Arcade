@@ -65,7 +65,7 @@ void NCurses::stop()
 void NCurses::clear()
 {
     if (_window)
-        ::clear();
+        erase();
     else
         throw ModuleException("The window can not be cleared");
 }
@@ -88,14 +88,18 @@ void NCurses::display()
 Key NCurses::getKey()
 {
     int ch = getch();
-    auto key = this->_keyMap.find(ch);
+    if (ch == ERR) {
+        return Key::UNKNOWN;
+    }
 
+    auto key = this->_keyMap.find(ch);
     return (key != this->_keyMap.end()) ? key->second : Key::UNKNOWN;
 }
 
 std::map<int, Key> NCurses::initKeyFromEnum()
 {
     std::map<int, Key> newMap = {
+
         {KEY_UP, Key::UP},
         {KEY_DOWN, Key::DOWN},
         {KEY_LEFT, Key::LEFT},
@@ -121,8 +125,9 @@ std::map<int, Key> NCurses::initKeyFromEnum()
         {KEY_F(2), Key::NEXT_GRAPHICS},
         {KEY_F(3), Key::PREV_GAME},
         {KEY_F(4), Key::NEXT_GAME},
+        {KEY_F(5), Key::RESTART},
         {KEY_F(6), Key::MENU},
-        {KEY_F(12), Key::EXIT}
+        {KEY_F(12), Key::EXIT},
     };
 
     return newMap;

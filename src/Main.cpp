@@ -9,15 +9,16 @@
 #include "core/Core.hpp"
 
 int main(int argc, char *const *argv) {
-    if (argc != 2)
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <graphics_library>" << std::endl;
         return 84;
+    }
 
     try {
         arcade::Core core(argv[1]);
-        
         core.run();
     } catch (const arcade::Core::CoreException& e) {
-        // std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "Error: " << e.what() << std::endl;
         return 84;
     }
     return 0;
