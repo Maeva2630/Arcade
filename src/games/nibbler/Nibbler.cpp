@@ -17,34 +17,136 @@ extern "C" arcade::IModule *entryPoint(void)
 
 namespace arcade {
 
-NibblerModule::FoodSystem::FoodSystem() : cell(-1.0f, -1.0f), hasFood(false), rng(std::random_device{}())
-{
-}
-
-void NibblerModule::FoodSystem::spawn(const Nibbler &Nibbler, int width, int height, GameState &state)
+void NibblerModule::spawnFood()
 {
     std::vector<Position> freeCells;
 
-    for (int y = 3; y < height - 2; ++y) {
-        for (int x = 1; x < width - 1; ++x) {
+    for (int y = 3; y < MAX_GRID_Y - 2; ++y) {
+        for (int x = 1; x < MAX_GRID_X - 1; ++x) {
             Position candidate(static_cast<float>(x), static_cast<float>(y));
-            if (!Nibbler.containsAtThisPos(candidate))
+            if (!isOccupied(candidate))
                 freeCells.emplace_back(candidate);
         }
     }
 
     if (freeCells.empty()) {
-        hasFood = false;
-        state = GameState::WON;
+        _hasFood = false;
+        _currentState = GameState::WON;
         return;
     }
 
     std::uniform_int_distribution<size_t> dist(0, freeCells.size() - 1);
-    cell = freeCells[dist(rng)];
-    hasFood = true;
+    _food = freeCells[dist(_rng)];
+    _hasFood = true;
 }
 
-NibblerModule::NibblerModule() : _score(0), _moveDelay(0.0f)
+std::vector<Position> NibblerModule::getFreeCells()
+{
+    std::vector<Position> freeCells;
+
+    for (int y = 3; y < MAX_GRID_Y - 2; ++y) {
+        for (int x = 1; x < MAX_GRID_X - 1; ++x) {
+            Position candidate(static_cast<float>(x), static_cast<float>(y));
+            if (!isOccupied(candidate))
+                freeCells.emplace_back(candidate);
+        }
+    }
+
+    return freeCells;
+}
+
+bool isSamePos(const Position &a, const Position &b)
+{
+    return a.x == b.x && a.y == b.y;
+}
+
+bool NibblerModule::isWallAt(const Position &p) const
+{
+    for (const auto &w : _walls)
+        if (isSamePos(w, p))
+            return true;
+    return false;
+}
+
+void NibblerModule::spawnWallSegment()
+{
+    constexpr int maxAttempts = 20;
+    constexpr int minLength = 4;
+    constexpr int maxLength = 8;
+
+    std::vector<Position> freeCells = getFreeCells();
+
+    if (freeCells.empty())
+        return;
+
+    std::uniform_int_distribution<size_t> distCell(0, freeCells.size() - 1);
+    std::uniform_int_distribution<size_t> distLen(minLength, maxLength);
+
+    for (int attempt = 0; attempt < maxAttempts; ++attempt) {
+        const bool horizontal = (_rng() % 2 == 0);
+        const size_t length = distLen(_rng);
+        const Position start = freeCells[distCell(_rng)];
+
+        std::vector<Position> candidateLine;
+        candidateLine.reserve(length);
+        bool valid = true;
+
+        for (size_t i = 0; i < length; ++i) {
+            const int x = horizontal ? static_cast<int>(start.x) + static_cast<int>(i)
+                                     : static_cast<int>(start.x);
+            const int y = horizontal ? static_cast<int>(start.y)
+                                     : static_cast<int>(start.y) + static_cast<int>(i);
+
+            if (x < 1 || x > MAX_GRID_X - 2 || y < 3 || y > MAX_GRID_Y - 3) {
+                valid = false;
+                break;
+            }
+
+            const Position p(static_cast<float>(x), static_cast<float>(y));
+            if (isOccupied(p)) {
+                valid = false;
+                break;
+            }
+
+            candidateLine.push_back(p);
+        }
+
+        if (!valid)
+            continue;
+
+        _walls.insert(_walls.end(), candidateLine.begin(), candidateLine.end());
+        return;
+    }
+}
+
+void NibblerModule::updateLevel()
+{
+    constexpr float minMoveInterval = 0.06f;
+
+    if (_score < static_cast<int>(_nextLevelScore))
+        return;
+
+    ++_level;
+    _nextLevelScore += 5;
+
+    if (_moveInterval > minMoveInterval)
+        _moveInterval -= 0.01f;
+
+    spawnWallSegment();
+}
+
+bool NibblerModule::isOccupied(const Position &p) const
+{
+    if (_nibbler.containsAtThisPos(p))
+        return true;
+    if (_hasFood && isSamePos(_food, p))
+        return true;
+    if (isWallAt(p))
+        return true;
+    return false;
+}
+
+NibblerModule::NibblerModule() : _score(0), _level(1), _nextLevelScore(5), _moveDelay(0.0f), _moveInterval(MOVE_INTERVAL_SECONDS), _hasFood(false), _rng(std::random_device{}())
 {
     _currentState = GameState::MENU;
     _renderContext = {MAX_GRID_X + 1, MAX_GRID_Y + 1, CoordinateSpace::GRID};
@@ -60,9 +162,17 @@ void NibblerModule::init()
     _currentState = GameState::RUNNING;
 
     _score = 0;
+    _level = 1;
+    _nextLevelScore = 5;
     _moveDelay = 0.0f;
+    _moveInterval = MOVE_INTERVAL_SECONDS;
+    _hasFood = false;
+    _food = Position(-1.0f, -1.0f);
+    _walls.clear();
+
     _nibbler = Nibbler();
-    generateFood();
+    spawnFood();
+    spawnWallSegment();
     refreshEntities();
     refreshUI();
 }
@@ -71,9 +181,15 @@ void NibblerModule::stop()
 {
     _currentState = GameState::MENU;
     _score = 0;
+    _level = 1;
+    _nextLevelScore = 5;
     _moveDelay = 0.0f;
+    _moveInterval = MOVE_INTERVAL_SECONDS;
+    _hasFood = false;
+    _food = Position(-1.0f, -1.0f);
     _entities.clear();
     _uiText.clear();
+    _walls.clear();
 }
 
 const std::string& NibblerModule::getName() const
@@ -83,7 +199,7 @@ const std::string& NibblerModule::getName() const
 }
 
 void NibblerModule::update(float deltaTime)
-{
+{   
     if (_currentState != GameState::RUNNING)
         return;
 
@@ -92,15 +208,16 @@ void NibblerModule::update(float deltaTime)
 
     _moveDelay += deltaTime;
 
-    while (_moveDelay >= MOVE_INTERVAL_SECONDS && _currentState == GameState::RUNNING) {
-        _moveDelay -= MOVE_INTERVAL_SECONDS;
+    while (_moveDelay >= _moveInterval && _currentState == GameState::RUNNING) {
+        _moveDelay -= _moveInterval;
 
         Nibbler::NibblerSegment nextHead = _nibbler.getNextHead();
-        const bool hasEaten = _food.hasFood
-            && nextHead.pos.x == _food.cell.x
-            && nextHead.pos.y == _food.cell.y;
+        const bool hasEaten = _hasFood
+            && nextHead.pos.x == _food.x
+            && nextHead.pos.y == _food.y;
 
-        if (_nibbler.containsAtThisPos(nextHead.pos) && !hasEaten) {
+        if ((_nibbler.containsAtThisPos(nextHead.pos) || isWallAt(nextHead.pos))
+        && !hasEaten) {
             _nibbler.setAlive(false);
             _currentState = GameState::GAME_OVER;
             refreshUI();
@@ -108,7 +225,8 @@ void NibblerModule::update(float deltaTime)
         } else {
             if (hasEaten) {
                 _score++;
-                generateFood();
+                updateLevel();
+                spawnFood();
             }
             _nibbler.updateBody(hasEaten, nextHead);
         }
@@ -116,11 +234,6 @@ void NibblerModule::update(float deltaTime)
         refreshEntities();
         refreshUI();
     }
-}
-
-void NibblerModule::generateFood()
-{
-    _food.spawn(_nibbler, MAX_GRID_X, MAX_GRID_Y, _currentState);
 }
 
 void NibblerModule::refreshFrame()
@@ -163,15 +276,25 @@ void NibblerModule::refreshEntities()
         _entities.emplace_back(segmentEntity);
     }
 
-    if (_food.hasFood) {
+    if (_hasFood) {
         Entity foodEntity;
-        foodEntity.pos = _food.cell;
+        foodEntity.pos = _food;
         foodEntity.size = Position(1.0f, 1.0f);
         foodEntity.character = '*';
         foodEntity.color = Colors::RED;
         _entities.emplace_back(foodEntity);
     }
 
+    if (!_walls.empty()) {
+        for (const Position &i : _walls) {
+            Entity wallEntity;
+            wallEntity.pos = i;
+            wallEntity.size = Position(1.0f, 1.0f);
+            wallEntity.character = '#';
+            wallEntity.color = Colors::WHITE;
+            _entities.emplace_back(wallEntity);
+        }
+    }
     refreshFrame();
 }
 

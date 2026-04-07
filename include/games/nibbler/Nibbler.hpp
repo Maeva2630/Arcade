@@ -37,6 +37,11 @@ namespace arcade {
             void init() override;
 
             /**
+             * @brief Update the current difficulty level
+             */
+            void updateLevel();
+
+            /**
              * @brief Stop game
              * 
              * clear all entities
@@ -125,7 +130,9 @@ namespace arcade {
              * using "uniform_int_distribution" to generate a random number
              * keeping the same amount of chance for each cell
              */
-            void generateFood();
+            void spawnFood();
+
+            void spawnWallSegment();
 
             /**
              * @brief Update all game entities
@@ -150,31 +157,24 @@ namespace arcade {
              */
             void refreshFrame();
 
-            struct FoodSystem {
-                Position cell;
-                bool hasFood;
-                std::mt19937 rng;
+            bool isWallAt(const Position &p) const;
 
-                /**
-                 * @brief Construct a new Food System object
-                 */
-                FoodSystem();
-        
-                /**
-                 * @brief Spawn food on game area
-                 * 
-                 * @param nibbler 
-                 * @param width 
-                 * @param height 
-                 * @param state 
-                 */
-                void spawn(const Nibbler &nibbler, int width, int height, GameState &state);
-            };
+            bool isOccupied(const Position &p) const;
+
+            std::vector<Position> getFreeCells();
 
             int _score;
+            int _level;
+            std::size_t _nextLevelScore;
             float _moveDelay;
-            FoodSystem _food;
+            float _moveInterval;
+            Position _food;
+            bool _hasFood;
+
+            std::vector<Position> _walls;
             Nibbler _nibbler;
+
+            std::mt19937 _rng;
     };
 };
 
