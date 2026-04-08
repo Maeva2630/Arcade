@@ -9,25 +9,16 @@
     #define CORE_HPP
     #define FONTSIZE 48
     #define SPACING 2
-    #include <vector>
+    #define SAVEPATH "highscores.txt"
     #include <map>
+    #include <vector>
     #include <memory>
+    #include <unordered_map>
     #include "games/IGameModule.hpp"
     #include "graphicals/IDisplayModule.hpp"
     #include "dlloader/DLLoader.hpp"
 
 namespace arcade {
-
-    struct PlayerScore {
-        std::string player;
-        std::size_t score;
-    };
-
-    struct GameScores {
-        PlayerScore bestGameScore;
-        std::map<std::string, std::size_t> bestPlayerScores;
-    };
-
     class Core {
         public:
             /**
@@ -82,6 +73,15 @@ namespace arcade {
              */
             void loadLibs(std::string dir);
 
+            /**
+             * @brief Load scores from a file
+             */
+            void loadScores();
+
+            /**
+             * @brief Update the player's score for the current game
+             * @param newScore The new score to update
+             */
             void updateScore(std::size_t newScore);
 
             /**
@@ -121,8 +121,10 @@ namespace arcade {
             std::vector<std::string> _displayLibs;
             std::vector<std::string> _gameLibs;
 
-            std::map<std::string, GameScores> _scores;
+            // GameName --> PlayerName --> High Score
+            std::map<std::string, std::unordered_map<std::string, std::size_t>> _scores;
             std::string _playerName;
+            std::string _bestPlayerName;
 
             std::size_t _currentDisplayIdx;
             std::size_t _currentGameIdx;

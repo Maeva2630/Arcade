@@ -9,6 +9,7 @@
 #include <filesystem>
 #include <functional>
 #include <iostream>
+#include <fstream>
 #include <dlfcn.h>
 
 namespace arcade {
@@ -48,10 +49,8 @@ Core::Core(std::string libPath)
     switchDisplay(_currentDisplayIdx);
     switchGame(_currentGameIdx);
     
-    // _scores = loadScores("scores.txt");
-    _scores.emplace("snake", GameScores{{"alice", 100}, {{"bob", 80}, {"charlie", 60}}});
-    _scores.emplace("nibbler", GameScores{{"dave", 150}, {{"eve", 120}, {"frank", 90}}});
-
+    loadScores();
+    
     _previousState = GameState::MENU;
 
     _running = true;
@@ -232,35 +231,58 @@ void Core::renderHighScores()
     _menuY += SPACING;
     _display->drawText(Text("=== HIGH SCORES ===", _menuX, _menuY += SPACING, Colors::YELLOW, FONTSIZE + 5));
 
-    for (const auto& pair : _scores) {
-        const std::string& game = pair.first;
-        const GameScores& scores = pair.second;
+    for (const auto& gameScore : _scores) {
+        const std::string game = gameScore.first;
         if (game != libName(_gameLibs[_selectedGameIdx]))
             continue;
 
         _display->drawText(Text(game + ":", _menuX, _menuY += SPACING, Colors::MAGENTA, FONTSIZE));
 
-        _display->drawText(Text(
-            "Best: " + scores.bestGameScore.player + " - " +
-            std::to_string(scores.bestGameScore.score),
-            _menuX + 2,
-            _menuY += SPACING,
-            Colors::WHITE,
-            FONTSIZE
-        ));
+        std::pair<std::string, std::size_t> bestPlayerEver;
+        std::pair<std::string, std::size_t> player;
+        for (const auto& playerScores : gameScore.second)
+            if (bestPlayerEver.first.empty()|| playerScores.second > bestPlayerEver.second) {
+                bestPlayerEver = playerScores;
+            if (playerScores.first == _playerName)
+                player = playerScores;
+        }
 
-        std::size_t playerScore = 0;
-        auto it = scores.bestPlayerScores.find(_playerName);
-        if (it != scores.bestPlayerScores.end())
-            playerScore = it->second;
+        if (bestPlayerEver.second == 0) {
+            _display->drawText(Text(
+                "Best: ~~~ ",
+                _menuX + 2,
+                _menuY += SPACING,
+                Colors::WHITE,
+                FONTSIZE
+            ));
+        } else {
+            _display->drawText(Text(
+                "Best: " + bestPlayerEver.first + " - " +
+                std::to_string(bestPlayerEver.second),
+                _menuX + 2,
+                _menuY += SPACING,
+                Colors::WHITE,
+                FONTSIZE
+            ));
+        }
 
-        _display->drawText(Text(
-            "You: " + _playerName + " - " + std::to_string(playerScore),
-            _menuX + 2,
-            _menuY += SPACING,
-            Colors::CYAN,
-            FONTSIZE
-        ));
+        if (_playerName.empty()) {
+            _display->drawText(Text(
+                "You: ~~~ ",
+                _menuX + 2,
+                _menuY += SPACING,
+                Colors::CYAN,
+                FONTSIZE
+            ));
+        } else {
+            _display->drawText(Text(
+                "You: " + _playerName + " - " + std::to_string(player.second),
+                _menuX + 2,
+                _menuY += SPACING,
+                Colors::CYAN,
+                FONTSIZE
+            ));
+        }
     }
 }
 
@@ -307,7 +329,7 @@ void Core::renderMenu()
     renderPlayerName();
     renderHighScores();
     renderSelection();
-
+    
     // Helper
     _display->drawText(
         Text("Enter: launch | Escape: exit", _menuX, _menuY += SPACING, Colors::WHITE, FONTSIZE - 8));
@@ -389,21 +411,81 @@ void Core::loadLibs(std::string dir)
     }
 }
 
+void Core::loadScores()
+{
+    std::ifstream file(SAVEPATH);
+    std::string line;
+    std::string gameName = "";
+
+    if (!file.is_open()) {
+        std::cerr << "Failed to open " << SAVEPATH << " for loading scores." << std::endl;
+        return;
+    }
+
+    while (getline(file, line)) {
+        std::size_t delimiter = line.find(':');
+
+        if (line.empty() || line.find('#') != line.npos)
+            continue;
+
+        if (delimiter == line.npos) {
+            gameName = "";
+            for (std::size_t i = 0; i < _gameLibs.size(); i++) {
+                if (libName(_gameLibs[i]) == line)
+                    gameName = line;
+            }
+            continue;
+        }
+
+        if (gameName == "")
+            continue;
+
+        std::string playerName = line.substr(0, line.find(':'));
+        std::size_t highScore = atoi(line.substr(delimiter + 1, line.size()).c_str());
+
+        if (playerName.empty() || highScore == 0) {
+            std::cerr << "Invalid data:" << std::endl;
+            std::cerr << "   Player Name: " << playerName << std::endl;
+            std::cerr << "   High Score: " << highScore << std::endl;
+            continue;
+        }
+
+        _scores[gameName].emplace(playerName, highScore);
+    }
+
+    file.close();
+}
+
 void Core::updateScore(std::size_t newScore)
 {
     std::string game = libName(_gameLibs[_currentGameIdx]);
-    auto& gameData = _scores[game];
+    auto& playerScores = _scores[game];
 
-    if (gameData.bestPlayerScores[_playerName] < newScore) {
-        gameData.bestPlayerScores[_playerName] = newScore;
-    }
-
-    if (gameData.bestGameScore.score < newScore) {
-        gameData.bestGameScore = {_playerName, newScore};
-    }
+    if (playerScores[_playerName] < newScore)
+        playerScores[_playerName] = newScore;
 }
 
 void Core::saveScore()
-{}
+{
+    std::ofstream file(SAVEPATH);
+
+    if (!file.is_open()) {
+        std::cerr << "Failed to open " << SAVEPATH << " for saving scores." << std::endl;
+        return;
+    }
+
+    for (const auto& scores : _scores) {
+        file << scores.first << std::endl;
+
+        for (const auto& playerscores : scores.second) {
+            if (!playerscores.first.empty() && playerscores.second > 0)
+                file << playerscores.first << ':' << playerscores.second << std::endl;
+        }
+
+        file << std::endl;
+    }
+
+    file.close();
+}
 
 }
