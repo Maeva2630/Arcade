@@ -20,7 +20,7 @@ extern "C" arcade::IModule *entryPoint(void)
 
 namespace {
     constexpr size_t foodBaseAmount = 3;
-    constexpr float wallBlockDurationSeconds = 0.2f;
+    constexpr float wallBlockTimer = 0.2f;
     constexpr float autoTurnAfterSeconds = 0.8f;
 }
 
@@ -131,8 +131,8 @@ bool NibblerModule::isOccupied(const Position &p) const
 }
 
 NibblerModule::NibblerModule() : _score(0), _level(1), _moveDelay(0.0f),
-_moveInterval(MOVE_INTERVAL_SECONDS), _wallBlockTimer(0.0f), _stuckOnWallTime(0.0f),
-_lastBlockedFace(Nibbler::Face::EAST), _isStuckOnWall(false), _hasFood(false), _rng(std::random_device{}())
+_moveInterval(MOVE_INTERVAL_SECONDS), _wallBlockTimer(0.0f), _wallStuckTime(0.0f),
+_lastBlockedFace(Nibbler::Face::EAST), wallStuck(false), _hasFood(false), _rng(std::random_device{}())
 {
     _currentState = GameState::MENU;
     _renderContext = {MAX_GRID_X + 1, MAX_GRID_Y + 1, CoordinateSpace::GRID};
@@ -152,9 +152,9 @@ void NibblerModule::init()
     _moveDelay = 0.0f;
     _moveInterval = MOVE_INTERVAL_SECONDS;
     _wallBlockTimer = 0.0f;
-    _stuckOnWallTime = 0.0f;
+    _wallStuckTime = 0.0f;
     _lastBlockedFace = Nibbler::Face::EAST;
-    _isStuckOnWall = false;
+    wallStuck = false;
     _hasFood = false;
     loadStaticMap();
     _nibbler = Nibbler();
@@ -171,9 +171,9 @@ void NibblerModule::stop()
     _moveDelay = 0.0f;
     _moveInterval = MOVE_INTERVAL_SECONDS;
     _wallBlockTimer = 0.0f;
-    _stuckOnWallTime = 0.0f;
+    _wallStuckTime = 0.0f;
     _lastBlockedFace = Nibbler::Face::EAST;
-    _isStuckOnWall = false;
+    wallStuck = false;
     _hasFood = false;
     _food.clear();
     _entities.clear();
@@ -232,8 +232,46 @@ bool NibblerModule::tryTurnFromFace(Nibbler::Face currentFace)
             return true;
     }
 
-    _nibbler.setFace(currentFace;
+    _nibbler.setFace(currentFace);
     return false;
+}
+
+bool NibblerModule::handleWallCollision(Nibbler::Face currentFace)
+{
+    if (wallStuck && currentFace == _lastBlockedFace)
+        _wallStuckTime += wallBlockTimer;
+    else {
+        wallStuck = true;
+        _lastBlockedFace = currentFace;
+        _wallStuckTime = wallBlockTimer;
+    }
+
+    if (_wallStuckTime >= autoTurnAfterSeconds && tryTurnFromFace(currentFace)) {
+        _wallStuckTime = 0.0f;
+        wallStuck = false;
+        _wallBlockTimer = 0.0f;
+        return true;
+    }
+    _wallBlockTimer = wallBlockTimer;
+    _moveDelay = 0.0f;
+    refreshUI();
+    return false;
+}
+
+void NibblerModule::resetWallStuckState()
+{
+    wallStuck = false;
+    _wallStuckTime = 0.0f;
+}
+
+bool NibblerModule::updateWallBlockTimer(float deltaTime)
+{
+    if (_wallBlockTimer > 0.0f) {
+        _wallBlockTimer = (_wallBlockTimer - deltaTime > 0) ?
+        _wallBlockTimer - deltaTime : 0;
+        return false;
+    }
+    return true;
 }
 
 void NibblerModule::update(float deltaTime)
@@ -241,14 +279,9 @@ void NibblerModule::update(float deltaTime)
     if (_currentState != GameState::RUNNING || deltaTime <= 0.0f)
         return;
 
-    if (_wallBlockTimer > 0.0f) {
-        _wallBlockTimer = (_wallBlockTimer -= deltaTime) ?
-        _wallBlockTimer -= deltaTime : 0;
+    if (!updateWallBlockTimer(deltaTime))
         return;
-    }
-
     _moveDelay += deltaTime;
-
     while (_moveDelay >= _moveInterval && _currentState == GameState::RUNNING) {
         _moveDelay -= _moveInterval;
 
@@ -257,30 +290,11 @@ void NibblerModule::update(float deltaTime)
 
         if (isWallAt(nextHead.pos)) {
             const Nibbler::Face currentFace = _nibbler.getHead().face;
-
-            if (_isStuckOnWall && currentFace == _lastBlockedFace)
-                _stuckOnWallTime += wallBlockDurationSeconds;
-            else {
-                _isStuckOnWall = true;
-                _lastBlockedFace = currentFace;
-                _stuckOnWallTime = wallBlockDurationSeconds;
-            }
-
-            if (_stuckOnWallTime >= autoTurnAfterSeconds && tryAutoTurnFrom(currentFace)) {
-                _stuckOnWallTime = 0.0f;
-                _isStuckOnWall = false;
-                _wallBlockTimer = 0.0f;
+            if (handleWallCollision(currentFace))
                 continue;
-            }
-
-            _wallBlockTimer = wallBlockDurationSeconds;
-            _moveDelay = 0.0f;
-            refreshUI();
             break;
         }
-
-        _isStuckOnWall = false;
-        _stuckOnWallTime = 0.0f;
+        resetWallStuckState();
 
         if ((_nibbler.containsAtThisPos(nextHead.pos))
         && !hasEaten) {
@@ -296,7 +310,6 @@ void NibblerModule::update(float deltaTime)
             }
             _nibbler.updateBody(hasEaten, nextHead);
         }
-
         refreshEntities();
         refreshUI();
     }
