@@ -174,6 +174,7 @@ namespace arcade {
             int _level;
             float _moveDelay;
             float _moveInterval;
+            float _wallBlockTimer;
             std::vector<Position> _food;
             bool _hasFood;
 

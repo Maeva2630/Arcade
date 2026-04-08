@@ -9,6 +9,7 @@
 #include "games/nibbler/NibblerStaticMap.hpp"
 #include <vector>
 #include <random>
+#include <algorithm>
 
 
 extern "C" arcade::IModule *entryPoint(void)
@@ -18,6 +19,7 @@ extern "C" arcade::IModule *entryPoint(void)
 
 namespace {
     constexpr size_t foodBaseAmount = 3;
+    constexpr float wallBlockDurationSeconds = 0.2f;
 }
 
 namespace arcade {
@@ -127,7 +129,7 @@ bool NibblerModule::isOccupied(const Position &p) const
 }
 
 NibblerModule::NibblerModule() : _score(0), _level(1), _moveDelay(0.0f),
-_moveInterval(MOVE_INTERVAL_SECONDS), _hasFood(false), _rng(std::random_device{}())
+_moveInterval(MOVE_INTERVAL_SECONDS), _wallBlockTimer(0.0f), _hasFood(false), _rng(std::random_device{}())
 {
     _currentState = GameState::MENU;
     _renderContext = {MAX_GRID_X + 1, MAX_GRID_Y + 1, CoordinateSpace::GRID};
@@ -146,6 +148,7 @@ void NibblerModule::init()
     _level = 1;
     _moveDelay = 0.0f;
     _moveInterval = MOVE_INTERVAL_SECONDS;
+    _wallBlockTimer = 0.0f;
     _hasFood = false;
     loadStaticMap();
     _nibbler = Nibbler();
@@ -161,6 +164,7 @@ void NibblerModule::stop()
     _level = 1;
     _moveDelay = 0.0f;
     _moveInterval = MOVE_INTERVAL_SECONDS;
+    _wallBlockTimer = 0.0f;
     _hasFood = false;
     _food.clear();
     _entities.clear();
@@ -196,6 +200,13 @@ void NibblerModule::update(float deltaTime)
     if (deltaTime <= 0.0f)
         return;
 
+    if (_wallBlockTimer > 0.0f) {
+        _wallBlockTimer -= deltaTime;
+        if (_wallBlockTimer < 0.0f)
+            _wallBlockTimer = 0.0f;
+        return;
+    }
+
     _moveDelay += deltaTime;
 
     while (_moveDelay >= _moveInterval && _currentState == GameState::RUNNING) {
@@ -204,7 +215,14 @@ void NibblerModule::update(float deltaTime)
         Nibbler::NibblerSegment nextHead = _nibbler.getNextHead();
         const bool hasEaten = (_hasFood && isFoodAt(nextHead.pos)) ? true : false;
 
-        if ((_nibbler.containsAtThisPos(nextHead.pos) || isWallAt(nextHead.pos))
+        if (isWallAt(nextHead.pos)) {
+            _wallBlockTimer = wallBlockDurationSeconds;
+            _moveDelay = 0.0f;
+            refreshUI();
+            break;
+        }
+
+        if ((_nibbler.containsAtThisPos(nextHead.pos))
         && !hasEaten) {
             _nibbler.setAlive(false);
             _currentState = GameState::GAME_OVER;
