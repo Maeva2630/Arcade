@@ -109,7 +109,7 @@ void NibblerModule::updateLevel()
 
     _level++;
     spawnFood();
-    getNibblerStaticMap(_level);
+    loadStaticMap();
 
     if (_moveInterval > minMoveInterval)
         _moveInterval -= 0.01f;
