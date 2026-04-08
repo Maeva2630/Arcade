@@ -11,7 +11,7 @@
     #include "games/nibbler/NibblerEntity.hpp"
     #include "games/nibbler/NibblerStaticMap.hpp"
     #include <iostream>
-    #include <list>
+    #include <unordered_map>
     #include <random>
     #include <array>
 
@@ -165,6 +165,8 @@ namespace arcade {
             bool isFoodAt(const Position &p) const;
 
             bool isOccupied(const Position &p) const;
+
+            void removeFoodAt(const Position &p);
 
             std::vector<Position> getFreeCells();
 
