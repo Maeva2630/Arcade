@@ -9,12 +9,15 @@
 # define NIBBLERMODULE_HPP_
     #include "games/AGameModule.hpp"
     #include "games/nibbler/NibblerEntity.hpp"
+    #include "games/nibbler/NibblerStaticMap.hpp"
     #include <iostream>
     #include <list>
     #include <random>
     #include <array>
 
     #define MOVE_INTERVAL_SECONDS 0.12
+
+    #define FONT_SIZE 36
 
 namespace arcade {
 
@@ -132,7 +135,7 @@ namespace arcade {
              */
             void spawnFood();
 
-            void spawnWallSegment();
+            void loadStaticMap();
 
             /**
              * @brief Update all game entities
@@ -159,16 +162,17 @@ namespace arcade {
 
             bool isWallAt(const Position &p) const;
 
+            bool isFoodAt(const Position &p) const;
+
             bool isOccupied(const Position &p) const;
 
             std::vector<Position> getFreeCells();
 
             int _score;
             int _level;
-            std::size_t _nextLevelScore;
             float _moveDelay;
             float _moveInterval;
-            Position _food;
+            std::vector<Position> _food;
             bool _hasFood;
 
             std::vector<Position> _walls;
