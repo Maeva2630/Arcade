@@ -7,6 +7,7 @@
 
 #include "games/nibbler/Nibbler.hpp"
 #include "games/nibbler/NibblerStaticMap.hpp"
+#include "games/nibbler/NibblerEntities.hpp"
 #include <vector>
 #include <random>
 #include <algorithm>
@@ -244,87 +245,18 @@ void NibblerModule::update(float deltaTime)
 
 void NibblerModule::refreshFrame()
 {
-    const size_t frameSize = 4;
-    std::array<Entity, frameSize> frames;
-
-    frames[0].pos = Position(0.0f, 2.0f);
-    frames[0].size = Position(1.0f, END_ROW - 1);
-
-    frames[1].pos = Position(0.0f, 2.0f);
-    frames[1].size = Position(END_COL, 1.0f);
-
-    frames[2].pos = Position(0.0f, END_ROW);
-    frames[2].size = Position(END_COL, 1.0f);
-
-    frames[3].pos = Position(END_COL, 2.0f);
-    frames[3].size = Position(1.0f, END_ROW - 1);
-
-    for (Entity &i : frames) {
-        i.color = Colors::WHITE;
-        i.backgroundColor = Colors::BLACK;
-        i.character = '*';
-        _entities.emplace_back(i);
-    }
+    NibblerEntities::appendFrame(_entities);
 }
 
 void NibblerModule::refreshEntities()
 {
-    _entities.clear();
-
     const std::deque<Nibbler::NibblerSegment> &segments = _nibbler.getSegments();
-
-    for (size_t i = 0; i < segments.size(); ++i) {
-        Entity segmentEntity;
-        segmentEntity.pos = segments[i].pos;
-        segmentEntity.size = Position(1.0f, 1.0f);
-        segmentEntity.character = (i + 1 == segments.size()) ? '@' : 'o';
-        segmentEntity.color = (i + 1 == segments.size()) ? Colors::CYAN : Colors::MAGENTA;
-        _entities.emplace_back(segmentEntity);
-    }
-
-    if (_hasFood && !_food.empty()) {
-        for (const Position &i : _food) {
-            Entity foodEntity;
-            foodEntity.pos = i;
-            foodEntity.size = Position(1.0f, 1.0f);
-            foodEntity.character = '*';
-            foodEntity.color = Colors::RED;
-            _entities.emplace_back(foodEntity);
-        }
-    }
-
-    if (!_walls.empty()) {
-        for (const Position &i : _walls) {
-            Entity wallEntity;
-            wallEntity.pos = i;
-            wallEntity.size = Position(1.0f, 1.0f);
-            wallEntity.character = '#';
-            wallEntity.color = Colors::WHITE;
-            _entities.emplace_back(wallEntity);
-        }
-    }
-    refreshFrame();
+    NibblerEntities::buildEntities(_entities, segments, _food, _walls);
 }
 
 void NibblerModule::refreshUI()
 {
-    _uiText.clear();
-
-    std::string title = "NIBBLER";
-    _uiText.emplace_back(title, MAX_GRID_X / 2 - 3, 0.0f, Colors::YELLOW, FONT_SIZE);
-    
-    std::string scoreStr = "Score: " + std::to_string(_score);
-    _uiText.emplace_back(scoreStr, 1.0f, 1.0f, Colors::WHITE, FONT_SIZE);
-
-    if (_currentState == GameState::PAUSED) {
-        _uiText.emplace_back("PAUSED", MAX_GRID_X / 2 - 3, MAX_GRID_Y / 2, Colors::YELLOW, FONT_SIZE);
-    } else if (_currentState == GameState::GAME_OVER) {
-        _uiText.emplace_back("GAME OVER", MAX_GRID_X / 2 - 3, MAX_GRID_Y / 2, Colors::RED, FONT_SIZE);
-    } else if (_currentState == GameState::WON) {
-        _uiText.emplace_back("YOU WIN!", MAX_GRID_X / 2 - 3, MAX_GRID_Y / 2, Colors::GREEN, FONT_SIZE);
-    }
-    _uiText.emplace_back("[Arrows: move] [P: pause] [R: restart] [Esc: exit]",
-                         1.0f, MAX_GRID_Y, Colors::CYAN, FONT_SIZE);
+    NibblerEntities::buildUI(_uiText, _score, _currentState, FONT_SIZE);
 }
 
 void NibblerModule::handleInput(Key key)
