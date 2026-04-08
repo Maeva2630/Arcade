@@ -98,6 +98,13 @@ namespace arcade {
             void renderGame();
 
             /**
+             * @brief Extract the library name from its path
+             * @param path The path to the library
+             * @return The library name
+             */
+            std::string libName(const std::string& path);
+
+            /**
              * @brief Initialize all modules (display and game)
              */
             void initAll();
