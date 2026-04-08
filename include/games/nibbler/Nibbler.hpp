@@ -166,6 +166,8 @@ namespace arcade {
 
             bool isOccupied(const Position &p) const;
 
+            bool tryTurnFromFace(Nibbler::Face blockedFace);
+
             void removeFoodAt(const Position &p);
 
             std::vector<Position> getFreeCells();
@@ -175,6 +177,9 @@ namespace arcade {
             float _moveDelay;
             float _moveInterval;
             float _wallBlockTimer;
+            float _stuckOnWallTime;
+            Nibbler::Face _lastBlockedFace;
+            bool _isStuckOnWall;
             std::vector<Position> _food;
             bool _hasFood;
 
