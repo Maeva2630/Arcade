@@ -158,6 +158,7 @@ void NibblerModule::init()
     _hasFood = false;
     loadStaticMap();
     _nibbler = Nibbler();
+    _food.clear();
     spawnFood();
     refreshEntities();
     refreshUI();
