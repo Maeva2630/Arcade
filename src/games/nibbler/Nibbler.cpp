@@ -20,6 +20,7 @@ extern "C" arcade::IModule *entryPoint(void)
 
 namespace {
     constexpr size_t foodBaseAmount = 3;
+    constexpr size_t levelNb = 5;
     constexpr float wallBlockTimer = 0.2f;
     constexpr float autoTurnAfterSeconds = 0.8f;
 }
@@ -112,6 +113,11 @@ void NibblerModule::updateLevel()
         return;
 
     _level++;
+
+    if (_level >= levelNb) {
+        _currentState = GameState::WON;
+        return;
+    }
     spawnFood();
     loadStaticMap();
 
