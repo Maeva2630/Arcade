@@ -12,11 +12,16 @@ namespace arcade
 
 Nibbler::Nibbler() : _isALive(true)
 {
+    setStarter();
+}
+
+void Nibbler::setStarter()
+{
     _nibblerSegment.clear();
 
     for (int i = 0; i < START_NIBBLER_LENGTH; ++i) {
         NibblerSegment segment;
-        segment.pos = { START_HEAD_X - i, START_HEAD_Y };
+        segment.pos = { START_HEAD_X - static_cast<float>(i), START_HEAD_Y };
         segment.face = Face::NORTH;
         _nibblerSegment.emplace_back(segment);
     }
