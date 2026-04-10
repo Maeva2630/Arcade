@@ -8,7 +8,7 @@
 #ifndef NIBBLERMODULE_HPP_
 # define NIBBLERMODULE_HPP_
     #include "games/AGameModule.hpp"
-    #include "games/nibbler/NibblerEntity.hpp"
+    #include "games/nibbler/NibblerPlayer.hpp"
     #include "games/nibbler/NibblerStaticMap.hpp"
     #include <iostream>
     #include <unordered_map>

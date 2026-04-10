@@ -123,8 +123,6 @@ namespace arcade
              */
             void updateBody(bool hasEaten, NibblerSegment nextHead);
 
-            void resetStarterPosition(Position &p);
-
         private:
             bool _isALive;
             std::deque<NibblerSegment> _nibblerSegment; 

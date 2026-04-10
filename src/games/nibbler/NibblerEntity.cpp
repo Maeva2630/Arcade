@@ -5,7 +5,7 @@
 ** NibblerEntity.cpp
 */
 
-#include "games/nibbler/NibblerEntity.hpp"
+#include "games/nibbler/NibblerPlayer.hpp"
 
 namespace arcade
 {
