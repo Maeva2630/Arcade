@@ -74,7 +74,7 @@ void NibblerEntities::buildEntities(std::vector<Entity> &entities,
 void NibblerEntities::buildUI(std::vector<Text> &uiText,
     int score,
     GameState state,
-    float fontSize)
+    float fontSize, size_t level)
 {
     uiText.clear();
 
@@ -83,6 +83,9 @@ void NibblerEntities::buildUI(std::vector<Text> &uiText,
 
     std::string scoreStr = "Score: " + std::to_string(score);
     uiText.emplace_back(scoreStr, 1.0f, 1.0f, Colors::WHITE, fontSize);
+
+    std::string levelStr = "Level: " + std::to_string(level);
+    uiText.emplace_back(levelStr, MAX_GRID_X - START_COL - 5, 1.0f, Colors::RED, fontSize);
 
     if (state == GameState::PAUSED) {
         uiText.emplace_back("PAUSED", MAX_GRID_X / 2 - 3, MAX_GRID_Y / 2, Colors::YELLOW, fontSize);

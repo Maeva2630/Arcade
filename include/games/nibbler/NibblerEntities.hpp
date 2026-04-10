@@ -25,7 +25,7 @@ namespace arcade
             static void buildUI(std::vector<Text> &uiText,
                 int score,
                 GameState state,
-                float fontSize);
+                float fontSize, size_t level);
     };
 };
 
