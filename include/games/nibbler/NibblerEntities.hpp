@@ -15,7 +15,6 @@ namespace arcade
     class NibblerEntities
     {
         public:
-            static void appendFrame(std::vector<Entity> &entities);
 
             static void buildEntities(std::vector<Entity> &entities,
                 const std::deque<Nibbler::NibblerSegment> &segments,

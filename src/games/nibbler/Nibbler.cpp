@@ -335,11 +335,6 @@ void NibblerModule::update(float deltaTime)
     }
 }
 
-void NibblerModule::refreshFrame()
-{
-    NibblerEntities::appendFrame(_entities);
-}
-
 void NibblerModule::refreshEntities()
 {
     const std::deque<Nibbler::NibblerSegment> &segments = _nibbler.getSegments();

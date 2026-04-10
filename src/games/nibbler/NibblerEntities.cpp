@@ -11,30 +11,6 @@
 namespace arcade
 {
 
-void NibblerEntities::appendFrame(std::vector<Entity> &entities)
-{
-    const std::size_t frameSize = 4;
-    std::array<Entity, frameSize> frames;
-
-    frames[0].pos = Position(0.0f, 2.0f);
-    frames[0].size = Position(1.0f, END_ROW - 1);
-
-    frames[1].pos = Position(0.0f, 2.0f);
-    frames[1].size = Position(END_COL, 1.0f);
-
-    frames[2].pos = Position(0.0f, END_ROW);
-    frames[2].size = Position(END_COL, 1.0f);
-
-    frames[3].pos = Position(END_COL, 2.0f);
-    frames[3].size = Position(1.0f, END_ROW - 1);
-
-    for (Entity &i : frames) {
-        i.color = Colors::WHITE;
-        i.backgroundColor = Colors::BLACK;
-        i.character = '#';
-        entities.emplace_back(i);
-    }
-}
 
 void NibblerEntities::buildEntities(std::vector<Entity> &entities,
     const std::deque<Nibbler::NibblerSegment> &segments,
