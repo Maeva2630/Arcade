@@ -29,23 +29,9 @@ namespace arcade {
 
 void NibblerModule::spawnFood()
 {
-    std::vector<Position> freeCells;
+    std::vector<Position> freeCells = getFreeCells();
 
-    for (int y = START_ROW; y < END_ROW; ++y) {
-        for (int x = START_COL; x < END_COL; ++x) {
-            Position candidate(static_cast<float>(x), static_cast<float>(y));
-            if (!isOccupied(candidate))
-                freeCells.emplace_back(candidate);
-        }
-    }
-
-    if (freeCells.empty()) {
-        _hasFood = false;
-        _currentState = GameState::WON;
-        return;
-    }
-
-    for (size_t i = 0; i < foodBaseAmount; i++) {
+    for (size_t i = 0; i < foodBaseAmount * _level; i++) {
         std::uniform_int_distribution<size_t> dist(0, freeCells.size() - 1);
         _food.emplace_back(freeCells[dist(_rng)]);
         _hasFood = true;
@@ -120,6 +106,7 @@ void NibblerModule::updateLevel()
     }
     spawnFood();
     loadStaticMap();
+    _nibbler.setStarter();
 
     if (_moveInterval > minMoveInterval)
         _moveInterval -= 0.01f;

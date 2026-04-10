@@ -135,6 +135,9 @@ namespace arcade {
              */
             void spawnFood();
 
+            /**
+             * @brief Load nibbler map from NibblerStaticMap
+             */
             void loadStaticMap();
 
             /**
@@ -179,7 +182,7 @@ namespace arcade {
             std::vector<Position> getFreeCells();
 
             int _score;
-            int _level;
+            size_t _level;
             float _moveDelay;
             float _moveInterval;
             float _wallBlockTimer;
