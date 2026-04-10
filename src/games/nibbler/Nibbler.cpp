@@ -121,7 +121,7 @@ bool NibblerModule::updateLevel()
 
     _level++;
 
-    if (_level >= levelNb) {
+    if (_level >= levelNb + 1) {
         _currentState = GameState::WON;
         return false;
     }
@@ -348,7 +348,7 @@ void NibblerModule::refreshEntities()
 
 void NibblerModule::refreshUI()
 {
-    NibblerEntities::buildUI(_uiText, _score, _currentState, FONT_SIZE);
+    NibblerEntities::buildUI(_uiText, _score, _currentState, FONT_SIZE, _level);
 }
 
 void NibblerModule::handleInput(Key key)
