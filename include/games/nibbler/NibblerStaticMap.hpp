@@ -12,7 +12,10 @@
 
 namespace arcade {
 
-using NibblerStaticMap = std::array<std::array<int, MAX_GRID_X>, MAX_GRID_Y>;
+constexpr std::size_t NIBBLER_MAP_WIDTH = static_cast<std::size_t>(END_COL - START_COL);
+constexpr std::size_t NIBBLER_MAP_HEIGHT = static_cast<std::size_t>(END_ROW - START_ROW);
+
+using NibblerStaticMap = std::array<std::array<int, NIBBLER_MAP_WIDTH>, NIBBLER_MAP_HEIGHT>;
 
 const NibblerStaticMap &getNibblerStaticMap(std::size_t level);
 
