@@ -2,11 +2,11 @@
 ** EPITECH PROJECT, 2025
 ** G-OOP-400-MPL-4-1-arcade-6
 ** File description:
-** NibblerEntity.cpp
+** NibblerPlayer.cpp
 */
 
-#ifndef NIBBLER_ENTITY_HPP
-#define NIBBLER_ENTITY_HPP
+#ifndef NIBBLER_PLAYER_HPP
+#define NIBBLER_PLAYER_HPP
     #include <deque>
     #include "graphicals/IDisplayModule.hpp"
 

@@ -2,11 +2,11 @@
 ** EPITECH PROJECT, 2025
 ** G-OOP-400-MPL-4-1-arcade-6
 ** File description:
-** SnakeEntity.cpp
+** SnakePlayer.cpp
 */
 
-#ifndef SNAKE_ENTITY_HPP
-#define SNAKE_ENTITY_HPP
+#ifndef SNAKE_PLAYER_HPP
+#define SNAKE_PLAYER_HPP
     #include <deque>
     #include "graphicals/IDisplayModule.hpp"
     #define START_SNAKE_LENGTH 4
