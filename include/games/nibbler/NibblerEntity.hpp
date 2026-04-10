@@ -9,15 +9,18 @@
 #define NIBBLER_ENTITY_HPP
     #include <deque>
     #include "graphicals/IDisplayModule.hpp"
-    #define START_NIBBLER_LENGTH 4
-    #define START_HEAD_X 5.0f
-    #define START_HEAD_Y 5.0f
 
     #define MAX_GRID_X 50
     #define MAX_GRID_Y 20
+    
     #define START_ROW 3
-    #define END_ROW MAX_GRID_Y - 2
     #define START_COL 1
+
+    #define START_NIBBLER_LENGTH 4
+    #define START_HEAD_X ((MAX_GRID_X / 2) + START_COL + 1)
+    #define START_HEAD_Y (MAX_GRID_Y / 2)
+
+    #define END_ROW MAX_GRID_Y - 2
     #define END_COL MAX_GRID_X - 1
 
 
@@ -49,6 +52,10 @@ namespace arcade
                 Face face;
             };
 
+            /**
+             * @brief init Nibbler segments and position
+             */
+            void setStarter();
             /**
              * @brief Get the Head Reference object
              * To modify the head of the Nibbler
@@ -115,6 +122,8 @@ namespace arcade
              * @param nextHead 
              */
             void updateBody(bool hasEaten, NibblerSegment nextHead);
+
+            void resetStarterPosition(Position &p);
 
         private:
             bool _isALive;
