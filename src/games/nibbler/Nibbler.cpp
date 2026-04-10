@@ -67,7 +67,7 @@ std::vector<Position> NibblerModule::getFreeCells()
 void NibblerModule::loadStaticMap()
 {
     _walls.clear();
-    const NibblerStaticMap &map = getNibblerStaticMap(static_cast<std::size_t>(_level));
+    const NibblerStaticMap &map = NibblerLevels::getNibblerStaticMap(static_cast<std::size_t>(_level));
 
     for (std::size_t row = 0; row < END_ROW - START_ROW; ++row) {
         for (std::size_t col = 0; col < END_COL - START_COL; ++col) {

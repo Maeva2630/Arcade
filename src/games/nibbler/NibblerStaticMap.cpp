@@ -10,11 +10,7 @@
 
 namespace arcade {
 
-namespace {
-
-using MapRows = std::array<std::string_view, NIBBLER_MAP_HEIGHT>;
-
-NibblerStaticMap convertStaticMap(const MapRows &rows)
+NibblerStaticMap NibblerLevels::convertStaticMap(const MapRows &rows)
 {
     NibblerStaticMap map = {};
 
@@ -26,9 +22,7 @@ NibblerStaticMap convertStaticMap(const MapRows &rows)
     return map;
 }
 
-}
-
-const NibblerStaticMap &getNibblerStaticMap(std::size_t level)
+const NibblerStaticMap &NibblerLevels::getNibblerStaticMap(std::size_t level)
 {
     static const std::array<NibblerStaticMap, 5> maps = {{
             convertStaticMap({{
