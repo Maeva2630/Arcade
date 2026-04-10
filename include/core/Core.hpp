@@ -7,9 +7,8 @@
 
 #ifndef CORE_HPP
     #define CORE_HPP
-    #define FONTSIZE 48
-    #define SPACING 2
-    #define SAVEPATH "highscores.txt"
+    #define SAVEPATH "last_player_score.txt"
+    #define SEPARATOR ":"
     #include <map>
     #include <vector>
     #include <memory>
@@ -44,17 +43,17 @@ namespace arcade {
             void mainLoop();
 
             /**
-             * @brief Handle name input
-             * @param key The input key to handle
-             */
-            void handleNameInput(Key key);
-
-            /**
              * @brief Handle global input
              * @param key The input key to handle
              */
             void handleGlobalInput(Key key);
     
+            /**
+             * @brief Handle name input
+             * @param key The input key to handle
+             */
+            void handleNameInput(Key key);
+
             /**
              * @brief Switch the active display module
              * @param idx The index of the display module to switch to
@@ -73,28 +72,6 @@ namespace arcade {
              */
             void loadLibs(std::string dir);
 
-            /**
-             * @brief Load scores from a file
-             */
-            void loadScores();
-
-            /**
-             * @brief Update the player's score for the current game
-             * @param newScore The new score to update
-             */
-            void updateScore(std::size_t newScore);
-
-            /**
-             * @brief Save the player's score with the format "playerName:highscore" in a file
-             * @param name The player's name
-             * @param score The player's score
-             */
-            void saveScore();
-
-            void renderPlayerName();
-            void renderHighScores();
-            void renderSelection();
-            void renderMenu();
             void renderGame();
 
             /**
@@ -119,34 +96,41 @@ namespace arcade {
              */
             void applyMenuSelection();
 
+            /**
+             * @brief Formats a vector of libraries, keeping only the library name
+             * @return vector of formatted libraries name
+             */
+            std::vector<std::string> formatLib(const std::vector<std::string> unformatted);
+
+            /**
+             * @brief Save the player's score for a game
+             */
+            void saveScore();
+
             std::unique_ptr<DLLoader<IDisplayModule>> _displayLoader;
             std::unique_ptr<DLLoader<IGameModule>> _gameLoader;
+            std::unique_ptr<DLLoader<IGameModule>> _menuLoader;
 
             std::unique_ptr<IDisplayModule> _display;
             std::unique_ptr<IGameModule> _game;
+            std::unique_ptr<IGameModule> _menu;
 
             std::vector<std::string> _displayLibs;
             std::vector<std::string> _gameLibs;
 
-            // GameName --> PlayerName --> High Score
-            std::map<std::string, std::unordered_map<std::string, std::size_t>> _scores;
-            std::string _playerName;
-            std::string _bestPlayerName;
-
             std::size_t _currentDisplayIdx;
             std::size_t _currentGameIdx;
+            std::size_t _currentModule;
 
             std::size_t _selectedGameIdx;
             std::size_t _selectedDisplayIdx;
 
             GameState _previousState;
 
-            std::size_t _menuX;
-            std::size_t _menuY;
+            std::string _playerName;
 
             bool _running;
             bool _inCoreMenu;
-            bool _launchWithoutName;
     };
 }
 

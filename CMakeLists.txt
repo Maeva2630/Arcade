@@ -115,6 +115,11 @@ arcade_library(arcade_sdl2)
 
 set(GAME_COMMON_SRC src/games/AGame.cpp)
 
+# ---- Menu ----
+file(GLOB MENU_SRC src/games/menu/*.cpp)
+add_library(arcade_menu SHARED ${MENU_SRC} ${GAME_COMMON_SRC})
+arcade_library(arcade_menu)
+
 # ---- Snake ----
 file(GLOB SNAKE_SRC src/games/snake/*.cpp)
 add_library(arcade_snake SHARED ${SNAKE_SRC} ${GAME_COMMON_SRC})
