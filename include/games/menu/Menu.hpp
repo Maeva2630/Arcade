@@ -46,38 +46,33 @@ namespace arcade {
             ~MenuModule() override = default;
     
             /**
-             * @brief Init game
-             * 
-             * write ???
+             * @brief Init menu
              */
             void init() override;
 
             /**
-             * @brief Stop game
-             * 
-             * write ???
+             * @brief Stop menu
              */
             void stop() override;
 
             /**
              * @brief Get the Name object
-             * 
              * @return const std::string& 
              */
             const std::string& getName() const override;
 
             /**
-             * @brief Update game states and displays
+             * @brief Update menu states and displays
              * 
-             * write ???
+             * update menu state and refresh ui texts
              * @param deltaTime 
              */
             void update(float deltaTime) override;
 
             /**
-             * @brief Handle user inputs for the game
+             * @brief Handle user inputs for the menu
              * 
-             * write ???
+             * player name input, game and display selection
              * @param key 
              */
             void handleInput(Key key) override;
@@ -179,7 +174,6 @@ namespace arcade {
             std::size_t _selectedDisplay = 0;
 
             std::string _playerName;
-            // std::string _bestPlayerName;
             // GameName --> PlayerName --> High Score
             std::map<std::string, std::unordered_map<std::string, std::size_t>> _scores;
     
