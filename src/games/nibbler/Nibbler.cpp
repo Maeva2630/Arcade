@@ -31,6 +31,7 @@ void NibblerModule::spawnFood()
 {
     std::vector<Position> freeCells = getFreeCells();
 
+    _food.clear();
     for (size_t i = 0; i < foodBaseAmount * _level; i++) {
         std::uniform_int_distribution<size_t> dist(0, freeCells.size() - 1);
         _food.emplace_back(freeCells[dist(_rng)]);
@@ -91,25 +92,27 @@ bool NibblerModule::isFoodAt(const Position &p) const
     return false;
 }
 
-void NibblerModule::updateLevel()
+bool NibblerModule::updateLevel()
 {
     constexpr float minMoveInterval = 0.06f;
 
     if (!_food.empty())
-        return;
+        return false;
 
     _level++;
 
     if (_level >= levelNb) {
         _currentState = GameState::WON;
-        return;
+        return false;
     }
+
     spawnFood();
     loadStaticMap();
     _nibbler.setStarter();
 
     if (_moveInterval > minMoveInterval)
         _moveInterval -= 0.01f;
+    return true;
 }
 
 bool NibblerModule::isOccupied(const Position &p) const
@@ -276,6 +279,7 @@ void NibblerModule::update(float deltaTime)
     if (!updateWallBlockTimer(deltaTime))
         return;
     _moveDelay += deltaTime;
+    bool isNextLevel = false;
     while (_moveDelay >= _moveInterval && _currentState == GameState::RUNNING) {
         _moveDelay -= _moveInterval;
 
@@ -300,9 +304,10 @@ void NibblerModule::update(float deltaTime)
             if (hasEaten) {
                 _score++;
                 removeFoodAt(nextHead.pos);
-                updateLevel();
+                isNextLevel = updateLevel();
             }
-            _nibbler.updateBody(hasEaten, nextHead);
+            (!isNextLevel) ? _nibbler.updateBody(hasEaten, nextHead) :
+            _nibbler.updateBody(hasEaten, _nibbler.getHead()) ;
         }
         refreshEntities();
         refreshUI();

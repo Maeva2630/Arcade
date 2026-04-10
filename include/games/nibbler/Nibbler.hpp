@@ -42,7 +42,7 @@ namespace arcade {
             /**
              * @brief Update the current difficulty level
              */
-            void updateLevel();
+            bool updateLevel();
 
             /**
              * @brief Stop game
