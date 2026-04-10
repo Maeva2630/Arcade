@@ -79,6 +79,16 @@ void NibblerModule::loadStaticMap()
             }
         }
     }
+
+    for (int x = 0; x <= END_COL; ++x) {
+        _walls.emplace_back(static_cast<float>(x), 2.0f);
+        _walls.emplace_back(static_cast<float>(x), static_cast<float>(END_ROW));
+    }
+
+    for (int y = 2; y <= END_ROW; ++y) {
+        _walls.emplace_back(0.0f, static_cast<float>(y));
+        _walls.emplace_back(static_cast<float>(END_COL), static_cast<float>(y));
+    }
 }
 
 bool isAtPosition(const Position &a, const Position &b)

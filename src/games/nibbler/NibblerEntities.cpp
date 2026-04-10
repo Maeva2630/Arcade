@@ -31,7 +31,7 @@ void NibblerEntities::appendFrame(std::vector<Entity> &entities)
     for (Entity &i : frames) {
         i.color = Colors::WHITE;
         i.backgroundColor = Colors::BLACK;
-        i.character = '*';
+        i.character = '#';
         entities.emplace_back(i);
     }
 }
@@ -69,8 +69,6 @@ void NibblerEntities::buildEntities(std::vector<Entity> &entities,
         wallEntity.color = Colors::WHITE;
         entities.emplace_back(wallEntity);
     }
-
-    appendFrame(entities);
 }
 
 void NibblerEntities::buildUI(std::vector<Text> &uiText,

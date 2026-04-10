@@ -53,13 +53,13 @@ Nibbler::NibblerSegment Nibbler::getNextHead() const
     int y = static_cast<int>(head.pos.y);
 
     if (head.face == Face::EAST)
-        x = (x >= MAX_GRID_X - 2) ? 1 : x + 1;
+        x += 1;
     else if (head.face == Face::WEST)
-        x = (x <= 1) ? MAX_GRID_X - 2 : x - 1;
+        x -= 1;
     else if (head.face == Face::NORTH)
-        y = (y <= 3) ? MAX_GRID_Y - 3 : y - 1;
+        y -= 1;
     else if (head.face == Face::SOUTH)
-        y = (y >= MAX_GRID_Y - 3) ? 3 : y + 1;
+        y += 1;
 
     return NibblerSegment{ Position{ static_cast<float>(x), static_cast<float>(y) }, head.face };
 }
