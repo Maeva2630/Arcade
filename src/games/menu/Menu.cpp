@@ -68,12 +68,27 @@ void MenuModule::renderPlayerName(std::size_t& x, std::size_t& y)
     y += SPACING + SPACING / 2;
     _uiText.emplace_back("Player:", x, y, Colors::CYAN, FONTSIZE);
 
+    std::string content = _playerName;
+    if (_nameFocused) {
+        content = _playerName + "_";
+    } else if (_playerName.empty()) {
+        content = NAMEUSAGE;
+    }
+
+    Color color = Colors::WHITE;
+    if (_nameFocused) {
+        color = Colors::CYAN;
+    } else if (_launchWithoutName) {
+        color = Colors::RED;
+    }
+
     y += SPACING;
+    _namePosition = {(float) (x + INDENTATION), (float) y};
     _uiText.emplace_back(
-        _playerName.empty() ? "Enter your name..." : _playerName,
+        content,
         x + INDENTATION,
         y,
-        _launchWithoutName ? Colors::RED : Colors::WHITE,
+        color,
         FONTSIZE - 15
     );
 }

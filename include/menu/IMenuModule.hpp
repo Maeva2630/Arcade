@@ -58,6 +58,13 @@ class IMenuModule : public IModule {
         virtual const std::string& getName() const = 0;
 
         /**
+         * @brief Handle user mouses inputs for the menu
+         * player name input
+         * @param event
+         */
+        virtual void handleMouseInput(const MouseEvent& event) = 0;
+
+        /**
          * @brief Handle keyboard input
          *
          * Process a key event to update menu state accordingly.
