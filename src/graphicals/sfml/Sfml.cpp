@@ -31,6 +31,8 @@ void Sfml::init()
     if (!_window)
         throw ModuleException("Sfml window creation has failed");
 
+    _window->setKeyRepeatEnabled(false);
+
      _deltaTime = 0.0f;
     _isOpen = true;
 }
@@ -121,6 +123,17 @@ const std::string& Sfml::getName() const
 {
     static std::string name = "SFML";
     return name;
+}
+
+Key Sfml::getKey()
+{
+    _window->pollEvent(_event);
+
+    if (_event.type != sf::Event::KeyPressed)
+        return Key::UNKNOWN;
+
+    auto it = _keyMap.find(_event.key.code);
+    return (it != _keyMap.end()) ? it->second : Key::UNKNOWN;
 }
 
 bool Sfml::isOpen() const
