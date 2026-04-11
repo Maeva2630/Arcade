@@ -100,6 +100,18 @@ void Sfml::setFullscreen(bool fullscreen)
     _winSize = Position(static_cast<float>(newSize.x), static_cast<float>(newSize.y));
 }
 
+void Sfml::setWindowSize(int w, int h)
+{
+    if (_window) {
+        _winSize = {static_cast<float>(w), static_cast<float>(h)};
+        _window->create(sf::VideoMode(w, h), "SFML Window");
+        if (!_window)
+            throw ModuleException("Window creation has failed");
+    }
+    else
+        throw ModuleException("Can not resize window");
+}
+
 void Sfml::setRenderContext(const RenderContext &context)
 {
     _renderContext = context;
