@@ -2,14 +2,14 @@
 ** EPITECH PROJECT, 2025
 ** G-OOP-400-MPL-4-1-arcade-6
 ** File description:
-** NibblerEntity.cpp
+** SnakePlayer.cpp
 */
 
-#ifndef NIBBLER_ENTITY_HPP
-#define NIBBLER_ENTITY_HPP
+#ifndef SNAKE_PLAYER_HPP
+#define SNAKE_PLAYER_HPP
     #include <deque>
     #include "graphicals/IDisplayModule.hpp"
-    #define START_NIBBLER_LENGTH 4
+    #define START_SNAKE_LENGTH 4
     #define START_HEAD_X 5.0f
     #define START_HEAD_Y 5.0f
     #define MAX_GRID_X 50
@@ -17,15 +17,15 @@
 
 namespace arcade
 {
-    class Nibbler
+    class Snake
     {
         public:
-            Nibbler();
-            ~Nibbler() = default;
+            Snake();
+            ~Snake() = default;
 
             /**
              * @brief
-             * Enum to know which direction the Nibbler is facing
+             * Enum to know which direction the snake is facing
              */
             enum Face {
                 EAST = 0,
@@ -36,36 +36,36 @@ namespace arcade
 
             /**
              * @brief 
-             * NibblerSegment struct regrouping one position and a face
+             * SnakeSegment struct regrouping one position and a face
              */
-            struct NibblerSegment {
+            struct SnakeSegment {
                 Position pos;
                 Face face;
             };
 
             /**
              * @brief Get the Head Reference object
-             * To modify the head of the Nibbler
-             * @return NibblerSegment& 
+             * To modify the head of the snake
+             * @return SnakeSegment& 
              */
-            NibblerSegment &getHeadReference();
+            SnakeSegment &getHeadReference();
             /**
              * @brief Get the Head object
-             * To obtain information on the head of the Nibbler
-             * @return NibblerSegment 
+             * To obtain information on the head of the snake
+             * @return SnakeSegment 
              */
-            NibblerSegment getHead() const;
+            SnakeSegment getHead() const;
 
             /**
              * @brief Get the Next Head object
              * Get the next head information depending on user input and current head informations
-             * @return NibblerSegment 
+             * @return SnakeSegment 
              */
-            NibblerSegment getNextHead() const;
+            SnakeSegment getNextHead() const;
 
             /**
              * @brief Set the Face object
-             * Set the new facing of the Nibbler depending on current face
+             * Set the new facing of the snake depending on current face
              * @param f 
              */
             void setFace(Face f);
@@ -80,14 +80,14 @@ namespace arcade
             /**
              * @brief Get the Segments object reference
              * 
-             * @return const std::deque<NibblerSegment>& 
+             * @return const std::deque<SnakeSegment>& 
              */
-            const std::deque<NibblerSegment> &getSegments() const;
+            const std::deque<SnakeSegment> &getSegments() const;
 
             /**
              * @brief 
              * 
-             * See if one segment of the Nibbler covers this position
+             * See if one segment of the snake covers this position
              * @param pos 
              * @return true 
              * @return false 
@@ -96,7 +96,7 @@ namespace arcade
 
             /**
              * @brief Set the Alive object
-             * Change the isAlive boolean of the Nibbler
+             * Change the isAlive boolean of the snake
              * @param isAlive 
              */
             void setAlive(bool isAlive);
@@ -104,15 +104,15 @@ namespace arcade
             /**
              * @brief 
              * 
-             * update the body size of the Nibbler
+             * update the body size of the snake
              * @param hasEaten 
              * @param nextHead 
              */
-            void updateBody(bool hasEaten, NibblerSegment nextHead);
+            void updateBody(bool hasEaten, SnakeSegment nextHead);
 
         private:
             bool _isALive;
-            std::deque<NibblerSegment> _nibblerSegment; 
+            std::deque<SnakeSegment> _snakeSegment; 
     };
 };
 

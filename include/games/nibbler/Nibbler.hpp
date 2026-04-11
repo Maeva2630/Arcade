@@ -8,13 +8,16 @@
 #ifndef NIBBLERMODULE_HPP_
 # define NIBBLERMODULE_HPP_
     #include "games/AGameModule.hpp"
-    #include "games/nibbler/NibblerEntity.hpp"
+    #include "games/nibbler/NibblerPlayer.hpp"
+    #include "games/nibbler/NibblerStaticMap.hpp"
     #include <iostream>
-    #include <list>
+    #include <unordered_map>
     #include <random>
     #include <array>
 
     #define MOVE_INTERVAL_SECONDS 0.12
+
+    #define FONT_SIZE 36
 
 namespace arcade {
 
@@ -35,6 +38,11 @@ namespace arcade {
              * init _Nibbler entity, generate food and place them on screen
              */
             void init() override;
+
+            /**
+             * @brief Update the current difficulty level
+             */
+            bool updateLevel();
 
             /**
              * @brief Stop game
@@ -125,7 +133,12 @@ namespace arcade {
              * using "uniform_int_distribution" to generate a random number
              * keeping the same amount of chance for each cell
              */
-            void generateFood();
+            void spawnFood();
+
+            /**
+             * @brief Load nibbler map from NibblerStaticMap
+             */
+            void loadStaticMap();
 
             /**
              * @brief Update all game entities
@@ -144,37 +157,102 @@ namespace arcade {
             void refreshUI() override;
 
             /**
-             * @brief Emplace frame entity
+             * @brief Check if a wall is at the position
              * 
-             * place a frame to delimit the game area
+             * @param p 
+             * @return true 
+             * @return false 
              */
-            void refreshFrame();
+            bool isWallAt(const Position &p) const;
 
-            struct FoodSystem {
-                Position cell;
-                bool hasFood;
-                std::mt19937 rng;
+            /**
+             * @brief Check if food is at the position
+             * 
+             * @param p 
+             * @return true 
+             * @return false 
+             */
+            bool isFoodAt(const Position &p) const;
 
-                /**
-                 * @brief Construct a new Food System object
-                 */
-                FoodSystem();
-        
-                /**
-                 * @brief Spawn food on game area
-                 * 
-                 * @param nibbler 
-                 * @param width 
-                 * @param height 
-                 * @param state 
-                 */
-                void spawn(const Nibbler &nibbler, int width, int height, GameState &state);
-            };
+            /**
+             * @brief Check if the position is occupied
+             * 
+             * check if any entity can occup this position (nibbler, walls, foods)
+             * @param p 
+             * @return true 
+             * @return false 
+             */
+            bool isOccupied(const Position &p) const;
+
+            /**
+             * @brief try to turn if nibbler is blocked
+             * 
+             * if nibbler is stuck because of a collision,
+             * it will identify the right direction to take depending the context
+             * @param blockedFace 
+             * @return true 
+             * @return false 
+             */
+            bool tryTurnFromFace(Nibbler::Face blockedFace);
+
+            /**
+             * @brief Handle wall collision
+             * 
+             * handle the delay from when the nibbler is blocked and when it
+             * automatically turn
+             * @param currentFace 
+             * @return true 
+             * @return false 
+             */
+            bool handleWallCollision(Nibbler::Face currentFace);
+
+            /**
+             * @brief Update the timer for blocked Nibbler
+             * 
+             * @param deltaTime 
+             * @return true 
+             * @return false 
+             */
+            bool updateWallBlockTimer(float deltaTime);
+
+            /**
+             * @brief Reset all stuck wall params
+             */
+            void resetWallStuckState();
+
+            /**
+             * @brief Remove available food
+             * 
+             * remove food from the _food vector
+             * @param p 
+             */
+            void removeFoodAt(const Position &p);
+
+            /**
+             * @brief Get the Free Cells from the grid
+             * 
+             * @return std::vector<Position> 
+             */
+            std::vector<Position> getFreeCells();
 
             int _score;
+            size_t _level;
+
             float _moveDelay;
-            FoodSystem _food;
+            float _moveInterval;
+    
+            float _wallBlockTimer;
+            float _wallStuckTime;
+            Nibbler::Face _lastBlockedFace;
+            bool wallStuck;
+    
+            std::vector<Position> _food;
+            bool _hasFood;
+
+            std::vector<Position> _walls;
             Nibbler _nibbler;
+
+            std::mt19937 _rng;
     };
 };
 

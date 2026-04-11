@@ -5,7 +5,7 @@
 ** SnakeEntity.cpp
 */
 
-#include "games/snake/SnakeEntity.hpp"
+#include "games/snake/SnakePlayer.hpp"
 
 namespace arcade
 {

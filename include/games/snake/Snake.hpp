@@ -8,7 +8,7 @@
 #ifndef SNAKEMODULE_HPP_
 # define SNAKEMODULE_HPP_
     #include "games/AGameModule.hpp"
-    #include "games/snake/SnakeEntity.hpp"
+    #include "games/snake/SnakePlayer.hpp"
     #include <iostream>
     #include <list>
     #include <random>

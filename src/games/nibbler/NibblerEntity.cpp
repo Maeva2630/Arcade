@@ -5,18 +5,23 @@
 ** NibblerEntity.cpp
 */
 
-#include "games/nibbler/NibblerEntity.hpp"
+#include "games/nibbler/NibblerPlayer.hpp"
 
 namespace arcade
 {
 
 Nibbler::Nibbler() : _isALive(true)
 {
+    setStarter();
+}
+
+void Nibbler::setStarter()
+{
     _nibblerSegment.clear();
 
     for (int i = 0; i < START_NIBBLER_LENGTH; ++i) {
         NibblerSegment segment;
-        segment.pos = { START_HEAD_X - i, START_HEAD_Y };
+        segment.pos = { START_HEAD_X - static_cast<float>(i), START_HEAD_Y };
         segment.face = Face::NORTH;
         _nibblerSegment.emplace_back(segment);
     }
@@ -48,13 +53,13 @@ Nibbler::NibblerSegment Nibbler::getNextHead() const
     int y = static_cast<int>(head.pos.y);
 
     if (head.face == Face::EAST)
-        x = (x >= MAX_GRID_X - 2) ? 1 : x + 1;
+        x += 1;
     else if (head.face == Face::WEST)
-        x = (x <= 1) ? MAX_GRID_X - 2 : x - 1;
+        x -= 1;
     else if (head.face == Face::NORTH)
-        y = (y <= 3) ? MAX_GRID_Y - 3 : y - 1;
+        y -= 1;
     else if (head.face == Face::SOUTH)
-        y = (y >= MAX_GRID_Y - 3) ? 3 : y + 1;
+        y += 1;
 
     return NibblerSegment{ Position{ static_cast<float>(x), static_cast<float>(y) }, head.face };
 }
