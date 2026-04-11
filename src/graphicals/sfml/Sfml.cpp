@@ -136,6 +136,37 @@ Key Sfml::getKey()
     return (it != _keyMap.end()) ? it->second : Key::UNKNOWN;
 }
 
+MouseEvent Sfml::getMouseEvent()
+{
+    _window->pollEvent(_event);
+    if (_event.type != sf::Event::MouseButtonPressed)
+        return MouseEvent();
+
+    Key button = Key::UNKNOWN;
+    if (_event.mouseButton.button == sf::Mouse::Button::Left)
+        button = Key::MOUSE_LEFT;
+    else if (_event.mouseButton.button == sf::Mouse::Button::Middle)
+        button = Key::MOUSE_MIDDLE;
+    else if (_event.mouseButton.button == sf::Mouse::Button::Right)
+        button = Key::MOUSE_RIGHT;
+
+    float gridX = _event.mouseButton.x;
+    float gridY = _event.mouseButton.y;
+
+    if (_renderContext.space == CoordinateSpace::GRID) {
+        float cellW = static_cast<float>(_winSize.x)  / static_cast<float>(_renderContext.width);
+        float cellH = static_cast<float>(_winSize.y) / static_cast<float>(_renderContext.height);
+
+        gridX = static_cast<float>(_event.mouseButton.x) / cellW;
+        gridY = static_cast<float>(_event.mouseButton.y) / cellH;
+    }
+
+    return MouseEvent(
+        Position(static_cast<float>(gridX), static_cast<float>(gridY)),
+        button
+    );
+}
+
 bool Sfml::isOpen() const
 {
     return _isOpen;
