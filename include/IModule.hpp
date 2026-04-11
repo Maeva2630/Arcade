@@ -26,7 +26,8 @@ namespace arcade {
  */
 enum class ModuleType {
     DISPLAY,    ///< Graphics/display library module
-    GAME        ///< Game logic module
+    GAME,       ///< Game logic module
+    MENU        ///< Menu logic module
 };
 
 /**
@@ -72,7 +73,7 @@ public:
 
     /**
      * @brief Get the type of this module
-     * @return Whether this is a DISPLAY or GAME module
+     * @return Whether this is a DISPLAY, GAME or MENU module
      */
     virtual ModuleType getType() const = 0;
 

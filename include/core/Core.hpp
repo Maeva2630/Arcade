@@ -7,11 +7,15 @@
 
 #ifndef CORE_HPP
     #define CORE_HPP
-    #include <vector>
+    #define SAVEPATH "last_player_score.txt"
+    #define SEPARATOR ":"
     #include <map>
+    #include <vector>
     #include <memory>
+    #include <unordered_map>
     #include "games/IGameModule.hpp"
     #include "graphicals/IDisplayModule.hpp"
+    #include "menu/IMenuModule.hpp"
     #include "dlloader/DLLoader.hpp"
 
 namespace arcade {
@@ -62,16 +66,15 @@ namespace arcade {
              * @param dir The directory to load libraries from
              */
             void loadLibs(std::string dir);
-            
-            /**
-             * @brief Save the player's score
-             * @param name The player's name
-             * @param score The player's score
-             */
-            void saveScore(std::string name, int score);
 
-            void renderMenu();
             void renderGame();
+
+            /**
+             * @brief Extract the library name from its path
+             * @param path The path to the library
+             * @return The library name
+             */
+            std::string libName(const std::string& path);
 
             /**
              * @brief Initialize all modules (display and game)
@@ -88,17 +91,22 @@ namespace arcade {
              */
             void applyMenuSelection();
 
+            /**
+             * @brief Formats a vector of libraries, keeping only the library name
+             * @return vector of formatted libraries name
+             */
+            std::vector<std::string> formatLib(const std::vector<std::string> unformatted);
+
             std::unique_ptr<DLLoader<IDisplayModule>> _displayLoader;
             std::unique_ptr<DLLoader<IGameModule>> _gameLoader;
+            std::unique_ptr<DLLoader<IMenuModule>> _menuLoader;
 
             std::unique_ptr<IDisplayModule> _display;
             std::unique_ptr<IGameModule> _game;
+            std::unique_ptr<IMenuModule> _menu;
 
             std::vector<std::string> _displayLibs;
             std::vector<std::string> _gameLibs;
-
-            std::map<std::string, int> _scores;
-            std::string _playerName;
 
             std::size_t _currentDisplayIdx;
             std::size_t _currentGameIdx;
@@ -106,7 +114,7 @@ namespace arcade {
             std::size_t _selectedGameIdx;
             std::size_t _selectedDisplayIdx;
 
-            GameState _previousState;
+            std::string _playerName;
 
             bool _running;
             bool _inCoreMenu;
