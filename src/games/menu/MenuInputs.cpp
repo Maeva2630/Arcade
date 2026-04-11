@@ -5,23 +5,13 @@
 ** MenuInputs.cpp
 */
 
-#include "games/menu/Menu.hpp"
+#include "menu/Menu.hpp"
 
 namespace arcade {
 
 void MenuModule::handleInput(Key key)
 {
     handleNameInput(key);
-
-    if (_games.empty() || _displays.empty()) {
-        if (key == Key::ENTER) {
-            if (!_playerName.empty())
-                _currentState = GameState::RUNNING;
-            else
-                _launchWithoutName = true;
-        }
-        return;
-    }
 
     std::map<Key, std::function<void()>> actions = {
         {Key::PREV_GAME, [this] {
@@ -47,6 +37,8 @@ void MenuModule::handleInput(Key key)
     auto it = actions.find(key);
     if (it != actions.end())
         it->second();
+    
+    refreshUI();
 }
 
 void MenuModule::handleNameInput(Key key)

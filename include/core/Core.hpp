@@ -15,6 +15,7 @@
     #include <unordered_map>
     #include "games/IGameModule.hpp"
     #include "graphicals/IDisplayModule.hpp"
+    #include "menu/IMenuModule.hpp"
     #include "dlloader/DLLoader.hpp"
 
 namespace arcade {
@@ -48,12 +49,6 @@ namespace arcade {
              */
             void handleGlobalInput(Key key);
     
-            /**
-             * @brief Handle name input
-             * @param key The input key to handle
-             */
-            void handleNameInput(Key key);
-
             /**
              * @brief Switch the active display module
              * @param idx The index of the display module to switch to
@@ -102,30 +97,22 @@ namespace arcade {
              */
             std::vector<std::string> formatLib(const std::vector<std::string> unformatted);
 
-            /**
-             * @brief Save the player's score for a game
-             */
-            void saveScore();
-
             std::unique_ptr<DLLoader<IDisplayModule>> _displayLoader;
             std::unique_ptr<DLLoader<IGameModule>> _gameLoader;
-            std::unique_ptr<DLLoader<IGameModule>> _menuLoader;
+            std::unique_ptr<DLLoader<IMenuModule>> _menuLoader;
 
             std::unique_ptr<IDisplayModule> _display;
             std::unique_ptr<IGameModule> _game;
-            std::unique_ptr<IGameModule> _menu;
+            std::unique_ptr<IMenuModule> _menu;
 
             std::vector<std::string> _displayLibs;
             std::vector<std::string> _gameLibs;
 
             std::size_t _currentDisplayIdx;
             std::size_t _currentGameIdx;
-            std::size_t _currentModule;
 
             std::size_t _selectedGameIdx;
             std::size_t _selectedDisplayIdx;
-
-            GameState _previousState;
 
             std::string _playerName;
 

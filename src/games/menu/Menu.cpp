@@ -5,7 +5,7 @@
 ** Menu.cpp
 */
 
-#include "games/menu/Menu.hpp"
+#include "menu/Menu.hpp"
 
 extern "C" arcade::IModule *entryPoint(void)
 {
@@ -14,9 +14,10 @@ extern "C" arcade::IModule *entryPoint(void)
 
 namespace arcade {
 
-MenuModule::MenuModule() : _launchWithoutName(false)
+MenuModule::MenuModule()
 {
     _currentState = GameState::MENU;
+    _launchWithoutName = false;
 }
 
 void MenuModule::init()
@@ -31,7 +32,6 @@ void MenuModule::init()
 void MenuModule::stop()
 {
     saveScore();
-    _entities.clear();
     _uiText.clear();
 }
 
@@ -40,35 +40,9 @@ const std::string& MenuModule::getName() const
     return _name;
 }
 
-const std::vector<Entity>& MenuModule::getEntities() const
-{
-    return _entities;
-}
-
-const std::vector<Text>& MenuModule::getUIText() const
-{
-    return _uiText;
-}
-
-GameState MenuModule::getState() const
-{
-    return _currentState;
-}
-
-int MenuModule::getScore() const
-{
-    return 0;
-}
-
 RenderContext MenuModule::getRenderContext() const
 {
     return RenderContext{80, 60, CoordinateSpace::GRID};
-}
-
-void MenuModule::update(float deltaTime)
-{
-    addScore();
-    refreshUI();
 }
 
 void MenuModule::refreshUI()
@@ -124,16 +98,6 @@ void MenuModule::renderDisplaysLib(std::size_t& x, std::size_t& y)
         std::string prefix = (i == _selectedDisplay) ? "> " : "  ";
         _uiText.emplace_back(prefix + _displays[i], x + 2, y += SPACING, Colors::WHITE, FONTSIZE - 10);
     }
-}
-
-void MenuModule::setAvailableGames(const std::vector<std::string>& games)
-{
-    _games = games;
-}
-
-void MenuModule::setAvailableDisplays(const std::vector<std::string>& displays)
-{
-    _displays = displays;
 }
 
 }

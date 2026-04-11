@@ -42,6 +42,9 @@ Core::Core(std::string libPath)
     if (!found)
         throw CoreException(libPath + " is not a graphics library.");
 
+    _menu->setAvailableDisplays(formatLib(_displayLibs));
+    _menu->setAvailableGames(formatLib(_gameLibs));
+
     _running = true;
     _inCoreMenu = true;
 
@@ -51,8 +54,6 @@ Core::Core(std::string libPath)
     
     switchDisplay(_currentDisplayIdx);
     switchGame(_currentGameIdx);
-
-    _previousState = GameState::MENU;
 }
 
 void Core::initAll()
@@ -82,25 +83,25 @@ void Core::mainLoop()
 {
     while (_running && _display->isOpen()) {
         Key key = _display->getKey();
-        if (key != Key::UNKNOWN)
+        if (key != Key::UNKNOWN) {
+            _menu->addScore(libName(_gameLibs[_currentGameIdx]), _game->getScore());
             handleGlobalInput(key);
+        }
 
         _display->clear();
 
-        IGameModule* current = _inCoreMenu ? _menu.get() : _game.get();
-        if (current) {
-            current->update(_display->getDeltaTime());
+        if (_inCoreMenu) {
+            for (const auto& text : _menu->getUIText())
+                _display->drawText(text);
+        } else {
+            _game->update(_display->getDeltaTime());
 
-            for (const auto& entity : current->getEntities())
+            for (const auto& entity : _game->getEntities())
                 _display->drawEntity(entity);
 
-            for (const auto& text : current->getUIText())
+            for (const auto& text : _game->getUIText())
                 _display->drawText(text);
         }
-
-        if (_previousState != GameState::MENU && current->getState() != _previousState)
-            saveScore();
-        _previousState = current->getState();
 
         _display->display();
     }
@@ -116,25 +117,6 @@ void Core::renderGame()
 
     for (Text text : _game->getUIText())
         _display->drawText(text);
-}
-
-void Core::saveScore()
-{
-    if (_playerName.empty() || _game->getScore() <= 0)
-        return;
-
-    std::ofstream file(SAVEPATH);
-
-    if (!file.is_open()) {
-        std::cerr << "Failed to open " << SAVEPATH << " for saving scores." << std::endl;
-        return;
-    }
-
-    file << libName(_gameLibs[_currentGameIdx]) << SEPARATOR;
-    file << _playerName << SEPARATOR;
-    file << _game->getScore() << std::endl;
-
-    file.close();
 }
 
 }

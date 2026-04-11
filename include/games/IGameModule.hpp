@@ -150,18 +150,6 @@ public:
      * @return Logical render context
      */
     virtual RenderContext getRenderContext() const = 0;
-
-    /**
-     * @brief Provide the list of available game libraries (optional)
-     * Only used by the menu module. Other games can ignore this.
-     */
-    virtual void setAvailableGames(const std::vector<std::string>&) {}
-    
-    /**
-     * @brief Provide the list of available display libraries (optional)
-     * Only used by the menu module. Other games can ignore this.
-     */
-    virtual void setAvailableDisplays(const std::vector<std::string>&) {}
 };
 
 } // namespace arcade

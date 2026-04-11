@@ -24,14 +24,13 @@ void Core::loadLibs(std::string dir)
                     _displayLibs.push_back(lib_path);
                     break;
                 case ModuleType::GAME:
-                    if (libName(lib_path) == "menu") {
-                        _menuLoader = std::make_unique<DLLoader<IGameModule>>(lib_path);
-                        _menu = std::unique_ptr<IGameModule>(
-                            dynamic_cast<IGameModule*>(_menuLoader->getInstance("entryPoint"))
+                    _gameLibs.push_back(lib_path);
+                    break;
+                case ModuleType::MENU:
+                    _menuLoader = std::make_unique<DLLoader<IMenuModule>>(lib_path);
+                    _menu = std::unique_ptr<IMenuModule>(
+                            dynamic_cast<IMenuModule*>(_menuLoader->getInstance("entryPoint"))
                         );
-                    } else {
-                        _gameLibs.push_back(lib_path);
-                    }
                     break;
                 default:
                     throw CoreException(lib_path + " invalid module type.");
@@ -41,9 +40,6 @@ void Core::loadLibs(std::string dir)
             std::cerr << "Skipping " << lib_path << ": " << e.what() << std::endl;
         }
     }
-
-    _menu->setAvailableGames(formatLib(_gameLibs));
-    _menu->setAvailableDisplays(formatLib(_displayLibs));
 }
 
 void Core::switchDisplay(std::size_t idx)
@@ -66,10 +62,12 @@ void Core::switchDisplay(std::size_t idx)
 
     _display->init();
 
-    IGameModule* current = _inCoreMenu ? _menu.get() : _game.get();
-    if (current) {
-        _display->setRenderContext(current->getRenderContext());
-        _display->setTitle(current->getName());
+    if (_inCoreMenu) {
+        _display->setRenderContext(_menu->getRenderContext());
+        _display->setTitle(_menu->getName());
+    } else {
+        _display->setRenderContext(_game->getRenderContext());
+        _display->setTitle(_game->getName());
     }
 
     _currentDisplayIdx = idx;
@@ -95,10 +93,12 @@ void Core::switchGame(std::size_t idx)
 
     _game->init();
 
-    IGameModule* current = _inCoreMenu ? _menu.get() : _game.get();
-    if (current) {
-        _display->setRenderContext(current->getRenderContext());
-        _display->setTitle(current->getName());
+    if (_inCoreMenu) {
+        _display->setRenderContext(_menu->getRenderContext());
+        _display->setTitle(_menu->getName());
+    } else {
+        _display->setRenderContext(_game->getRenderContext());
+        _display->setTitle(_game->getName());
     }
 
     _currentGameIdx = idx;

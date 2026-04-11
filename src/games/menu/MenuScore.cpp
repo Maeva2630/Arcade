@@ -5,7 +5,7 @@
 ** MenuScore.cpp
 */
 
-#include "games/menu/Menu.hpp"
+#include "menu/Menu.hpp"
 
 namespace arcade {
 
@@ -129,51 +129,10 @@ void MenuModule::saveScore()
     file.close();
 }
 
-void MenuModule::addScore()
+void MenuModule::addScore(std::string gameName, std::size_t score)
 {
-    if (!std::filesystem::exists(LASTSCOREPATH))
-        return;
-
-    std::ifstream file(LASTSCOREPATH);
-
-    if (!file.is_open()) {
-        std::cerr << "Failed to open " << LASTSCOREPATH << " for loading scores." << std::endl;
-        return;
-    }
-
-    std::string line;
-    while (getline(file, line)) {
-        std::size_t fst = line.find_first_of(SEPARATOR);
-        std::size_t snd = line.find_last_of(SEPARATOR);
-
-        if (line.empty() || line.find_first_of(COMMENTS) == 0 ||
-            fst == snd || fst == line.npos) {
-            std::cerr << "Invalid line format: " << line << std::endl;
-            continue;
-        }
-
-        std::string gameName = line.substr(0, fst);
-        std::string playerName = line.substr(fst + 1, snd - fst - 1);
-
-        std::size_t highScore = 0;
-        try {
-            highScore = std::stoul(line.substr(snd + 1));
-        } catch (...) {
-            continue;
-        }
-
-        if (playerName.empty() || highScore == 0) {
-            std::cerr << "Invalid data:" << std::endl;
-            std::cerr << "   Player Name: " << playerName << std::endl;
-            std::cerr << "   High Score: " << highScore << std::endl;
-            continue;
-        }
-
-        _scores[gameName][playerName] = std::max(_scores[gameName][playerName], highScore);
-    }
-
-    file.close();
-    std::filesystem::remove(LASTSCOREPATH);
+    if (!gameName.empty() && !_playerName.empty() && score > 0)
+        _scores[gameName][_playerName] = std::max(_scores[gameName][_playerName], score);
 }
 
 }
