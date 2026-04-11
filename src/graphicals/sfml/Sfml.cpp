@@ -91,6 +91,12 @@ void Sfml::setTitle(const std::string& title)
     _window->setTitle(title);
 }
 
-
+void Sfml::setFullscreen(bool fullscreen)
+{
+    if (!_window)
+        throw ModuleException("Window is not initialized");
+    _window->create(sf::VideoMode::getDesktopMode(), "SFML Window", sf::Style::Fullscreen);
+    
+}
 
 }
