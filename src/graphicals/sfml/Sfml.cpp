@@ -28,6 +28,8 @@ Sfml::~Sfml()
 void Sfml::init()
 {
     _window->create(sf::VideoMode(WIN_SIZE_X, WIN_SIZE_Y), "SFML Window");
+    if (!_window)
+        throw ModuleException("Sfml window creation has failed");
 
      _deltaTime = 0.0f;
     _isOpen = true;
@@ -74,5 +76,21 @@ std::map<int, Key> initKeyFromEnum()
 
     return newMap;
 }
+
+void Sfml::stop()
+{
+    if (_window)
+        _window->close();
+    
+}
+
+void Sfml::setTitle(const std::string& title)
+{
+    if (!_window)
+        throw ModuleException("Window is not initialized");
+    _window->setTitle(title);
+}
+
+
 
 }
