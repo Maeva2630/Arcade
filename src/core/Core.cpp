@@ -83,9 +83,13 @@ void Core::mainLoop()
 {
     while (_running && _display->isOpen()) {
         Key key = _display->getKey();
+        MouseEvent mouse = _display->getMouseEvent();
+
         if (key != Key::UNKNOWN) {
             _menu->addScore(libName(_gameLibs[_currentGameIdx]), _game->getScore());
             handleGlobalInput(key);
+        } else if (mouse.button != Key::UNKNOWN && _inCoreMenu) {
+            _menu->handleMouseInput(mouse);
         }
 
         _display->clear();

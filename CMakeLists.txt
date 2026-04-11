@@ -110,15 +110,18 @@ endif()
 arcade_library(arcade_sdl2)
 
 # =========================
+# MENU
+# =========================
+
+file(GLOB MENU_SRC src/menu/*.cpp)
+add_library(arcade_menu SHARED ${MENU_SRC})
+arcade_library(arcade_menu)
+
+# =========================
 # GAMES LIBS
 # =========================
 
 set(GAME_COMMON_SRC src/games/AGame.cpp)
-
-# ---- Menu ----
-file(GLOB MENU_SRC src/games/menu/*.cpp)
-add_library(arcade_menu SHARED ${MENU_SRC} ${GAME_COMMON_SRC})
-arcade_library(arcade_menu)
 
 # ---- Snake ----
 file(GLOB SNAKE_SRC src/games/snake/*.cpp)

@@ -9,9 +9,40 @@
 
 namespace arcade {
 
+void MenuModule::handleMouseInput(const MouseEvent& event)
+{
+    if (event.button != Key::MOUSE_LEFT)
+        return;
+
+    std::string name = (_playerName.empty()) ? NAMEUSAGE : _playerName;
+
+    if (event.pos.y >= _namePosition.y - 1 && event.pos.y <= _namePosition.y + 3) {
+        _nameFocused = true;
+    } else {
+        _nameFocused = false;
+    }
+
+    refreshUI();
+}
+
+void MenuModule::applyEnter()
+{
+    _currentState = GameState::MENU;
+
+    if (_nameFocused) {
+        _nameFocused = false;
+        return;
+    } else if (_playerName.empty()) {
+        _launchWithoutName = true;
+        return;
+    }
+    _currentState = GameState::RUNNING;
+}
+
 void MenuModule::handleInput(Key key)
 {
-    handleNameInput(key);
+    if (_nameFocused)
+        handleNameInput(key);
 
     std::map<Key, std::function<void()>> actions = {
         {Key::PREV_GAME, [this] {
@@ -26,12 +57,7 @@ void MenuModule::handleInput(Key key)
         {Key::NEXT_GRAPHICS, [this] {
             _selectedDisplay = (_selectedDisplay + 1) % _displays.size();
         }},
-        {Key::ENTER, [this] {
-            if (!_playerName.empty())
-                _currentState = GameState::RUNNING;
-            else
-                _launchWithoutName = true;
-        }}
+        {Key::ENTER, [this] { applyEnter(); }}
     };
 
     auto it = actions.find(key);

@@ -295,8 +295,19 @@ MouseEvent Sdl2::getMouseEvent()
     else if (_event.button.button == SDL_BUTTON_RIGHT)
         button = Key::MOUSE_RIGHT;
 
+    float gridX = _event.button.x;
+    float gridY = _event.button.y;
+
+    if (_renderContext.space == CoordinateSpace::GRID) {
+        float cellW = static_cast<float>(_winSize.x)  / static_cast<float>(_renderContext.width);
+        float cellH = static_cast<float>(_winSize.y) / static_cast<float>(_renderContext.height);
+
+        gridX = static_cast<float>(_event.button.x) / cellW;
+        gridY = static_cast<float>(_event.button.y) / cellH;
+    }
+
     return MouseEvent(
-        Position(static_cast<float>(_event.button.x), static_cast<float>(_event.button.y)),
+        Position(static_cast<float>(gridX), static_cast<float>(gridY)),
         button
     );
 }

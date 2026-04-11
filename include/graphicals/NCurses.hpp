@@ -212,6 +212,8 @@ namespace arcade
          * @return float 
          */
         float updateDeltaTime();
+
+        int _keyCode = ERR;
     };
 }
 
