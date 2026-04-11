@@ -92,7 +92,7 @@ target_include_directories(arcade_ncurses PRIVATE ${CURSES_INCLUDE_DIR})
 target_link_libraries(arcade_ncurses ${CURSES_LIBRARIES})
 arcade_library(arcade_ncurses)
 
-# # ---- SFML ----
+# ---- SFML ----
 # file(GLOB SFML_SRC src/graphicals/sfml/*.cpp)
 # add_library(arcade_sfml SHARED ${SFML_SRC})
 # target_link_libraries(arcade_sfml sfml-graphics sfml-window sfml-system)
@@ -110,15 +110,18 @@ endif()
 arcade_library(arcade_sdl2)
 
 # =========================
+# MENU
+# =========================
+
+file(GLOB MENU_SRC src/menu/*.cpp)
+add_library(arcade_menu SHARED ${MENU_SRC})
+arcade_library(arcade_menu)
+
+# =========================
 # GAMES LIBS
 # =========================
 
 set(GAME_COMMON_SRC src/games/AGame.cpp)
-
-# ---- Menu ----
-file(GLOB MENU_SRC src/games/menu/*.cpp)
-add_library(arcade_menu SHARED ${MENU_SRC} ${GAME_COMMON_SRC})
-arcade_library(arcade_menu)
 
 # ---- Snake ----
 file(GLOB SNAKE_SRC src/games/snake/*.cpp)

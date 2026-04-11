@@ -10,25 +10,17 @@
 
 extern "C" arcade::IModule *entryPoint(void)
 {
-    // std::cout << "NCurses entryPoint\n";
     return new arcade::NCurses();
 }
 
 namespace arcade {
 
-NCurses::NCurses() : _window(nullptr), _nbPairs(0), _lastTime(std::chrono::steady_clock::now())
-{
-    // std::cout << "NCurses constructor\n";
-}
+NCurses::NCurses() : _window(nullptr), _nbPairs(0), _lastTime(std::chrono::steady_clock::now()) {}
 
-NCurses::~NCurses()
-{
-    // std::cout << "NCurses destructor\n";
-}
+NCurses::~NCurses() {}
 
 void NCurses::init()
 {
-    // std::cout << "NCurses init\n";
     _window = initscr();
     if (!_window)
         throw ModuleException("NCurses window init failed");
@@ -36,9 +28,10 @@ void NCurses::init()
     cbreak();
     noecho();
     keypad(_window, TRUE);
+    mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, nullptr);
     wtimeout(_window, 50);
     curs_set(0);
-    
+
     if (start_color() == ERR)
         throw ModuleException("NCurses start color failed");
     
@@ -85,17 +78,6 @@ void NCurses::display()
         throw ModuleException("The window can not be refreshed");
 }
 
-Key NCurses::getKey()
-{
-    int ch = getch();
-    if (ch == ERR) {
-        return Key::UNKNOWN;
-    }
-
-    auto key = this->_keyMap.find(ch);
-    return (key != this->_keyMap.end()) ? key->second : Key::UNKNOWN;
-}
-
 std::map<int, Key> NCurses::initKeyFromEnum()
 {
     std::map<int, Key> newMap = {
@@ -133,10 +115,20 @@ std::map<int, Key> NCurses::initKeyFromEnum()
     return newMap;
 }
 
+Key NCurses::getKey()
+{
+    _keyCode = getch();
+    if (_keyCode == ERR || _keyCode == KEY_MOUSE) {
+        return Key::UNKNOWN;
+    }
+
+    auto key = this->_keyMap.find(_keyCode);
+    return (key != this->_keyMap.end()) ? key->second : Key::UNKNOWN;
+}
+
 MouseEvent NCurses::getMouseEvent()
 {
-    int ch = getch();
-    if (ch != KEY_MOUSE) {
+    if (_keyCode != KEY_MOUSE) {
         return MouseEvent();
     }
 
@@ -146,18 +138,20 @@ MouseEvent NCurses::getMouseEvent()
     }
 
     Key button = Key::UNKNOWN;
-    if (event.bstate & BUTTON1_PRESSED)
+    if (event.bstate & (BUTTON1_PRESSED | BUTTON1_CLICKED))
         button = Key::MOUSE_LEFT;
-    else if (event.bstate & BUTTON2_PRESSED)
+    else if (event.bstate & (BUTTON2_PRESSED | BUTTON2_CLICKED))
         button = Key::MOUSE_MIDDLE;
-    else if (event.bstate & BUTTON3_PRESSED)
+    else if (event.bstate & (BUTTON3_PRESSED | BUTTON3_CLICKED))
         button = Key::MOUSE_RIGHT;
-    return MouseEvent(Position(static_cast<float>(event.x), static_cast<float>(event.y)), button);
+
+    float gridX = static_cast<float>(event.x) * (static_cast<float>(_renderContext.width)  / _winSize.x);
+    float gridY = static_cast<float>(event.y) * (static_cast<float>(_renderContext.height) / _winSize.y);
+
+    return MouseEvent(Position(static_cast<float>(gridX), static_cast<float>(gridY)), button);
 }
 
-void NCurses::setTitle(const std::string&)
-{
-}
+void NCurses::setTitle(const std::string&) {}
 
 void NCurses::setWindowSize(int w, int h)
 {

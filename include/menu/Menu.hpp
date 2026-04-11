@@ -11,9 +11,13 @@
     #define FONTSIZE 50
     #define SPACING 4
     #define INDENTATION 10
+
     #define SEPARATOR ":"
     #define COMMENTS "#"
     #define SAVEPATH "highscores.txt"
+
+    #define TOP_N 3
+    #define NAMEUSAGE "Click here to enter your name..."
 
     #include "menu/AMenuModule.hpp"
     #include <filesystem>
@@ -50,9 +54,16 @@ class MenuModule : public AMenuModule
         void stop() override;
 
         /**
+         * @brief Handle user mouses inputs for the menu
+         * player name input
+         * @param event
+         */
+        void handleMouseInput(const MouseEvent& event);
+
+        /**
          * @brief Handle user inputs for the menu
          * player name input, game and display selection
-         * @param key 
+         * @param key
          */
         void handleInput(Key key) override;
 
@@ -78,6 +89,7 @@ class MenuModule : public AMenuModule
         void renderDisplaysLib(std::size_t& x, std::size_t& y);
 
         // Inputs
+        void applyEnter();
         void handleNameInput(Key key);
 
         // Scores
@@ -85,6 +97,9 @@ class MenuModule : public AMenuModule
         void saveScore();
 
         const std::string _name = "Welcome to my Arcade";
+        
+        bool _nameFocused = false;
+        Position _namePosition;
 };
 
 } // namespace arcade
