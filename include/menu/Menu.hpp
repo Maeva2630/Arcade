@@ -11,9 +11,12 @@
     #define FONTSIZE 50
     #define SPACING 4
     #define INDENTATION 10
+
     #define SEPARATOR ":"
     #define COMMENTS "#"
     #define SAVEPATH "highscores.txt"
+
+    #define TOP_N 3
     #define NAMEUSAGE "Click here to enter your name..."
 
     #include "menu/AMenuModule.hpp"

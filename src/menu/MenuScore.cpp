@@ -13,44 +13,54 @@ void MenuModule::renderHighScores(std::size_t& x, std::size_t& y)
 {
     _uiText.emplace_back("=== HIGH SCORES ===", x, y += SPACING, Colors::YELLOW, FONTSIZE + 10);
 
-    if (_games.empty() || _selectedGame > _games.size())
+    if (_games.empty() || _selectedGame >= _games.size())
         return;
 
     _uiText.emplace_back(_games[_selectedGame] + ":", x, y += SPACING, Colors::MAGENTA, FONTSIZE);
 
-    std::string bestPlayer;
-    std::size_t bestScore = 0;
-    std::size_t myScore = 0;
-
     auto it = _scores.find(_games[_selectedGame]);
     if (it == _scores.end()) {
-        _uiText.emplace_back("Best: ~~~", x + 2, y += SPACING, Colors::WHITE, FONTSIZE - 10);
-        _uiText.emplace_back("You: ~~~", x + 2, y += SPACING, Colors::CYAN, FONTSIZE - 10);
+        _uiText.emplace_back("No scores yet", x + 2, y += SPACING, Colors::WHITE, FONTSIZE - 10);
         return;
     }
 
-    for (const auto& playerScores : it->second) {
-        if (bestPlayer.empty() || playerScores.second > bestScore) {
-            bestPlayer = playerScores.first;
-            bestScore = playerScores.second;
+    std::vector<std::pair<std::string, std::size_t>> sorted(it->second.begin(), it->second.end());
+    std::sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) {
+        return a.second > b.second;
+    });
+
+    y += SPACING;
+    std::size_t offsetX = x + 2;
+    std::size_t rank = 1;
+    bool playerInTop = false;
+
+    for (const auto& [playerName, score] : sorted) {
+        if (rank > TOP_N)
+            break;
+
+        bool isPlayer = (playerName == _playerName);
+        if (isPlayer)
+            playerInTop = true;
+
+        std::string entry = std::to_string(rank) + ". " + playerName + " - " + std::to_string(score);
+
+        if (rank > 1) {
+            _uiText.emplace_back("|", offsetX, y, Colors::WHITE, FONTSIZE - 10);
+            offsetX += 2;
         }
-        if (playerScores.first == _playerName)
-            myScore = playerScores.second;
+
+        _uiText.emplace_back(entry, offsetX, y, isPlayer ? Colors::CYAN : Colors::WHITE, FONTSIZE - 10);
+        offsetX += entry.size() + 2;
+        rank++;
     }
 
-    _uiText.emplace_back(
-        "Best: " + (bestPlayer.empty() ? "~~~" : bestPlayer + " - " + std::to_string(bestScore)),
-        x + 2, y += SPACING,
-        Colors::WHITE,
-        FONTSIZE - 10
-    );
-
-    _uiText.emplace_back(
-        "You: " + (_playerName.empty() ? "~~~" : _playerName + " - " + std::to_string(myScore)),
-        x + 2, y += SPACING,
-        Colors::CYAN,
-        FONTSIZE - 10
-    );
+    if (!playerInTop && !_playerName.empty()) {
+        auto playerIt = it->second.find(_playerName);
+        if (playerIt != it->second.end()) {
+            std::string line = "You: " + _playerName + " - " + std::to_string(playerIt->second);
+            _uiText.emplace_back(line, x + 2, y += SPACING, Colors::CYAN, FONTSIZE - 10);
+        }
+    }
 }
 
 void MenuModule::loadScores()
@@ -131,8 +141,10 @@ void MenuModule::saveScore()
 
 void MenuModule::addScore(std::string gameName, std::size_t score)
 {
-    if (!gameName.empty() && !_playerName.empty() && score > 0)
+    if (!_nameFocused && !gameName.empty() && !_playerName.empty() && score > 0)
         _scores[gameName][_playerName] = std::max(_scores[gameName][_playerName], score);
+
+    refreshUI();
 }
 
 }

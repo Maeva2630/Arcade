@@ -40,23 +40,21 @@ void Core::handleGlobalInput(Key key)
             _display->setRenderContext(_menu->getRenderContext());
             _display->setTitle(_menu->getName());
         }},
-        {Key::ENTER,         [this] { _menu->handleInput(Key::ENTER); applyMenuSelection(); }},
+        {Key::ENTER,         [this] { applyMenuSelection(); }},
         {Key::EXIT,          [this] { _running = false; }},
         {Key::ESCAPE,        [this] { _running = false; }},
     };
- 
-    const auto it = coreInputs.find(key);
-    if (it != coreInputs.end()) {
-        it->second();
-        if (_inCoreMenu)
-            _menu->handleInput(key);
-        return;
-    }
  
     if (_inCoreMenu) {
         _menu->handleInput(key);
     } else if (_game) {
         _game->handleInput(key);
+    }
+
+    const auto it = coreInputs.find(key);
+    if (it != coreInputs.end()) {
+        it->second();
+        return;
     }
 }
 
