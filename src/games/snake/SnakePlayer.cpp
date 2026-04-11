@@ -16,7 +16,7 @@ Snake::Snake() : _isALive(true)
 
     for (int i = 0; i < START_SNAKE_LENGTH; ++i) {
         SnakeSegment segment;
-        segment.pos = { START_HEAD_X - i, START_HEAD_Y };
+        segment.pos = { START_HEAD_X - static_cast<float>(i), START_HEAD_Y };
         segment.face = Face::NORTH;
         _snakeSegment.emplace_back(segment);
     }
