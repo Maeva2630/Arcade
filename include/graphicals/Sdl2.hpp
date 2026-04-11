@@ -5,7 +5,7 @@
 ** Sdl2.hpp
 */
 
-#ifndef SL2_HPP
+#ifndef SDL2_HPP
 #define SDL2_HPP
 #include "ADisplayModule.hpp"
 #include <SDL2/SDL.h>
