@@ -167,6 +167,13 @@ MouseEvent Sfml::getMouseEvent()
     );
 }
 
+void Sfml::display()
+{
+    updateDeltaTime();
+    _window->display();
+}
+
+
 bool Sfml::isOpen() const
 {
     return _isOpen;
