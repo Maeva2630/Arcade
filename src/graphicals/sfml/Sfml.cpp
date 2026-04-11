@@ -106,5 +106,24 @@ const std::string& Sfml::getName() const
     return name;
 }
 
+bool Sfml::isOpen() const
+{
+    return _isOpen;
+}
+
+float Sfml::getDeltaTime() const
+{
+    return _deltaTime;
+}
+
+int Sfml::getWidth() const
+{
+    return convertToCell(_winSize.x);
+}
+
+int Sfml::getHeight() const
+{
+    return convertToCell(_winSize.y);
+}
 
 }
