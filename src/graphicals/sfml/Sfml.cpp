@@ -100,4 +100,11 @@ void Sfml::setFullscreen(bool fullscreen)
     _winSize = Position(static_cast<float>(newSize.x), static_cast<float>(newSize.y));
 }
 
+const std::string& Sfml::getName() const
+{
+    static std::string name = "SFML";
+    return name;
+}
+
+
 }
