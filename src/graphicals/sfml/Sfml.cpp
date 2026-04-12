@@ -15,7 +15,7 @@ extern "C" arcade::IModule *entryPoint(void)
 namespace arcade
 {
 
-Sfml::Sfml() : _window(nullptr), _font(nullptr), _lastTicks(0)
+Sfml::Sfml() : _window(nullptr), _font(nullptr)
 {
 }
 
@@ -45,6 +45,7 @@ void Sfml::init()
         throw ModuleException("Failed to load default font");
     }
 
+    _keyMap = initKeyFromEnum();
      _deltaTime = 0.0f;
     _isOpen = true;
 }
@@ -353,13 +354,7 @@ void Sfml::updateDeltaTime()
 {
     sf::Time time = _clock.restart();
 
-    float now = time.asSeconds();
-
-    if (_lastTicks == 0)
-        _deltaTime = 0.0f;
-    else
-        _deltaTime = static_cast<float>(now - _lastTicks);
-    _lastTicks = now;
+    float _deltaTime = time.asSeconds();
 }
 
 void Sfml::clear()
