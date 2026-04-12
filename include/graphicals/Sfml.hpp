@@ -207,6 +207,9 @@ namespace arcade
             sf::Font *_font;
             std::map<std::pair<std::string, int>, sf::Font *> _fontMap;
             
+            sf::Clock _clock;
+            float _lastTicks;
+
             void updateDeltaTime();
     };
 };

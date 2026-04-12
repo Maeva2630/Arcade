@@ -15,7 +15,7 @@ extern "C" arcade::IModule *entryPoint(void)
 namespace arcade
 {
 
-Sfml::Sfml() : _window(nullptr)
+Sfml::Sfml() : _window(nullptr), _lastTicks(0), _font(nullptr)
 {
 }
 
@@ -232,6 +232,19 @@ void Sfml::drawText(const Text& t)
 
     text.setFillColor(color);
     _window->draw(text);
+}
+
+void Sfml::updateDeltaTime()
+{
+    sf::Time time = _clock.restart();
+
+    float now = time.asSeconds();
+
+    if (_lastTicks == 0)
+        _deltaTime = 0.0f;
+    else
+        _deltaTime = static_cast<float>(now - _lastTicks);
+    _lastTicks = now;
 }
 
 void Sfml::display()
