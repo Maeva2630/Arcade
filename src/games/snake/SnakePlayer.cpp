@@ -126,13 +126,13 @@ std::string Snake::getSnakeTailSprite() const
     Snake::SnakeSegment tail = getTail();
 
     if (tail.face == Snake::Face::EAST)
-        return "assets/snake/green/tail_right.png";
-    else if (tail.face == Snake::Face::WEST)
         return "assets/snake/green/tail_left.png";
+    else if (tail.face == Snake::Face::WEST)
+        return "assets/snake/green/tail_right.png";
     else if (tail.face == Snake::Face::NORTH)
-        return "assets/snake/green/tail_up.png";
-    else if (tail.face == Snake::Face::SOUTH)
         return "assets/snake/green/tail_down.png";
+    else if (tail.face == Snake::Face::SOUTH)
+        return "assets/snake/green/tail_up.png";
 
     return "assets/snake/green/tail_right.png";
 }
@@ -152,8 +152,8 @@ std::string Snake::getSnakeBodySprite(const Snake::SnakeSegment &prev,
 
     const bool isLeft = (prevNorm.x == -1 || nextNorm.x == -1);
     const bool isRight = (prevNorm.x == 1 || nextNorm.x == 1);
-    const bool isUp = (prevNorm.y == -1 || nextNorm.y == -1);
-    const bool isDown = (prevNorm.y == 1 || nextNorm.y == 1);
+    const bool isDown = (prevNorm.y == -1 || nextNorm.y == -1);
+    const bool isUp = (prevNorm.y == 1 || nextNorm.y == 1);
 
     if (isLeft && isUp)
         return "assets/snake/green/body_turn_left_up.png";
