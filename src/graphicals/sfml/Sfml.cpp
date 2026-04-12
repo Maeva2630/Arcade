@@ -167,12 +167,20 @@ MouseEvent Sfml::getMouseEvent()
     );
 }
 
+Sfml::SpriteDefinition Sfml::getSprite(const Entity &e) const
+{
+    auto sprite = _spriteMap.find(e.spritePath);
+    if (sprite != _spriteMap.end())
+        return sprite->second;
+
+    return SpriteDefinition(e.spritePath);
+}
+
 void Sfml::display()
 {
     updateDeltaTime();
     _window->display();
 }
-
 
 bool Sfml::isOpen() const
 {
