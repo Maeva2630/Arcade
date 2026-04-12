@@ -215,6 +215,25 @@ Sfml::SpriteDefinition Sfml::getSprite(const Entity &e) const
     return SpriteDefinition(e.spritePath);
 }
 
+void Sfml::drawText(const Text& t)
+{
+    Position textPos = convertGridPosition(t.pos, static_cast<size_t>(_winSize.y), static_cast<size_t>(_winSize.x));
+    sf::Color color = colorConvert(t.color);
+    sf::Font *currentFont = getFontForText(t);
+    if (!currentFont)
+        return;
+
+    sf::Text text;
+    text.setFont(*currentFont);
+    text.setString(t.content.c_str());
+
+    int fontSize = (t.fontSize > 0) ? t.fontSize : 36;
+    text.setCharacterSize(fontSize);
+
+    text.setFillColor(color);
+    _window->draw(text);
+}
+
 void Sfml::display()
 {
     updateDeltaTime();
