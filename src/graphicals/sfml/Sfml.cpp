@@ -206,13 +206,15 @@ sf::Color Sfml::colorConvert(Color color)
     return newColor;
 }
 
-Sfml::SpriteDefinition Sfml::getSprite(const Entity &e) const
+Sfml::SpriteDefinition Sfml::getSprite(const Entity &e)
 {
     auto sprite = _spriteMap.find(e.spritePath);
     if (sprite != _spriteMap.end())
         return sprite->second;
 
-    return SpriteDefinition(e.spritePath);
+    SpriteDefinition nwSprite = SpriteDefinition(e.spritePath);
+    _spriteMap[e.spritePath] = nwSprite;
+    return nwSprite;
 }
 
 void Sfml::drawText(const Text& t)
@@ -245,6 +247,45 @@ void Sfml::drawRectangle(const Rect &rect, const Color &color)
 
     nwRect.setFillColor(sfmlColor);
     _window->draw(nwRect);
+}
+
+void Sfml::drawEntity(const Entity& e)
+{
+    Position entityPos = convertGridPosition(e.pos, _winSize.y, _winSize.x);
+    Position entitySize = convertGridSize(e.size, _winSize.y, _winSize.x);
+
+    const int startX = convertToCell(entityPos.x);
+    const int startY = convertToCell(entityPos.y);
+    const int width = (entitySize.x <= 0.0f) ? 1 : convertToCell(entitySize.x);
+    const int height = (entitySize.y <= 0.0f) ? 1 : convertToCell(entitySize.y);
+
+    Rect entityRect = {convertToCell(e.pos.x), convertToCell(e.pos.y),
+             convertToCell(e.size.x), convertToCell(e.size.y)};
+    if (e.spritePath.empty()) {
+        drawRectangle(entityRect, e.color);
+        return;
+    }
+
+    SpriteDefinition sprite = getSprite(e);
+    sf::Texture *texture = getTexture(sprite.texturePath);
+    if (!texture) {
+        drawRectangle(entityRect, e.color);
+        return;
+    }
+
+    SDL_Rect dstRect = {startX, startY, width, height};
+
+    if (sprite.useSrcRect) {
+        SDL_Rect srcRect = {
+            sprite.srcRect.x,
+            sprite.srcRect.y,
+            sprite.srcRect.width,
+            sprite.srcRect.height
+        };
+        SDL_RenderCopy(_renderer, texture, &srcRect, &dstRect);
+    } else {
+        SDL_RenderCopy(_renderer, texture, nullptr, &dstRect);
+    }
 }
 
 void Sfml::updateDeltaTime()

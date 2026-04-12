@@ -143,13 +143,15 @@ SDL_Texture *Sdl2::getTexture(const std::string &texturePath)
     return texture;
 }
 
-Sdl2::SpriteDefinition Sdl2::getSprite(const Entity &e) const
+Sdl2::SpriteDefinition Sdl2::getSprite(const Entity &e)
 {
     auto sprite = _spriteMap.find(e.spritePath);
     if (sprite != _spriteMap.end())
         return sprite->second;
 
-    return SpriteDefinition(e.spritePath);
+    SpriteDefinition nwSprite = SpriteDefinition(e.spritePath);
+    _spriteMap[e.spritePath] = nwSprite;
+    return nwSprite;
 }
 
 void Sdl2::stop()

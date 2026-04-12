@@ -188,7 +188,9 @@ namespace arcade
              * @param e 
              * @return SpriteDefinition 
              */
-            SpriteDefinition getSprite(const Entity &e) const;
+            SpriteDefinition getSprite(const Entity &e);
+
+            sf::Texture *getTexture(const std::string &texturePath);
 
             sf::Font *getFontForText(const Text &t);
 
@@ -200,6 +202,7 @@ namespace arcade
             std::map<int, Key> initKeyFromEnum();
 
             std::map<std::string, SpriteDefinition> _spriteMap;
+             std::map<std::string, sf::Texture *> _textureMap;
 
             sf::RenderWindow *_window;
             sf::Event _event;

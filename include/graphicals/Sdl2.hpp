@@ -214,7 +214,7 @@ namespace arcade
              * @param e 
              * @return SpriteDefinition 
              */
-            SpriteDefinition getSprite(const Entity &e) const;
+            SpriteDefinition getSprite(const Entity &e);
 
             /**
              * @brief Init keyMap from SDL inputs
