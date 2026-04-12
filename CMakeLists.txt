@@ -63,6 +63,25 @@ if (NOT SDL2_ttf_FOUND AND NOT TARGET SDL2_ttf::SDL2_ttf)
     pkg_check_modules(SDL2_TTF REQUIRED SDL2_ttf)
 endif()
 
+# ---- SDL2_image ----
+find_package(SDL2_image QUIET)
+
+if (NOT SDL2_image_FOUND AND NOT TARGET SDL2_image::SDL2_image)
+    message(STATUS "SDL2_image not found: Fetching...")
+    FetchContent_Declare(
+        SDL2_image
+        GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+        GIT_TAG release-2.8.2
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(SDL2_image)
+
+    if (NOT TARGET SDL2_image::SDL2_image)
+        find_package(PkgConfig REQUIRED)
+        pkg_check_modules(SDL2_IMAGE REQUIRED SDL2_image)
+    endif()
+endif()
+
 # =========================
 # CORE
 # =========================
@@ -101,11 +120,11 @@ arcade_library(arcade_sfml)
 # ---- SDL2 ----
 file(GLOB SDL2_SRC src/graphicals/sdl2/*.cpp)
 add_library(arcade_sdl2 SHARED ${SDL2_SRC} ${DISPLAY_COMMON_SRC})
-if (TARGET SDL2_ttf::SDL2_ttf)
-    target_link_libraries(arcade_sdl2 SDL2::SDL2 SDL2_ttf::SDL2_ttf)
+if (TARGET SDL2_ttf::SDL2_ttf AND TARGET SDL2_image::SDL2_image)
+    target_link_libraries(arcade_sdl2 SDL2::SDL2 SDL2_ttf::SDL2_ttf SDL2_image::SDL2_image)
 else()
-    target_include_directories(arcade_sdl2 PRIVATE ${SDL2_TTF_INCLUDE_DIRS})
-    target_link_libraries(arcade_sdl2 SDL2::SDL2 ${SDL2_TTF_LIBRARIES})
+    target_include_directories(arcade_sdl2 PRIVATE ${SDL2_TTF_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
+    target_link_libraries(arcade_sdl2 SDL2::SDL2 ${SDL2_TTF_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
 endif()
 arcade_library(arcade_sdl2)
 

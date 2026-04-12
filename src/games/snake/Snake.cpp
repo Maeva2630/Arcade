@@ -151,6 +151,20 @@ void SnakeModule::refreshFrame()
     }
 }
 
+std::string SnakeModule::getSnakeSegmentEntity(size_t i)
+{
+    const std::deque<arcade::Snake::SnakeSegment> segments =
+        _snake.getSegments();
+
+    if (i == 0)
+        return _snake.getSnakeTailSprite();
+    else if(i == _snake.getSegmentSize() - 1)
+        return _snake.getSnakeHeadSprite();
+
+    return _snake.getSnakeBodySprite(segments[i - 1], segments[i], segments[i + 1]);
+}
+
+
 void SnakeModule::refreshEntities()
 {
     _entities.clear();
@@ -163,6 +177,7 @@ void SnakeModule::refreshEntities()
         segmentEntity.size = Position(1.0f, 1.0f);
         segmentEntity.character = (i + 1 == segments.size()) ? '@' : 'o';
         segmentEntity.color = (i + 1 == segments.size()) ? Colors::YELLOW : Colors::GREEN;
+        segmentEntity.spritePath = getSnakeSegmentEntity(i);
         _entities.emplace_back(segmentEntity);
     }
 
@@ -172,6 +187,7 @@ void SnakeModule::refreshEntities()
         foodEntity.size = Position(1.0f, 1.0f);
         foodEntity.character = '*';
         foodEntity.color = Colors::RED;
+        foodEntity.spritePath = "assets/snake/food/food.png";
         _entities.emplace_back(foodEntity);
     }
 
