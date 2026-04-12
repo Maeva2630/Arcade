@@ -12,74 +12,107 @@
     #include <string>
     #include <iostream>
     #include "IModule.hpp"
+    #include "IDLLoader.hpp"
 
-template <typename T>
-class DLLoader {
-    private:
-        std::string _libPath;
-        void *_handle;
+namespace arcade {
 
-    public:
+    template <typename T>
+    class DLLoader : public virtual IDLLoader<T>
+    {
+        private:
+            std::string _libPath;
+            void *_handle;
 
-        /**
-         * @brief Exception class for DLLoader
-         * 
-         * if there is an error during the loading/ deletion of the library
-         * it will be thrown with a DLLoaderException
-         * 
-         */
-        class DLLoaderException : public std::exception
-        {
-            private:
-                std::string _message;
-            public:
-                DLLoaderException(std::string message, std::string context) : _message(message) {};
-                const char* what() const noexcept override { return this->_message.c_str(); };
-        };
+        public:
+            /**
+             * @brief Exception class for DLLoader
+             * 
+             * if there is an error during the loading/ deletion of the library
+             * it will be thrown with a DLLoaderException
+             */
+            class DLLoaderException : public std::exception
+            {
+                private:
+                    std::string _message;
+                public:
+                    DLLoaderException(std::string message) : _message(message) {};
+                    const char* what() const noexcept override { return this->_message.c_str(); };
+            };
 
-        /**
-         * @brief Construct a new DLLoader<T> object
-         * 
-         * try to load a .so library and stock it in the _handle variable
-         * 
-         * @param libraryPath 
-         */
-        DLLoader<T>(const std::string &libraryPath) : _libPath(libraryPath) {
-            _handle = dlopen(_libPath.c_str(), RTLD_LAZY);
-            if (!_handle)
-                throw DLLoaderException("On dlopen of " + _libPath, "DLLoader");
-        };
+            /**
+             * @brief Construct a new DLLoader<T> object
+             * 
+             * try to load a .so library and stock it in the _handle variable
+             * @param libraryPath 
+             */
+            DLLoader<T>(const std::string &libraryPath) :_libPath(""), _handle(nullptr) {
+                openLibrary(libraryPath);
+            };
 
-        /**
-         * @brief Get the Instance object
-         * 
-         * get the object of the library from the function entryPoint with dlsym
-         * 
-         * @param entryPoint 
-         * @return T* 
-         */
-        T *getInstance(const std::string &entryPoint) const {
-            T *(*fptr)(void);
-            T *obj = NULL;
+            /**
+             * @brief Open and load a library
+             * 
+             * close the current library if there is one, dlopen the new library with 
+             * the given path and throw an exception if there is one
+             * @param libraryPath 
+             */
+            void openLibrary(const std::string &libraryPath) override
+            {
+                if (_handle) {
+                    dlclose(_handle);
+                    _handle = nullptr;
+                }
 
-            void *entry = dlsym(_handle, entryPoint.c_str());
-            if (!entry)
-                throw DLLoaderException("On dlsym of " + _libPath, "DLLoader");
-            fptr = reinterpret_cast<T*(*)(void)>(entry);
-            obj = fptr();
-            if (!obj)
-                throw DLLoaderException("On cast of " + _libPath, "DLLoader");
-            return (obj);
-        };
+                _libPath = libraryPath;
+                _handle = dlopen(_libPath.c_str(), RTLD_LAZY);
+                if (!_handle)
+                    throw DLLoaderException("On dlopen of " + _libPath);
+            }
 
-        /**
-         * @brief Destroy the DLLoader object
-         * 
-         */
-        ~DLLoader() {
-            if (_handle)
-                dlclose(_handle);
-        }
+            /**
+             * @brief Get the Instance object
+             * 
+             * get the object of the library from the function entryPoint with dlsym
+             * 
+             * @param entryPoint 
+             * @return T* 
+             */
+            T *getInstance(const std::string &entryPoint) const override {
+                T *(*fptr)(void);
+                T *obj = NULL;
+
+                void *entry = dlsym(_handle, entryPoint.c_str());
+                if (!entry)
+                    throw DLLoaderException("On dlsym of " + _libPath);
+                fptr = reinterpret_cast<T*(*)(void)>(entry);
+                obj = fptr();
+                if (!obj)
+                    throw DLLoaderException("On cast of " + _libPath);
+                return (obj);
+            };
+
+            /**
+             * @brief Close library
+             * 
+             * check if _handle is initialized and dclose the current library
+             */
+            void closeLibrary() override
+            {
+                if (_handle) {
+                    dlclose(_handle);
+                    _handle = nullptr;
+                }
+            }
+
+            /**
+             * @brief Destroy the DLLoader object
+             * 
+             * close the current library
+             */
+            ~DLLoader() {
+                closeLibrary();
+            }
+    };
 };
 
 #endif

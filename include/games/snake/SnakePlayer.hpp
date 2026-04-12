@@ -2,18 +2,22 @@
 ** EPITECH PROJECT, 2025
 ** G-OOP-400-MPL-4-1-arcade-6
 ** File description:
-** SnakeEntity.cpp
+** SnakePlayer.cpp
 */
 
-#ifndef SNAKE_ENTITY_HPP
-#define SNAKE_ENTITY_HPP
+#ifndef SNAKE_PLAYER_HPP
+#define SNAKE_PLAYER_HPP
     #include <deque>
     #include "graphicals/IDisplayModule.hpp"
+    #define MAX_GRID_X 50
+    #define MAX_GRID_Y 20
+
+    #define START_ROW 3
+    #define START_COL 1
+
     #define START_SNAKE_LENGTH 4
-    #define START_HEAD_X 5.0f
-    #define START_HEAD_Y 5.0f
-    #define MAX_GRID_X 10
-    #define MAX_GRID_Y 10
+    #define START_HEAD_X ((MAX_GRID_X / 2) + START_COL + 1)
+    #define START_HEAD_Y (MAX_GRID_Y / 2)
 
 namespace arcade
 {
@@ -28,10 +32,10 @@ namespace arcade
              * Enum to know which direction the snake is facing
              */
             enum Face {
-                EAST = 1,
+                EAST = 0,
+                NORTH = 1,
                 WEST = 2,
-                NORTH = 3,
-                SOUTH = 4,
+                SOUTH = 3,
             };
 
             /**

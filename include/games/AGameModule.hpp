@@ -6,6 +6,8 @@
 #pragma once
 
 #include "IGameModule.hpp"
+#include <functional>
+#include <map>
 
 namespace arcade {
 
@@ -52,6 +54,16 @@ class AGameModule : public IGameModule {
          * in the _uiText vector for rendering.
          */
         virtual void refreshUI() {}
+
+        /**
+         * @brief Handle common in game input
+         *  
+         * handle pause, restart and exit keys.
+         * @param key 
+         */
+        void handleGameInput(Key key);
+
+
 };
 
 } // namespace arcade
