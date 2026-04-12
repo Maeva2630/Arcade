@@ -323,15 +323,20 @@ void Sdl2::setTitle(const std::string& title)
 
 void Sdl2::setFullscreen(bool fullscreen)
 {
-    _fullscreen = fullscreen;
+    if (fullscreen == _fullscreen)
+        return;
 
-    if (_window) {
-        SDL_SetWindowFullscreen(_window, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
-        int newSizeX, newSizeY = 0;
-        SDL_GetWindowSize(_window, &newSizeX, &newSizeY); 
-        _winSize = Position(static_cast<float>(newSizeX), static_cast<float>(newSizeY));
-    } else
+    if (!_window)
         throw ModuleException("Can not change window to full screen mode");
+
+    if (SDL_SetWindowFullscreen(_window, (fullscreen) ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0) != 0)
+        throw ModuleException("Failed to change fullscreen mode");
+
+    _fullscreen = fullscreen;
+    int newSizeX = 0;
+    int newSizeY = 0;
+    SDL_GetWindowSize(_window, &newSizeX, &newSizeY);
+    _winSize = Position(static_cast<float>(newSizeX), static_cast<float>(newSizeY));
 }
 
 void Sdl2::drawEntity(const Entity& e)

@@ -177,7 +177,7 @@ namespace arcade
                 SpriteDefinition() : texturePath(""), srcRect(0, 0, 0, 0), useSrcRect(false) {}
                 SpriteDefinition(const std::string &path)
                     : texturePath(path), srcRect(0, 0, 0, 0), useSrcRect(false) {}
-                SpriteDefinition(const std::string &path, const Rect &source)
+                SpriteDefinition(const std::string &path, const sf::IntRect &source)
                     : texturePath(path), srcRect(source), useSrcRect(true) {}
             };
 

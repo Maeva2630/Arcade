@@ -15,7 +15,7 @@ extern "C" arcade::IModule *entryPoint(void)
 namespace arcade
 {
 
-Sfml::Sfml() : _window(nullptr), _lastTicks(0), _font(nullptr)
+Sfml::Sfml() : _window(nullptr), _font(nullptr), _lastTicks(0)
 {
 }
 
@@ -128,9 +128,19 @@ void Sfml::setTitle(const std::string& title)
 
 void Sfml::setFullscreen(bool fullscreen)
 {
+    if (fullscreen == _fullscreen)
+        return;
+    _fullscreen = fullscreen;
+
     if (!_window)
         throw ModuleException("Can not change window to full screen mode");
-    _window->create(sf::VideoMode::getDesktopMode(), "SFML Window", sf::Style::Fullscreen);
+    if (fullscreen) {
+        _window->create(sf::VideoMode::getDesktopMode(), "SFML Window", sf::Style::Fullscreen);
+    } else {
+        _winSize = Position(static_cast<float>(WIN_SIZE_X), static_cast<float>(WIN_SIZE_Y));
+        _window->create(sf::VideoMode(WIN_SIZE_X, WIN_SIZE_Y), "SFML Window", sf::Style::Default);
+    }
+    _window->setKeyRepeatEnabled(false);
     sf::Vector2u newSize = _window->getSize();
     _winSize = Position(static_cast<float>(newSize.x), static_cast<float>(newSize.y));
 }
@@ -275,6 +285,7 @@ void Sfml::drawText(const Text& t)
     sf::Text text;
     text.setFont(*currentFont);
     text.setString(t.content.c_str());
+    text.setPosition(sf::Vector2f(textPos.x, textPos.y));
 
     int fontSize = (t.fontSize > 0) ? t.fontSize : 36;
     text.setCharacterSize(fontSize);
