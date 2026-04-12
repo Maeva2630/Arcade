@@ -42,7 +42,7 @@ void Sfml::init()
     _isOpen = true;
 }
 
-std::map<int, Key> initKeyFromEnum()
+std::map<int, Key> Sfml::initKeyFromEnum()
 {
     std::map<int, Key> newMap = {
 
