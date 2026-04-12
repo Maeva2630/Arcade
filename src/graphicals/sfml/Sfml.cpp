@@ -354,7 +354,7 @@ void Sfml::updateDeltaTime()
 {
     sf::Time time = _clock.restart();
 
-    float _deltaTime = time.asSeconds();
+    _deltaTime = time.asSeconds();
 }
 
 void Sfml::clear()

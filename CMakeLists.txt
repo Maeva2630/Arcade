@@ -94,7 +94,7 @@ arcade_library(arcade_ncurses)
 
 # ---- SFML ----
 file(GLOB SFML_SRC src/graphicals/sfml/*.cpp)
-add_library(arcade_sfml SHARED ${SFML_SRC})
+add_library(arcade_sfml SHARED ${SFML_SRC} ${DISPLAY_COMMON_SRC})
 target_link_libraries(arcade_sfml sfml-graphics sfml-window sfml-system)
 arcade_library(arcade_sfml)
 
