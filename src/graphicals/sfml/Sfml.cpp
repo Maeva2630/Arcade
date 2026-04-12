@@ -286,10 +286,13 @@ void Sfml::drawText(const Text& t)
     sf::Text text;
     text.setFont(*currentFont);
     text.setString(t.content.c_str());
-    text.setPosition(sf::Vector2f(textPos.x, textPos.y));
-
-    int fontSize = (t.fontSize > 0) ? t.fontSize : 36;
+    const int fontSize = (t.fontPath.empty() && t.fontSize <= 0) ? 12 : ((t.fontSize > 0)
+    ? t.fontSize : 36);
     text.setCharacterSize(fontSize);
+
+    const sf::FloatRect bounds = text.getLocalBounds();
+    text.setOrigin(bounds.left, bounds.top);
+    text.setPosition(sf::Vector2f(textPos.x, textPos.y));
 
     text.setFillColor(color);
     _window->draw(text);
