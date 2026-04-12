@@ -304,6 +304,7 @@ void Sfml::drawRectangle(const Rect &rect, const Color &color)
     sf::RectangleShape nwRect(sf::Vector2f(rectPos.x, rectPos.y));
     nwRect.setSize(sf::Vector2f(rectSize.x, rectSize.y));
 
+    nwRect.setPosition(sf::Vector2f(rectPos.x, rectPos.y));
     nwRect.setFillColor(sfmlColor);
     _window->draw(nwRect);
 }
