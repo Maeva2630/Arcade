@@ -217,6 +217,8 @@ sf::Texture *Sfml::getTexture(const std::string &texturePath)
     if (!texture)
         return nullptr;
 
+    texture->setRepeated(true);
+    texture->setSmooth(true);
     _textureMap[texturePath] = texture;
     return texture;
 }
@@ -266,41 +268,40 @@ void Sfml::drawRectangle(const Rect &rect, const Color &color)
 
 void Sfml::drawEntity(const Entity& e)
 {
-    Position entityPos = convertGridPosition(e.pos, _winSize.y, _winSize.x);
-    Position entitySize = convertGridSize(e.size, _winSize.y, _winSize.x);
+    const Position entityPos = convertGridPosition(e.pos, _winSize.y, _winSize.x);
+    const Position entitySize = convertGridSize(e.size, _winSize.y, _winSize.x);
+    const Position dstPos = {(entitySize.x <= 0.0f) ? 0.0f : entitySize.x,
+        (entitySize.y <= 0.0f) ? 0.0f : entitySize.y};
 
-    const int startX = convertToCell(entityPos.x);
-    const int startY = convertToCell(entityPos.y);
-    const int width = (entitySize.x <= 0.0f) ? 1 : convertToCell(entitySize.x);
-    const int height = (entitySize.y <= 0.0f) ? 1 : convertToCell(entitySize.y);
-
-    Rect entityRect = {convertToCell(e.pos.x), convertToCell(e.pos.y),
-             convertToCell(e.size.x), convertToCell(e.size.y)};
     if (e.spritePath.empty()) {
+        Rect entityRect(static_cast<int>(e.pos.x), static_cast<int>(e.pos.y),
+                        static_cast<int>(e.size.x), static_cast<int>(e.size.y));
         drawRectangle(entityRect, e.color);
         return;
     }
-
-    SpriteDefinition sprite = getSprite(e);
-    sf::Texture *texture = getTexture(sprite.texturePath);
+    SpriteDefinition spriteDef = getSprite(e);
+    sf::Texture *texture = getTexture(spriteDef.texturePath);
     if (!texture) {
+        Rect entityRect(static_cast<int>(e.pos.x), static_cast<int>(e.pos.y),
+                        static_cast<int>(e.size.x), static_cast<int>(e.size.y));
         drawRectangle(entityRect, e.color);
         return;
     }
 
-    SDL_Rect dstRect = {startX, startY, width, height};
+    sf::Sprite sprite(*texture);
+    Position src = {static_cast<float>(texture->getSize().x),
+        static_cast<float>(texture->getSize().y)};
 
-    if (sprite.useSrcRect) {
-        SDL_Rect srcRect = {
-            sprite.srcRect.x,
-            sprite.srcRect.y,
-            sprite.srcRect.width,
-            sprite.srcRect.height
-        };
-        SDL_RenderCopy(_renderer, texture, &srcRect, &dstRect);
-    } else {
-        SDL_RenderCopy(_renderer, texture, nullptr, &dstRect);
+    if (spriteDef.useSrcRect) {
+        sprite.setTextureRect(spriteDef.srcRect);
+        src.x = static_cast<float>(spriteDef.srcRect.width);
+        src.y = static_cast<float>(spriteDef.srcRect.height);
     }
+    sprite.setPosition(entityPos.x, entityPos.y);
+
+    if (dstPos.x > 0.0f && dstPos.y > 0.0f && src.x > 0.0f && src.y > 0.0f)
+        sprite.setScale(dstPos.x / src.x, dstPos.y / src.y);
+    _window->draw(sprite);
 }
 
 void Sfml::updateDeltaTime()
