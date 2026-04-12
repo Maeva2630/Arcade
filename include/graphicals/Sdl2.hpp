@@ -223,6 +223,13 @@ namespace arcade
              */
             std::map<int, Key> initKeyFromEnum();
 
+            /**
+             * @brief Update deltaTime for display
+             * 
+             * update _deltaTime between now and the last render
+             */
+            void updateDeltaTime();
+        
             SDL_Window *_window;
 
             SDL_Renderer *_renderer;
@@ -235,8 +242,6 @@ namespace arcade
             std::map<std::pair<std::string, int>, TTF_Font *> _fontMap;
             std::map<std::string, SDL_Texture *> _textureMap;
             std::map<std::string, SpriteDefinition> _spriteMap;
-
-            void updateDeltaTime();
     };
 };
 

@@ -167,7 +167,7 @@ namespace arcade
             /**
              * @brief Sprite definition struct
              * 
-             * define what is needed for a sprite (sprite, texture and rect)
+             * define what is needed for a sprite (sprite, texture and int rect)
              */
             struct SpriteDefinition {
                 std::string texturePath;
@@ -190,8 +190,22 @@ namespace arcade
              */
             SpriteDefinition getSprite(const Entity &e);
 
+              /**
+             * @brief Get the Texture object
+             * 
+             * Check if the texture exists on the _textureMap or create and use it
+             * @param texturePath 
+             * @return sf::Texture* 
+             */
             sf::Texture *getTexture(const std::string &texturePath);
 
+            /**
+             * @brief Get the Font For Text object
+             * 
+             * Check if the font exists on the _fontMap or create and use it
+             * @param t 
+             * @return sf::Font* 
+             */
             sf::Font *getFontForText(const Text &t);
 
             /**
@@ -200,6 +214,13 @@ namespace arcade
              * @return std::map<int, Key> 
              */
             std::map<int, Key> initKeyFromEnum();
+
+            /**
+             * @brief Update deltaTime for display
+             * 
+             * update _deltaTime between now and the last render
+             */
+            void updateDeltaTime();
 
             std::map<std::string, SpriteDefinition> _spriteMap;
              std::map<std::string, sf::Texture *> _textureMap;
@@ -211,8 +232,6 @@ namespace arcade
             std::map<std::pair<std::string, int>, sf::Font *> _fontMap;
             
             sf::Clock _clock;
-
-            void updateDeltaTime();
     };
 };
 
