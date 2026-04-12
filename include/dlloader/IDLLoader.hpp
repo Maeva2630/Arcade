@@ -7,6 +7,7 @@
 
 #ifndef IDLLOADER_HPP
 #define IDLLOADER_HPP
+    #include <string>
 
 namespace arcade
 {
