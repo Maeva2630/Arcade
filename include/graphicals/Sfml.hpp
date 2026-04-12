@@ -201,7 +201,7 @@ namespace arcade
 
             std::map<std::string, SpriteDefinition> _spriteMap;
 
-            sf::Window *_window;
+            sf::RenderWindow *_window;
             sf::Event _event;
             
             sf::Font *_font;
