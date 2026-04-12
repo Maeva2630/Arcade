@@ -247,6 +247,11 @@ void Sfml::updateDeltaTime()
     _lastTicks = now;
 }
 
+void Sfml::clear()
+{
+    _window->clear();
+}
+
 void Sfml::display()
 {
     updateDeltaTime();
