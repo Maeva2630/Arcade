@@ -21,20 +21,27 @@ Sfml::Sfml() : _window(nullptr), _lastTicks(0), _font(nullptr)
 
 Sfml::~Sfml()
 {
-    if (_window)
+    if (_window || _font || !_fontMap.empty() || !_textureMap.empty())
         stop();
 }
 
 void Sfml::init()
 {
-    _window->create(sf::VideoMode(WIN_SIZE_X, WIN_SIZE_Y), "SFML Window");
-    if (!_window)
+    _window = new sf::RenderWindow(sf::VideoMode(WIN_SIZE_X, WIN_SIZE_Y), "SFML Window");
+    if (!_window || !_window->isOpen()) {
+        delete _window;
+        _window = nullptr;
         throw ModuleException("Sfml window creation has failed");
+    }
 
     _window->setKeyRepeatEnabled(false);
 
-    _font->loadFromFile("assets/font.ttf");
-    if (!_font) {
+    _font = new sf::Font();
+    if (!_font || !_font->loadFromFile("assets/font.ttf")) {
+        delete _font;
+        _font = nullptr;
+        delete _window;
+        _window = nullptr;
         throw ModuleException("Failed to load default font");
     }
 
@@ -86,9 +93,30 @@ std::map<int, Key> Sfml::initKeyFromEnum()
 
 void Sfml::stop()
 {
-    if (_window)
+    if (_window) {
         _window->close();
-    
+        delete _window;
+        _window = nullptr;
+    }
+
+    for (auto &entry : _fontMap) {
+        if (entry.second)
+            delete entry.second;
+    }
+    _fontMap.clear();
+
+    for (auto &entry : _textureMap) {
+        if (entry.second)
+            delete entry.second;
+    }
+    _textureMap.clear();
+
+    if (_font) {
+        delete _font;
+        _font = nullptr;
+    }
+    _spriteMap.clear();
+    _isOpen = false;
 }
 
 void Sfml::setTitle(const std::string& title)
@@ -185,10 +213,11 @@ sf::Font *Sfml::getFontForText(const Text &t)
     if (it != _fontMap.end())
         return it->second;
 
-    sf::Font *loadedFont;
-    loadedFont->loadFromFile(fontPath.c_str());
-    if (!loadedFont)
+    sf::Font *loadedFont = new sf::Font();
+    if (!loadedFont || !loadedFont->loadFromFile(fontPath)) {
+        delete loadedFont;
         return _font;
+    }
 
     _fontMap[key] = loadedFont;
     return loadedFont;
@@ -212,10 +241,11 @@ sf::Texture *Sfml::getTexture(const std::string &texturePath)
     if (cached != _textureMap.end())
         return cached->second;
 
-    sf::Texture *texture;
-    texture->loadFromFile(texturePath);
-    if (!texture)
+    sf::Texture *texture = new sf::Texture();
+    if (!texture || !texture->loadFromFile(texturePath)) {
+        delete texture;
         return nullptr;
+    }
 
     texture->setRepeated(true);
     texture->setSmooth(true);
@@ -270,8 +300,10 @@ void Sfml::drawEntity(const Entity& e)
 {
     const Position entityPos = convertGridPosition(e.pos, _winSize.y, _winSize.x);
     const Position entitySize = convertGridSize(e.size, _winSize.y, _winSize.x);
-    const Position dstPos = {(entitySize.x <= 0.0f) ? 0.0f : entitySize.x,
-        (entitySize.y <= 0.0f) ? 0.0f : entitySize.y};
+    const Position dstSize = {
+        (entitySize.x <= 0.0f) ? 1.0f : entitySize.x,
+        (entitySize.y <= 0.0f) ? 1.0f : entitySize.y
+    };
 
     if (e.spritePath.empty()) {
         Rect entityRect(static_cast<int>(e.pos.x), static_cast<int>(e.pos.y),
@@ -289,8 +321,10 @@ void Sfml::drawEntity(const Entity& e)
     }
 
     sf::Sprite sprite(*texture);
-    Position src = {static_cast<float>(texture->getSize().x),
-        static_cast<float>(texture->getSize().y)};
+    Position src = {
+        static_cast<float>(texture->getSize().x),
+        static_cast<float>(texture->getSize().y)
+    };
 
     if (spriteDef.useSrcRect) {
         sprite.setTextureRect(spriteDef.srcRect);
@@ -299,8 +333,8 @@ void Sfml::drawEntity(const Entity& e)
     }
     sprite.setPosition(entityPos.x, entityPos.y);
 
-    if (dstPos.x > 0.0f && dstPos.y > 0.0f && src.x > 0.0f && src.y > 0.0f)
-        sprite.setScale(dstPos.x / src.x, dstPos.y / src.y);
+    if (dstSize.x > 0.0f && dstSize.y > 0.0f && src.x > 0.0f && src.y > 0.0f)
+        sprite.setScale(dstSize.x / src.x, dstSize.y / src.y);
     _window->draw(sprite);
 }
 
