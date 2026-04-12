@@ -10,6 +10,15 @@
 namespace arcade
 {
 
+static float normValue(int d)
+{
+    if (d > 1)
+        return -1;
+    if (d < -1)
+        return 1;
+    return d;
+}
+
 Snake::Snake() : _isALive(true)
 {
     _snakeSegment.clear();
@@ -30,6 +39,11 @@ Snake::SnakeSegment &Snake::getHeadReference()
 Snake::SnakeSegment Snake::getHead() const
 {
     return _snakeSegment.back();
+}
+
+Snake::SnakeSegment Snake::getTail() const
+{
+    return _snakeSegment.front();
 }
 
 void Snake::setFace(Face f) 
@@ -89,6 +103,67 @@ void Snake::updateBody(bool hasEaten, SnakeSegment nextHead)
         _snakeSegment.pop_front();
     }
     _snakeSegment.push_back(nextHead);
+}
+
+std::string Snake::getSnakeHeadSprite() const
+{
+    Snake::SnakeSegment head = getHead();
+
+    if (head.face == Snake::Face::EAST)
+        return "assets/snake/green/head_right.png";
+    else if (head.face == Snake::Face::WEST)
+        return "assets/snake/green/head_left.png";
+    else if (head.face == Snake::Face::NORTH)
+        return "assets/snake/green/head_up.png";
+    else if (head.face == Snake::Face::SOUTH)
+        return "assets/snake/green/head_down.png";
+
+    return "assets/snake/green/head_right.png";
+}
+
+std::string Snake::getSnakeTailSprite() const
+{
+    Snake::SnakeSegment tail = getTail();
+
+    if (tail.face == Snake::Face::EAST)
+        return "assets/snake/green/tail_right.png";
+    else if (tail.face == Snake::Face::WEST)
+        return "assets/snake/green/tail_left.png";
+    else if (tail.face == Snake::Face::NORTH)
+        return "assets/snake/green/tail_up.png";
+    else if (tail.face == Snake::Face::SOUTH)
+        return "assets/snake/green/tail_down.png";
+
+    return "assets/snake/green/tail_right.png";
+}
+
+std::string Snake::getSnakeBodySprite(const Snake::SnakeSegment &prev,
+    const Snake::SnakeSegment &current, const Snake::SnakeSegment &next) const
+{
+    Position prevNorm = {normValue(static_cast<int>(prev.pos.x - current.pos.x)),
+        normValue(static_cast<int>(prev.pos.y - current.pos.y))};
+    Position nextNorm = {normValue(static_cast<int>(next.pos.x - current.pos.x)),
+        normValue(static_cast<int>(next.pos.y - current.pos.y))};
+
+    if (prevNorm.y == 0 && nextNorm.y == 0)
+        return "assets/snake/green/body_straight_horizontal.png";
+    else if (prevNorm.x == 0 && nextNorm.x == 0)
+        return "assets/snake/green/body_straight_vertical.png";
+
+    const bool isLeft = (prevNorm.x == -1 || nextNorm.x == -1);
+    const bool isRight = (prevNorm.x == 1 || nextNorm.x == 1);
+    const bool isUp = (prevNorm.y == -1 || nextNorm.y == -1);
+    const bool isDown = (prevNorm.y == 1 || nextNorm.y == 1);
+
+    if (isLeft && isUp)
+        return "assets/snake/green/body_turn_left_up.png";
+    if (isLeft && isDown)
+        return "assets/snake/green/body_turn_left_down.png";
+    if (isRight && isUp)
+        return "assets/snake/green/body_turn_right_up.png";
+    if (isRight && isDown)
+        return "assets/snake/green/body_turn_right_down.png";
+    return "assets/snake/green/body_straight_horizontal.png";
 }
 
 }
