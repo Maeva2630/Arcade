@@ -5,7 +5,7 @@
 ** Sdl2.hpp
 */
 
-#ifndef SL2_HPP
+#ifndef SDL2_HPP
 #define SDL2_HPP
 #include "ADisplayModule.hpp"
 #include <SDL2/SDL.h>
@@ -214,7 +214,7 @@ namespace arcade
              * @param e 
              * @return SpriteDefinition 
              */
-            SpriteDefinition getSprite(const Entity &e) const;
+            SpriteDefinition getSprite(const Entity &e);
 
             /**
              * @brief Init keyMap from SDL inputs
@@ -223,6 +223,13 @@ namespace arcade
              */
             std::map<int, Key> initKeyFromEnum();
 
+            /**
+             * @brief Update deltaTime for display
+             * 
+             * update _deltaTime between now and the last render
+             */
+            void updateDeltaTime();
+        
             SDL_Window *_window;
 
             SDL_Renderer *_renderer;
@@ -235,8 +242,6 @@ namespace arcade
             std::map<std::pair<std::string, int>, TTF_Font *> _fontMap;
             std::map<std::string, SDL_Texture *> _textureMap;
             std::map<std::string, SpriteDefinition> _spriteMap;
-
-            void updateDeltaTime();
     };
 };
 

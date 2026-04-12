@@ -93,10 +93,10 @@ target_link_libraries(arcade_ncurses ${CURSES_LIBRARIES})
 arcade_library(arcade_ncurses)
 
 # ---- SFML ----
-# file(GLOB SFML_SRC src/graphicals/sfml/*.cpp)
-# add_library(arcade_sfml SHARED ${SFML_SRC})
-# target_link_libraries(arcade_sfml sfml-graphics sfml-window sfml-system)
-# arcade_library(arcade_sfml)
+file(GLOB SFML_SRC src/graphicals/sfml/*.cpp)
+add_library(arcade_sfml SHARED ${SFML_SRC} ${DISPLAY_COMMON_SRC})
+target_link_libraries(arcade_sfml sfml-graphics sfml-window sfml-system)
+arcade_library(arcade_sfml)
 
 # ---- SDL2 ----
 file(GLOB SDL2_SRC src/graphicals/sdl2/*.cpp)
