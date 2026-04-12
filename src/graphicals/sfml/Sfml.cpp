@@ -171,7 +171,8 @@ const std::string& Sfml::getName() const
 
 Key Sfml::getKey()
 {
-    _window->pollEvent(_event);
+    if (!_window->pollEvent(_event))
+        return Key::UNKNOWN;
 
     if (_event.type != sf::Event::KeyPressed)
         return Key::UNKNOWN;
@@ -182,7 +183,9 @@ Key Sfml::getKey()
 
 MouseEvent Sfml::getMouseEvent()
 {
-    _window->pollEvent(_event);
+    if (!_window->pollEvent(_event))
+        return MouseEvent();
+
     if (_event.type != sf::Event::MouseButtonPressed)
         return MouseEvent();
 
