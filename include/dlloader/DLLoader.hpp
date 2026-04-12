@@ -64,9 +64,11 @@ namespace arcade {
                 }
 
                 _libPath = libraryPath;
+                dlerror();
                 _handle = dlopen(_libPath.c_str(), RTLD_LAZY);
-                if (!_handle)
-                    throw DLLoaderException("On dlopen of " + _libPath);
+                const char *error = dlerror();
+                if (error)
+                    throw DLLoaderException(std::string("On dlopen of ") + _libPath + ": " + error);
             }
 
             /**
@@ -81,9 +83,11 @@ namespace arcade {
                 T *(*fptr)(void);
                 T *obj = NULL;
 
+                dlerror();
                 void *entry = dlsym(_handle, entryPoint.c_str());
-                if (!entry)
-                    throw DLLoaderException("On dlsym of " + _libPath);
+                const char *error = dlerror();
+                if (error)
+                    throw DLLoaderException(std::string("On dlsym of ") + _libPath + ": " + error);
                 fptr = reinterpret_cast<T*(*)(void)>(entry);
                 obj = fptr();
                 if (!obj)
