@@ -167,6 +167,28 @@ MouseEvent Sfml::getMouseEvent()
     );
 }
 
+sf::Font *Sfml::getFontForText(const Text &t)
+{
+    if (t.fontPath.empty() && t.fontSize <= 0)
+        return _font;
+
+    const std::string fontPath = t.fontPath.empty() ? "assets/font.ttf" : t.fontPath;
+    const int fontSize = (t.fontSize > 0) ? t.fontSize : 36;
+    const std::pair<std::string, int> key = {fontPath, fontSize};
+
+    auto it = _fontMap.find(key);
+    if (it != _fontMap.end())
+        return it->second;
+
+    sf::Font *loadedFont;
+    loadedFont->loadFromFile(fontPath.c_str());
+    if (!loadedFont)
+        return _font;
+
+    _fontMap[key] = loadedFont;
+    return loadedFont;
+}
+
 Sfml::SpriteDefinition Sfml::getSprite(const Entity &e) const
 {
     auto sprite = _spriteMap.find(e.spritePath);

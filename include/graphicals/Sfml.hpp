@@ -189,6 +189,8 @@ namespace arcade
              */
             SpriteDefinition getSprite(const Entity &e) const;
 
+            sf::Font *getFontForText(const Text &t);
+
             /**
              * @brief Init keyMap from SDL inputs
              * 
@@ -200,7 +202,10 @@ namespace arcade
 
             sf::Window *_window;
             sf::Event _event;
-
+            
+            sf::Font *_font;
+            std::map<std::pair<std::string, int>, sf::Font *> _fontMap;
+            
             void updateDeltaTime();
     };
 };
