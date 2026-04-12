@@ -194,6 +194,18 @@ sf::Font *Sfml::getFontForText(const Text &t)
     return loadedFont;
 }
 
+sf::Color Sfml::colorConvert(Color color)
+{
+    sf::Color newColor;
+
+    newColor.a = color.a;
+    newColor.r = color.r;
+    newColor.g = color.g;
+    newColor.b = color.b;
+
+    return newColor;
+}
+
 Sfml::SpriteDefinition Sfml::getSprite(const Entity &e) const
 {
     auto sprite = _spriteMap.find(e.spritePath);

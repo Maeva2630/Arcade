@@ -163,6 +163,7 @@ namespace arcade
             void setRenderContext(const RenderContext &context) override;
         
         private:
+            sf::Color colorConvert(Color color);
             /**
              * @brief Sprite definition struct
              * 
