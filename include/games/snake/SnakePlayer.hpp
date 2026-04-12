@@ -60,6 +60,8 @@ namespace arcade
              */
             SnakeSegment getHead() const;
 
+            SnakeSegment getTail() const;
+
             /**
              * @brief Get the Next Head object
              * Get the next head information depending on user input and current head informations
@@ -113,6 +115,12 @@ namespace arcade
              * @param nextHead 
              */
             void updateBody(bool hasEaten, SnakeSegment nextHead);
+
+            std::string getSnakeHeadSprite() const;
+            std::string getSnakeTailSprite() const;
+            std::string getSnakeBodySprite(const Snake::SnakeSegment &prev,
+                const Snake::SnakeSegment &current, const Snake::SnakeSegment &next)
+                const;
 
         private:
             bool _isALive;

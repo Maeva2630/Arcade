@@ -150,6 +150,8 @@ namespace arcade {
              */
             void refreshFrame();
 
+            std::string getSnakeSegmentEntity(size_t i);
+
             struct FoodSystem {
                 Position cell;
                 bool hasFood;

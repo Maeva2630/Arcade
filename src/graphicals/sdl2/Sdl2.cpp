@@ -6,6 +6,7 @@
 */
 
 #include "graphicals/Sdl2.hpp"
+#include <SDL_image.h>
 
 extern "C" arcade::IModule *entryPoint(void)
 {
@@ -42,6 +43,10 @@ void Sdl2::init()
     
     if (TTF_Init() == -1) {
         throw ModuleException("SDL_ttf init failed");
+    }
+
+    if ((IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG) & (IMG_INIT_PNG | IMG_INIT_JPG)) == 0) {
+        throw ModuleException("SDL_image init failed");
     }
 
     _font = TTF_OpenFont("assets/font.ttf", 12);
@@ -130,7 +135,7 @@ SDL_Texture *Sdl2::getTexture(const std::string &texturePath)
     if (cached != _textureMap.end())
         return cached->second;
 
-    SDL_Surface *surface = SDL_LoadBMP(texturePath.c_str());
+    SDL_Surface *surface = IMG_Load(texturePath.c_str());
     if (!surface)
         return nullptr;
 
@@ -177,6 +182,7 @@ void Sdl2::stop()
         _font = nullptr;
     }
     TTF_Quit();
+    IMG_Quit();
 
     if (_renderer) {
         SDL_DestroyRenderer(_renderer);
