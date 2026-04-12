@@ -184,6 +184,7 @@ void SnakeModule::refreshEntities()
         foodEntity.size = Position(1.0f, 1.0f);
         foodEntity.character = '*';
         foodEntity.color = Colors::RED;
+        foodEntity.spritePath = "assets/snake/food/food.png";
         _entities.emplace_back(foodEntity);
     }
 
