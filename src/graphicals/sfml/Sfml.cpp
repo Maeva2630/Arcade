@@ -33,6 +33,11 @@ void Sfml::init()
 
     _window->setKeyRepeatEnabled(false);
 
+    _font->loadFromFile("assets/font.ttf");
+    if (!_font) {
+        throw ModuleException("Failed to load default font");
+    }
+
      _deltaTime = 0.0f;
     _isOpen = true;
 }
