@@ -234,6 +234,19 @@ void Sfml::drawText(const Text& t)
     _window->draw(text);
 }
 
+void Sfml::drawRectangle(const Rect &rect, const Color &color)
+{
+    Position rectPos = convertGridPosition(Position(rect.x, rect.y), _winSize.y, _winSize.x);
+    Position rectSize = convertGridSize(Position(rect.width, rect.height), _winSize.y, _winSize.x);
+    sf::Color sfmlColor = colorConvert(color);
+
+    sf::RectangleShape nwRect(sf::Vector2f(rectPos.x, rectPos.y));
+    nwRect.setSize(sf::Vector2f(rectSize.x, rectSize.y));
+
+    nwRect.setFillColor(sfmlColor);
+    _window->draw(nwRect);
+}
+
 void Sfml::updateDeltaTime()
 {
     sf::Time time = _clock.restart();
