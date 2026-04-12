@@ -206,6 +206,21 @@ sf::Color Sfml::colorConvert(Color color)
     return newColor;
 }
 
+sf::Texture *Sfml::getTexture(const std::string &texturePath)
+{
+    auto cached = _textureMap.find(texturePath);
+    if (cached != _textureMap.end())
+        return cached->second;
+
+    sf::Texture *texture;
+    texture->loadFromFile(texturePath);
+    if (!texture)
+        return nullptr;
+
+    _textureMap[texturePath] = texture;
+    return texture;
+}
+
 Sfml::SpriteDefinition Sfml::getSprite(const Entity &e)
 {
     auto sprite = _spriteMap.find(e.spritePath);
