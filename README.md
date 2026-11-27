@@ -1,69 +1,48 @@
-# ARCADE  
-### <u>A RETRO PLATFORM</u>
+# Arcade — Retro Gaming Platform
 
-## Description
-
-**Arcade** is a retro gaming platform developed in **C++**.  
-It allows different games and graphics libraries to be dynamically loaded at runtime.
-
-The program is designed as a system of **plugins** :
-- **Games** are dynamic libraries (`.so`)
-- **Graphical interefaces** are also dynamic libraries
-
-The core of the program does not depend on any specific graphics library.
+> **Epitech Tek2 — Object-Oriented Programming (C++)**  
+> A modular retro gaming platform in **C++** allowing games and graphical libraries to be dynamically loaded and hot-swapped at runtime.
 
 ---
 
-## Compilation
+## Architecture & Features
 
-### CMake
+The **Core** engine is completely decoupled from both games and rendering backends via shared interfaces (`IDisplay` / `IGame`) and a dynamic library loader (`dlopen`):
+- **Games (`.so` plugins)**:
+  - **Snake**
+  - **Nibbler**
+- **Graphical Libraries (`.so` plugins)**:
+  - **NCurses** (terminal)
+  - **SDL2** (2D hardware-accelerated)
+  - **SFML** (2D hardware-accelerated)
+- **Interactive Menu & High Scores**: Switch games and graphics libraries live without restarting the program, with persistent score tracking.
 
-```
-mkdir build && cd build
+---
+
+## Build & Usage
+
+### Prerequisites
+- C++20 compiler (`g++` / `clang++`)
+- CMake
+- `ncurses`, `SDL2`, and `SFML` development libraries
+
+### Compile
+```bash
+mkdir -p build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build .
 ```
 
----
-
-## Use
-
-In the source folder:
-```
+### Run
+From the repository root, pass any graphical library plugin as argument:
+```bash
 ./arcade ./lib/arcade_ncurses.so
+# or ./lib/arcade_sdl2.so / ./lib/arcade_sfml.so
 ```
 
 ---
 
-## Games
+## Credits
 
-- Snake
-
----
-
-## Graphical interfaces
-
-- NCurses
-- SDL2
-- SFML
-
----
-
-## Interface collaborator
-
-- gustave.binet@epitech.eu
-- alban.lembrez@epitech.eu
-- nielsen.combe-bracciale@epitech.eu
-
----
-
-## Contributors
-
-- VINCENT Julie
-- ARRONIZ Maëva
-
----
-
-## Licence
-
-Academic project - Epitech
+- **Core, Games & Graphics Implementation**: **Maëva Arroniz** ([@Maeva2630](https://github.com/Maeva2630)) & **Julie Vincent**
+- **Shared Interface Design Collaborators**: Gustave Binet, Alban Lembrez, Nielsen Combe-Bracciale
